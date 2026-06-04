@@ -1,1 +1,0 @@
-import{f as e}from"./mermaid-parser.core-CwNuNikP.js";import{A as m}from"./mermaid-parser.core-CwNuNikP.js";import"./index-DSjLcIko.js";import"https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/+esm";export{m as ArchitectureModule,e as createArchitectureServices};
