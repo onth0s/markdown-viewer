@@ -283,9 +283,9 @@ let copyToClipboard = (text, success, error) => {
 };
 
 let notifyCopied = () => {
-  let el = document.querySelector('#copy-button a');
-  el.textContent = 'Copied!';
-  setTimeout(() => { el.textContent = 'Copy'; }, 1000);
+  let el = document.querySelector('#copy-button');
+  el.title = 'Copied!';
+  setTimeout(() => { el.title = 'Copy'; }, 1000);
 };
 
 document.querySelector('#copy-button').addEventListener('click', (e) => {
@@ -351,6 +351,19 @@ let exportPreviewToPdf = async () => {
 document.querySelector('#export-button').addEventListener('click', (e) => {
   e.preventDefault();
   exportPreviewToPdf();
+});
+
+document.querySelector('#download-button').addEventListener('click', (e) => {
+  e.preventDefault();
+  let blob = new Blob([editor.value], { type: 'text/markdown' });
+  let url = URL.createObjectURL(blob);
+  let a = document.createElement('a');
+  a.href = url;
+  a.download = 'document.md';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 });
 
 let setPreviewCss = (useDark) => {
