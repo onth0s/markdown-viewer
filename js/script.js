@@ -37,13 +37,45 @@ let updateCustomScrollbar = () => {
 
 let updateCaretIndicator = () => {
   if (!caretIndicator || !editor) return;
-  let pos = editor.selectionStart;
-  let text = editor.value.substring(0, pos);
-  let caretLine = text.split('\n').length - 1;
-  let totalLines = editor.value.split('\n').length;
+  let start = editor.selectionStart;
+  let end = editor.selectionEnd;
+  let text = editor.value;
+  let len = text.length;
   let trackHeight = customScrollbar ? customScrollbar.clientHeight : editor.clientHeight;
-  let top = totalLines <= 1 ? 0 : (caretLine / (totalLines - 1)) * trackHeight;
-  caretIndicator.style.top = top + 'px';
+
+  let lineOf = (offset) => {
+    let n = 0;
+    for (let i = 0; i < offset && i < len; i++) {
+      if (text.charCodeAt(i) === 10) n++;
+    }
+    return n;
+  };
+
+  let totalLines = 1;
+  for (let i = 0; i < len; i++) {
+    if (text.charCodeAt(i) === 10) totalLines++;
+  }
+
+  let clamp = (val, max) => val < 0 ? 0 : val > max ? max : val;
+
+  if (start !== end) {
+    let startLine = lineOf(start);
+    let endLine = lineOf(end);
+    let topLine = totalLines <= 1 ? 0 : (startLine / (totalLines - 1)) * trackHeight;
+    let bottomLine = totalLines <= 1 ? 0 : (endLine / (totalLines - 1)) * trackHeight;
+    let selHeight = Math.max(2, bottomLine - topLine);
+    topLine = clamp(topLine, trackHeight - selHeight);
+    caretIndicator.style.top = topLine + 'px';
+    caretIndicator.style.height = selHeight + 'px';
+    caretIndicator.classList.add('selection-active');
+  } else {
+    let caretLine = lineOf(start);
+    let top = totalLines <= 1 ? 0 : (caretLine / (totalLines - 1)) * trackHeight;
+    top = clamp(top, trackHeight - 2);
+    caretIndicator.style.top = top + 'px';
+    caretIndicator.style.height = '2px';
+    caretIndicator.classList.remove('selection-active');
+  }
 };
 
 let initCustomScrollbar = () => {
@@ -429,8 +461,16 @@ editor.addEventListener('scroll', () => {
 });
 
 editor.addEventListener('keyup', updateCaretIndicator);
-editor.addEventListener('click', updateCaretIndicator);
-editor.addEventListener('mouseup', updateCaretIndicator);
+editor.addEventListener('mousedown', () => setTimeout(updateCaretIndicator, 0));
+editor.addEventListener('mouseup', () => setTimeout(updateCaretIndicator, 0));
+let caretRafPending = false;
+editor.addEventListener('mousemove', (e) => {
+  if (e.buttons && !caretRafPending) {
+    caretRafPending = true;
+    requestAnimationFrame(() => { caretRafPending = false; updateCaretIndicator(); });
+  }
+});
+editor.addEventListener('select', updateCaretIndicator);
 
 let activePane = 'editor';
 

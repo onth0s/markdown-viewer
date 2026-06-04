@@ -424,7 +424,7 @@ header input[type="checkbox"] {
   color: var(--selection-text);
 }
 
-/* ── Caret Position Indicator ── */
+/* ── Caret / Selection Position Indicator ── */
 #caret-indicator {
   position: absolute;
   right: 0;
@@ -436,9 +436,17 @@ header input[type="checkbox"] {
   opacity: 0.8;
 }
 
+#caret-indicator.selection-active {
+  opacity: 0.5;
+}
+
 [data-theme="dark"] #caret-indicator {
   background-color: var(--color-primary);
   opacity: 0.9;
+}
+
+[data-theme="dark"] #caret-indicator.selection-active {
+  opacity: 0.5;
 }
 
 /* ── Syntax Highlighting (Light) ── */
@@ -613,9 +621,17 @@ header input[type="checkbox"] {
   opacity: 0.8;
 }
 
+#caret-indicator.selection-active {
+  opacity: 0.5;
+}
+
 [data-theme="dark"] #caret-indicator {
   background-color: var(--color-primary);
   opacity: 0.9;
+}
+
+[data-theme="dark"] #caret-indicator.selection-active {
+  opacity: 0.5;
 }
 
 #preview-custom-scrollbar {
