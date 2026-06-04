@@ -61,7 +61,7 @@ header {
 }
 
 header .nav-logo {
-  height: 20px;
+  height: 28px;
   display: block;
 }
 
@@ -75,10 +75,12 @@ header a:hover {
 
 #menu-items {
     display: flex;
+    align-items: center;
+    width: 100%;
 }
 
 #copy-button {
-    margin-left: 16px;
+    margin-left: auto;
 }
 
 #export-button {
@@ -87,6 +89,9 @@ header a:hover {
 
 #sync-button {
     margin-left: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
