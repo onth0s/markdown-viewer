@@ -61,10 +61,6 @@ header a:hover {
     display: flex;
 }
 
-#reset-button {
-    margin-left: 16px;
-}
-
 #copy-button {
     margin-left: 16px;
 }
@@ -122,6 +118,44 @@ header input[type="checkbox"] {
 }
 
 [data-theme="light"] .theme-toggle-knob {
+    left: 18px;
+}
+
+.sync-toggle {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 12px;
+    cursor: pointer;
+    vertical-align: middle;
+    line-height: 1;
+}
+
+.sync-toggle-slider {
+    position: relative;
+    width: 36px;
+    height: 20px;
+    background-color: #888;
+    border-radius: 10px;
+    display: inline-block;
+}
+
+.sync-toggle-knob {
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background-color: #fff;
+    top: 2px;
+    left: 2px;
+    display: block;
+    transition: left 0.15s;
+}
+
+.sync-toggle-knob path {
+    stroke: #555;
+}
+
+[data-sync="on"] .sync-toggle-knob {
     left: 18px;
 }
 

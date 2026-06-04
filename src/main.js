@@ -12,7 +12,7 @@ const init = () => {
     const localStorageKey = 'last_state';
     const localStorageScrollBarKey = 'scroll_bar_settings';
     const localStorageThemeKey = 'theme_settings';
-    const confirmationMessage = 'Are you sure you want to reset? Your changes will be lost.';
+
     let mermaidRenderTimer = null;
     let mermaidRenderVersion = 0;
     // default template
@@ -262,21 +262,6 @@ This web site is using ${"`"}markedjs/marked${"`"}.
         scheduleMermaidRender();
     };
 
-    // Reset input text
-    let reset = () => {
-        let changed = editor.getValue() != defaultInput;
-        if (hasEdited || changed) {
-            var confirmed = window.confirm(confirmationMessage);
-            if (!confirmed) {
-                return;
-            }
-        }
-        presetValue(defaultInput);
-        document.querySelectorAll('.column').forEach((element) => {
-            element.scrollTo({ top: 0 });
-        });
-    };
-
     let presetValue = (value) => {
         editor.setValue(value);
         editor.revealPosition({ lineNumber: 1, column: 1 });
@@ -286,14 +271,22 @@ This web site is using ${"`"}markedjs/marked${"`"}.
 
     // ----- sync scroll position -----
 
-    let initScrollBarSync = (settings) => {
-        let checkbox = document.querySelector('#sync-scroll-checkbox');
-        checkbox.checked = settings;
-        scrollBarSync = settings;
+    let setSyncScroll = (enabled) => {
+        document.documentElement.setAttribute('data-sync', enabled ? 'on' : 'off');
+        scrollBarSync = enabled;
+    };
 
-        checkbox.addEventListener('change', (event) => {
-            let checked = event.currentTarget.checked;
+    let initScrollBarSync = (settings) => {
+        setSyncScroll(settings);
+
+        let toggle = document.querySelector('.sync-toggle');
+        if (!toggle) return;
+
+        toggle.addEventListener('click', () => {
+            let isOn = document.documentElement.getAttribute('data-sync') === 'on';
+            let checked = !isOn;
             scrollBarSync = checked;
+            setSyncScroll(checked);
             saveScrollBarSettings(checked);
         });
     };
@@ -486,13 +479,6 @@ This web site is using ${"`"}markedjs/marked${"`"}.
     // ----- setup -----
 
     // setup navigation actions
-    let setupResetButton = () => {
-        document.querySelector("#reset-button").addEventListener('click', (event) => {
-            event.preventDefault();
-            reset();
-        });
-    };
-
     let setupCopyButton = (editor) => {
         document.querySelector("#copy-button").addEventListener('click', (event) => {
             event.preventDefault();
@@ -649,7 +635,6 @@ This web site is using ${"`"}markedjs/marked${"`"}.
     } else {
         presetValue(defaultInput);
     }
-    setupResetButton();
     setupCopyButton(editor);
     setupExportButton();
 

@@ -52,11 +52,14 @@
     <header>
         <div id="menu-items">
             <div><a href="/">Markdown Viewer</a></div>
-            <div id="reset-button"><a href="#">Reset</a></div>
             <div id="copy-button"><a href="#">Copy</a></div>
             <div id="export-button"><a href="#">Export PDF</a></div>
             <div id="sync-button">
-              <input type="checkbox" id="sync-scroll-checkbox"><label for="sync-scroll-checkbox">Sync scroll</label>
+              <span class="sync-toggle" title="Toggle sync scroll">
+                <span class="sync-toggle-slider">
+                  <svg class="sync-toggle-knob" width="16" height="16" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M11.31,4.37,9.17,7.5A1,1,0,0,0,9.86,9h4.28a1,1,0,0,0,.69-1.5L12.69,4.37A.82.82,0,0,0,11.31,4.37Zm1.38,15.25,2.14-3.12a1,1,0,0,0-.69-1.5H9.86a1,1,0,0,0-.69,1.5l2.14,3.12A.82.82,0,0,0,12.69,19.62Z" style="fill: none; stroke: #555; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.5;"/></svg>
+                </span>
+              </span>
               <span class="theme-toggle" title="Toggle dark mode">
                 <span class="theme-toggle-slider">
                   <svg class="theme-toggle-knob" width="16" height="16" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g fill="#555" fill-rule="nonzero"><path d="M12,22 C17.5228475,22 22,17.5228475 22,12 C22,6.4771525 17.5228475,2 12,2 C6.4771525,2 2,6.4771525 2,12 C2,17.5228475 6.4771525,22 12,22 Z M12,20 L12,4 C16.418278,4 20,7.581722 20,12 C20,16.418278 16.418278,20 12,20 Z"/></g></svg>
