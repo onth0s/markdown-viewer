@@ -250,11 +250,11 @@ header input[type="checkbox"] {
 }
 
 #editor::selection {
-  background: rgba(0,0,0,0.08);
+  background: #accef7;
 }
 
 [data-theme="dark"] #editor::selection {
-  background: rgba(255,255,255,0.08);
+  background: #264f78;
 }
 
 /* Syntax highlight colors - pure color only */
