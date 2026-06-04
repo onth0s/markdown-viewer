@@ -390,16 +390,21 @@ document.querySelector('#export-button').addEventListener('click', (e) => {
 
 let setPreviewCss = (useDark) => {
   let link = document.getElementById('gh-markdown-link');
+  let desired = useDark ? PREVIEW_CSS_DARK : PREVIEW_CSS_LIGHT;
   if (!link) {
     let newLink = document.createElement('link');
     newLink.id = 'gh-markdown-link';
     newLink.rel = 'stylesheet';
-    newLink.href = useDark ? PREVIEW_CSS_DARK : PREVIEW_CSS_LIGHT;
+    newLink.href = desired;
     document.head.appendChild(newLink);
-    return;
+    return Promise.resolve();
   }
-  let desired = useDark ? PREVIEW_CSS_DARK : PREVIEW_CSS_LIGHT;
-  if (link.getAttribute('href') !== desired) link.setAttribute('href', desired);
+  if (link.getAttribute('href') === desired) return Promise.resolve();
+  return new Promise((resolve) => {
+    let loaded = () => { link.removeEventListener('load', loaded); requestAnimationFrame(resolve); };
+    link.addEventListener('load', loaded);
+    link.setAttribute('href', desired);
+  });
 };
 
 let setTheme = (enabled) => {
@@ -433,7 +438,7 @@ let initThemeToggle = (settings) => {
       : 0;
     setTheme(checked);
     saveThemeSettings(checked);
-    setPreviewCss(checked);
+    await setPreviewCss(checked);
     await renderMermaidDiagrams();
     if ((preview.scrollHeight - preview.clientHeight) > 0) {
       preview.scrollTop = ratio * (preview.scrollHeight - preview.clientHeight);
