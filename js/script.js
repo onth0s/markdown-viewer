@@ -180,6 +180,20 @@ let syncHighlight = () => {
   editorHighlight.scrollTop = editor.scrollTop;
 };
 
+let syncHighlightPadding = () => {
+  let scrollbarWidth = editor.offsetWidth - editor.clientWidth;
+  if (scrollbarWidth > 0) {
+    let basePaddingRight = 16;
+    editorHighlight.style.paddingRight = (basePaddingRight + scrollbarWidth) + 'px';
+  } else {
+    editorHighlight.style.paddingRight = '';
+  }
+};
+
+syncHighlightPadding();
+window.addEventListener('resize', syncHighlightPadding);
+new ResizeObserver(syncHighlightPadding).observe(editor);
+
 let renderer = new marked.Renderer();
 let renderCode = renderer.code.bind(renderer);
 renderer.code = (token) => {
@@ -489,7 +503,7 @@ let setupDivider = () => {
   });
   document.addEventListener('mousemove', (e) => {
     if (!isDragging) return;
-    document.body.style.userSelect = 'none';
+    e.preventDefault();
     let cr = container.getBoundingClientRect();
     let offsetX = e.clientX - cr.left;
     let dw = divider.offsetWidth;
@@ -505,7 +519,13 @@ let setupDivider = () => {
       isDragging = false;
       divider.classList.remove('active', 'hover');
       document.body.style.cursor = 'default';
-      document.body.style.userSelect = '';
+    }
+  });
+  document.addEventListener('mouseleave', () => {
+    if (isDragging) {
+      isDragging = false;
+      divider.classList.remove('active', 'hover');
+      document.body.style.cursor = 'default';
     }
   });
   window.addEventListener('resize', () => {

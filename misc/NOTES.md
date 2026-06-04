@@ -1,0 +1,2 @@
+- Don't delete Roboto.ttf, use it on the Preview right side. 
+- 
