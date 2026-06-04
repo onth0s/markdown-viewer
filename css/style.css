@@ -223,6 +223,19 @@ header a:hover {
   margin-left: auto;
 }
 
+#swap-button {
+  margin-left: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  opacity: 0.85;
+  transition: opacity 0.15s;
+}
+
+#swap-button:hover {
+  opacity: 1;
+}
+
 #export-button {
   margin-left: 16px;
 }
@@ -478,6 +491,10 @@ header input[type="checkbox"] {
   display: flex;
   height: 100%;
   width: 100%;
+}
+
+[data-swapped] .split-container {
+  flex-direction: row-reverse;
 }
 
 .editor-pane {

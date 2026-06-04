@@ -569,3 +569,16 @@ let themeSettings = loadThemeSettings();
 initThemeToggle(themeSettings);
 
 setupDivider();
+
+const STORAGE_SWAP_KEY = 'mdv_swapped';
+
+document.getElementById('swap-button').addEventListener('click', () => {
+  let swapped = localStorage.getItem(STORAGE_SWAP_KEY) === 'true';
+  swapped = !swapped;
+  localStorage.setItem(STORAGE_SWAP_KEY, swapped);
+  if (swapped) {
+    document.documentElement.setAttribute('data-swapped', '');
+  } else {
+    document.documentElement.removeAttribute('data-swapped');
+  }
+});
