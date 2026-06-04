@@ -90,10 +90,94 @@ const PREVIEW_CSS_LIGHT = 'css/github-markdown-light.css';
 const PREVIEW_CSS_DARK = 'css/github-markdown-dark_dimmed.css';
 
 let editor = document.getElementById('editor');
+let editorHighlight = document.getElementById('editor-highlight');
 let output = document.getElementById('output');
 
 let escapeHtml = (value) => {
   return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+};
+
+let highlightMd = (txt) => {
+  let h = escapeHtml(txt);
+  let lines = h.split('\n');
+  let result = [];
+  let i = 0;
+
+  while (i < lines.length) {
+    let l = lines[i];
+    let m = l.match(/^(`{3,})\s*(\w*)/);
+
+    if (m) {
+      let fenceMarker = m[1];
+      let lang = m[2] ? ' <span class="hl-fence-lang">' + m[2] + '</span>' : '';
+      let open = '<span class="hl-fence hl-fence-open">' + m[1] + '</span>' + lang;
+
+      let codeLines = [];
+      i++;
+      while (i < lines.length && lines[i].trim() !== fenceMarker) {
+        codeLines.push(lines[i]);
+        i++;
+      }
+
+      let close = i < lines.length
+        ? '<span class="hl-fence hl-fence-close">' + lines[i].trim() + '</span>'
+        : '';
+
+      result.push(
+        '<div class="hl-fenced-block">' +
+        open +
+        '<div class="hl-code-content">' + codeLines.join('\n') + '</div>' +
+        close +
+        '</div>'
+      );
+      i++;
+      continue;
+    }
+
+    l = l.replace(/^(&gt;)+/, '<span class="hl-quote">$&</span>');
+
+    l = l.replace(/^(\s*)([-*+]|\d{1,3}\.)(\s)/, (_, sp, mk, ws) => {
+      return sp + '<span class="hl-list-marker">' + mk + '</span>' + ws;
+    });
+
+    l = l.replace(/^(-{3,}|\*{3,}|_{3,})$/, '<span class="hl-hr">$&</span>');
+
+    l = l.replace(/^(\|[\s:-]+\|[\s:-]+\|)/, '<span class="hl-table-sep">$1</span>');
+
+    l = l.replace(/!\[([^\]]*)\]\(([^)]*)\)/g,
+      '<span class="hl-image">![<span class="hl-img-alt">$1</span>](<span class="hl-img-url">$2</span>)</span>');
+
+    l = l.replace(/\[([^\]]*)\]\(([^)]*)\)/g,
+      '<span class="hl-link">[<span class="hl-link-text">$1</span>](<span class="hl-link-url">$2</span>)</span>');
+
+    l = l.replace(/(`[^`\n]+`)/g, '<span class="hl-code">$1</span>');
+
+    l = l.replace(/(\*\*\*\S[^*]*\*\*\*)/g, '<span class="hl-em-strong">$1</span>');
+    l = l.replace(/(\*\*\S[^*]*\*\*)/g, '<span class="hl-strong">$1</span>');
+    l = l.replace(/(?<!\*)\*(\S[^*]*)\*(?!\*)/g, '<span class="hl-em">*$1*</span>');
+    l = l.replace(/(___\S[^_]*___)/g, '<span class="hl-em-strong">$1</span>');
+    l = l.replace(/(__\S[^_]*__)/g, '<span class="hl-strong">$1</span>');
+    l = l.replace(/(?<!_)_(\S[^_]*)_(?!_)/g, '<span class="hl-em">_$1_</span>');
+
+    l = l.replace(/(~~\S[^~]*~~)/g, '<span class="hl-strike">$1</span>');
+
+    l = l.replace(/^(#{1,6})\s+/, (_, hashes) => {
+      return '<span class="hl-hash">' + hashes + '</span> ';
+    });
+    l = l.replace(/^(<span class="hl-hash">[#]+<\/span> )(.+)/, (_, hash, rest) => {
+      let level = (hash.match(/#/g) || []).length;
+      return hash + '<span class="hl-heading hl-h' + level + '">' + rest + '</span>';
+    });
+
+    result.push(l);
+    i++;
+  }
+  return result.join('\n');
+};
+
+let syncHighlight = () => {
+  editorHighlight.innerHTML = highlightMd(editor.value);
+  editorHighlight.scrollTop = editor.scrollTop;
 };
 
 let renderer = new marked.Renderer();
@@ -184,6 +268,7 @@ let loadLastContent = () => {
 let presetValue = (value) => {
   editor.value = value;
   editor.scrollTop = 0;
+  syncHighlight();
   editor.focus();
   hasEdited = value !== defaultInput;
   convert(value);
@@ -191,8 +276,13 @@ let presetValue = (value) => {
 
 editor.addEventListener('input', () => {
   if (editor.value !== defaultInput) hasEdited = true;
+  syncHighlight();
   convert(editor.value);
   saveLastContent(editor.value);
+});
+
+editor.addEventListener('scroll', () => {
+  editorHighlight.scrollTop = editor.scrollTop;
 });
 
 editor.addEventListener('scroll', () => {
@@ -347,8 +437,8 @@ let initThemeToggle = (settings) => {
 let loadScrollBarSettings = () => {
   try {
     let raw = localStorage.getItem(STORAGE_SCROLL_KEY);
-    return raw === 'true';
-  } catch (e) { return false; }
+    return raw !== 'false';
+  } catch (e) { return true; }
 };
 
 let saveScrollBarSettings = (settings) => {
@@ -423,7 +513,7 @@ if (lastContent) {
   presetValue(defaultInput);
 }
 
-let scrollBarSettings = loadScrollBarSettings() || false;
+let scrollBarSettings = loadScrollBarSettings();
 initScrollBarSync(scrollBarSettings);
 
 let themeSettings = loadThemeSettings();

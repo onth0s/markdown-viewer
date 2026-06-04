@@ -4,16 +4,21 @@
   font-display: swap;
 }
 
-html, body {
+html {
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+}
+
+body {
   color: #333;
-  overflow-x: hidden;
   margin: 0;
   padding: 0;
   font-family: Helvetica, arial, freesans, clean, sans-serif;
   font-size: 1em;
   line-height: 1.5em;
   background-color: #fff;
-  overscroll-behavior-y: none;
+  overscroll-behavior: none;
 }
 
 body {
@@ -45,13 +50,14 @@ img {
 
 header {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   padding: 8px 16px;
   width: 100%;
   background-color: #444;
   font-size: 12px;
   color: #fff;
+  box-sizing: border-box;
 }
 
 header a:link, header a:hover, header a:visited, header a:active {
@@ -113,7 +119,7 @@ header input[type="checkbox"] {
     border-radius: 50%;
     background-color: #fff;
     top: 2px;
-    left: 2px;
+    left: 18px;
     display: block;
     transition: left 0.15s;
 }
@@ -123,7 +129,7 @@ header input[type="checkbox"] {
 }
 
 [data-theme="light"] .theme-toggle-knob {
-    left: 18px;
+    left: 2px;
 }
 
 .sync-toggle {
@@ -167,18 +173,45 @@ header input[type="checkbox"] {
 
 #container {
   height: 100%;
-  overflow: hidden;
   width: 100%;
   margin: 0 auto;
   background-color: #fff;
   border-bottom: 1px solid #e8e8e8;
   display: flex;
+  overflow: hidden;
 }
 
 #editor-wrapper {
   flex: 1;
   overflow: hidden;
   padding: 0;
+  position: relative;
+}
+
+#editor-highlight {
+  margin: 0;
+  padding: 12px 16px;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+  pointer-events: none;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  font-family: 'Monaco', 'Consolas', 'Courier New', monospace;
+  font-size: 14px;
+  line-height: 1.5;
+  tab-size: 4;
+  background: transparent;
+  border: none;
+  color: #333;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+[data-theme="dark"] #editor-highlight {
+  color: #e6edf3;
 }
 
 #editor {
@@ -192,17 +225,77 @@ header input[type="checkbox"] {
   font-size: 14px;
   line-height: 1.5;
   tab-size: 4;
-  background: #fff;
-  color: #333;
+  background: transparent;
+  color: transparent;
+  caret-color: #333;
   box-sizing: border-box;
   display: block;
   overscroll-behavior: none;
+  position: relative;
+  -webkit-text-fill-color: transparent;
 }
 
 [data-theme="dark"] #editor {
-  background: #212830;
-  color: #e6edf3;
+  caret-color: #e6edf3;
 }
+
+/* Syntax highlight colors - blue theme */
+.hl-heading { font-weight: 700; }
+.hl-h1 { color: #0550ae; font-size: 1.4em; }
+.hl-h2 { color: #0550ae; font-size: 1.2em; }
+.hl-h3 { color: #0550ae; font-size: 1.1em; }
+.hl-h4 { color: #0550ae; }
+.hl-h5 { color: #0550ae; }
+.hl-h6 { color: #0550ae; font-size: 0.9em; }
+.hl-hash { color: #0550ae; }
+.hl-em { font-style: italic; color: #1f2328; }
+.hl-strong { font-weight: 700; color: #1f2328; }
+.hl-em-strong { font-style: italic; font-weight: 700; color: #1f2328; }
+.hl-code { color: #0550ae; background: #ddf4ff; border-radius: 3px; padding: 0 2px; }
+.hl-fence { color: #656d76; display: block; }
+.hl-fence-lang { color: #656d76; }
+.hl-fenced-block { display: block; background: #f0f6ff; border-radius: 4px; margin: 4px 0; }
+.hl-code-content { display: block; padding: 4px 0 4px 8px; border-left: 3px solid #0969da; margin: 2px 0; color: #1f2328; white-space: pre-wrap; }
+.hl-link { color: #0550ae; }
+.hl-link-text { color: #0550ae; text-decoration: underline; }
+.hl-link-url { color: #656d76; font-size: 0.9em; }
+.hl-image { color: #0969da; }
+.hl-img-alt { color: #0969da; font-style: italic; }
+.hl-img-url { color: #656d76; font-size: 0.9em; }
+.hl-quote { color: #656d76; }
+.hl-list-marker { color: #0550ae; }
+.hl-hr { color: #d0d7de; display: block; }
+.hl-strike { color: #656d76; text-decoration: line-through; }
+.hl-table-sep { color: #d0d7de; }
+.hl-table { color: #1f2328; }
+
+[data-theme="dark"] .hl-h1,
+[data-theme="dark"] .hl-h2,
+[data-theme="dark"] .hl-h3,
+[data-theme="dark"] .hl-h4,
+[data-theme="dark"] .hl-h5,
+[data-theme="dark"] .hl-h6,
+[data-theme="dark"] .hl-hash { color: #58a6ff; }
+[data-theme="dark"] .hl-em { color: #e6edf3; }
+[data-theme="dark"] .hl-strong { color: #e6edf3; }
+[data-theme="dark"] .hl-em-strong { color: #e6edf3; }
+[data-theme="dark"] .hl-code { color: #58a6ff; background: #0d1b2a; }
+[data-theme="dark"] .hl-fence { color: #6e7681; }
+[data-theme="dark"] .hl-fence-lang { color: #6e7681; }
+[data-theme="dark"] .hl-fenced-block { background: #0d1b2a; }
+[data-theme="dark"] .hl-code-content { color: #e6edf3; border-left-color: #58a6ff; }
+[data-theme="dark"] .hl-link { color: #58a6ff; }
+[data-theme="dark"] .hl-link-text { color: #58a6ff; }
+[data-theme="dark"] .hl-link-url { color: #6e7681; }
+[data-theme="dark"] .hl-image { color: #79c0ff; }
+[data-theme="dark"] .hl-img-alt { color: #79c0ff; }
+[data-theme="dark"] .hl-img-url { color: #6e7681; }
+[data-theme="dark"] .hl-quote { color: #6e7681; }
+[data-theme="dark"] .hl-list-marker { color: #58a6ff; }
+[data-theme="dark"] .hl-hr { color: #30363d; }
+[data-theme="dark"] .hl-strike { color: #6e7681; }
+[data-theme="dark"] .hl-table-sep { color: #30363d; }
+[data-theme="dark"] .hl-table { color: #e6edf3; }
 
 #preview-wrapper {
   padding: 8px 16px 16px 16px;
@@ -218,6 +311,7 @@ header input[type="checkbox"] {
 
 #preview.column {
   overflow-y: scroll;
+  overscroll-behavior: none;
   white-space: normal;
 }
 
@@ -276,7 +370,11 @@ header input[type="checkbox"] {
 }
 
 /* Dark theme overrides */
-[data-theme="dark"] html, [data-theme="dark"] body {
+[data-theme="dark"] html {
+  background-color: #212830;
+}
+
+[data-theme="dark"] body {
   background-color: #212830;
   color: #e6edf3;
 }
@@ -305,5 +403,28 @@ header input[type="checkbox"] {
 
 [data-theme="dark"] .split-divider.active {
   background: #768390;
+}
+
+/* Dark scrollbar */
+[data-theme="dark"] ::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+[data-theme="dark"] ::-webkit-scrollbar-track {
+  background: transparent;
+}
+[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  background: #555;
+  border-radius: 5px;
+}
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+  background: #777;
+}
+[data-theme="dark"] ::-webkit-scrollbar-corner {
+  background: transparent;
+}
+[data-theme="dark"] * {
+  scrollbar-color: #555 transparent;
+  scrollbar-width: thin;
 }
 

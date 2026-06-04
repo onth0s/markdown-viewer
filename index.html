@@ -12,6 +12,11 @@
           var useDark = raw !== 'light';
           document.documentElement.setAttribute('data-theme', useDark ? 'dark' : 'light');
 
+          var SCROLL_KEY = 'mdv_scroll_sync';
+          var scrollRaw = localStorage.getItem(SCROLL_KEY);
+          var syncOn = scrollRaw !== 'false';
+          document.documentElement.setAttribute('data-sync', syncOn ? 'on' : 'off');
+
           var PREVIEW_CSS_LIGHT = 'css/github-markdown-light.css';
           var PREVIEW_CSS_DARK = 'css/github-markdown-dark_dimmed.css';
           var href = useDark ? PREVIEW_CSS_DARK : PREVIEW_CSS_LIGHT;
@@ -26,6 +31,7 @@
     </script>
 
     <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
     <link rel="icon" type="image/png" href="favicon.png">
     <title>Markdown Viewer</title>
   </head>
@@ -53,7 +59,8 @@
           </div>
         </header>
         <div id="editor-wrapper">
-          <textarea id="editor"></textarea>
+          <div id="editor-highlight"></div>
+          <textarea id="editor" spellcheck="false"></textarea>
         </div>
       </div>
 
