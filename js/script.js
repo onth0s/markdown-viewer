@@ -156,6 +156,72 @@ let initPreviewCustomScrollbar = () => {
   update();
 };
 
+let initScrollOverlay = () => {
+  let PROXIMITY_THRESHOLD = 60;
+
+  let setupOverlay = (overlayEl, scrollEl) => {
+    if (!overlayEl || !scrollEl) return;
+
+    let show = () => {
+      overlayEl.classList.add('visible');
+    };
+
+    let hide = () => {
+      overlayEl.classList.remove('visible');
+    };
+
+    let wrapper = scrollEl.parentElement;
+    if (wrapper) {
+      wrapper.addEventListener('mousemove', (e) => {
+        let rect = wrapper.getBoundingClientRect();
+        let mouseY = e.clientY - rect.top;
+        let mouseX = e.clientX - rect.left;
+        let height = rect.height;
+        let nearRight = mouseX >= rect.width - PROXIMITY_THRESHOLD;
+        let nearTop = mouseY <= PROXIMITY_THRESHOLD;
+        let nearBottom = mouseY >= height - PROXIMITY_THRESHOLD;
+
+        if (nearRight && (nearTop || nearBottom)) {
+          overlayEl.classList.toggle('at-top', nearTop);
+          overlayEl.classList.toggle('at-bottom', nearBottom);
+          show();
+        } else {
+          hide();
+        }
+      });
+
+      wrapper.addEventListener('mouseleave', () => {
+        hide();
+      });
+    }
+
+    overlayEl.addEventListener('mouseenter', () => {
+      show();
+    });
+
+    overlayEl.addEventListener('mouseleave', () => {
+      hide();
+    });
+
+    let topBtn = overlayEl.querySelector('.scroll-popup-top');
+    let bottomBtn = overlayEl.querySelector('.scroll-popup-bottom');
+
+    if (topBtn) {
+      topBtn.addEventListener('click', () => { scrollEl.scrollTop = 0; });
+    }
+    if (bottomBtn) {
+      bottomBtn.addEventListener('click', () => { scrollEl.scrollTop = scrollEl.scrollHeight; });
+    }
+  };
+
+  let editorOverlay = document.getElementById('editor-scroll-overlay');
+  let previewOverlay = document.getElementById('preview-scroll-overlay');
+  let previewEl = document.getElementById('preview-wrapper');
+
+  setupOverlay(editorOverlay, editor);
+  setupOverlay(previewOverlay, previewEl);
+};
+
 let escapeHtml = (value) => {
   return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 };
@@ -718,6 +784,7 @@ initThemeToggle(themeSettings);
 setupDivider();
 initCustomScrollbar();
 initPreviewCustomScrollbar();
+initScrollOverlay();
 
 const STORAGE_SWAP_KEY = 'mdv_swapped';
 
