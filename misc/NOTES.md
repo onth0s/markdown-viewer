@@ -1,2 +1,5 @@
 - Don't delete Roboto.ttf, use it on the Preview right side. 
+- svg/scroll-up-down.svg, svg/light-dark.svg these two should be the ones referenced on the navbar, remove their inline counterparts
+- svg/download.svg actally implement this one right next to the download pdf icon, do download the markdown itself
+- sanitize the .gitignore, most of that stuff is no longer needed. Don't add even more fluff. It might not even be needed in the first place.
 - 
