@@ -170,6 +170,11 @@ img {
   color: var(--selection-text);
 }
 
+.preview-selection {
+  background-color: var(--selection-bg);
+  border-radius: 2px;
+}
+
 /* ── Header ── */
 header {
   display: flex;
@@ -891,4 +896,13 @@ header input[type="checkbox"] {
 
 [data-theme="dark"] .markdown-body .color-border-default {
   border-color: var(--border-default) !important;
+}
+
+/* ── Selection overlay over code blocks ── */
+/* Must appear AFTER .markdown-body pre/code rules to win specificity tiebreaker */
+.markdown-body .preview-selection code,
+.markdown-body .preview-selection pre,
+.markdown-body .preview-selection .highlight pre,
+.markdown-body .preview-selection pre code {
+  background-color: transparent !important;
 }

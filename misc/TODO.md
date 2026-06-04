@@ -1,0 +1,2 @@
+- ~~Selection of the entire first line ("H1", one single `#`), somehow adds thickness to the Preview Panel selection. Selecting less, doesn't. Fix that~~ ✅ Fixed: full-coverage blocks with inline children now use inline precision instead of block-level `<div>` wrapping, avoiding margin fill on `<h1>`/`<p>` elements
+- 
