@@ -41,7 +41,7 @@ _You **can** combine them_
 
 ## Links
 
-You may be using [Markdown Viewer](https://onth0s.github.io/markdown-viewer//).
+You may be using [Markdown Viewer](https://onth0s.github.io/markdown-viewer/).
 
 ## Blockquotes
 
