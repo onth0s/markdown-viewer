@@ -1,28 +1,14 @@
-import { escapeHtml } from '../editor/highlighter.js';
-import { scheduleMermaidRender } from './mermaid-renderer.js';
+const marked = require('marked');
+const fs = require('fs');
+const path = require('path');
 
-/* global marked, DOMPurify */
-
-/**
- * @typedef {import('marked').Marked} Marked
- * @typedef {{ sanitize: (html: string) => string }} DOMPurifyInstance
- */
-
+// Mock renderWithSelection directly
 let renderer = new marked.Renderer();
 let renderCode = renderer.code.bind(renderer);
 renderer.code = (token) => {
   let lang = (token.lang || '').match(/^\S*/)?.[0].toLowerCase();
   if (lang !== 'mermaid') return renderCode(token);
-  return '<pre class="mermaid">' + escapeHtml(token.text) + '</pre>\n';
-};
-
-let renderImage = renderer.image.bind(renderer);
-renderer.image = (token) => {
-  let href = token.href || '';
-  if (href.endsWith('markdown-preview-logo.svg') || href.endsWith('logo.png')) {
-    return `<img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="${escapeHtml(token.text || '')}" class="themed-logo" data-original-src="${href}">`;
-  }
-  return renderImage(token);
+  return '<pre class="mermaid">' + token.text + '</pre>\n';
 };
 
 let inlineTokenTypes = new Set(['text','strong','em','del','codespan','br','link','image','checkbox']);
@@ -52,23 +38,22 @@ let walkInlineTokens = (tokens, offsetNow, localStart, localEnd) => {
         let contentOff = tok.raw.indexOf(tok.text || '');
         if (contentOff < 0) contentOff = 0;
         let textLen = (tok.text || '').length;
-        let s = Math.max(0, Math.min(textLen, (localStart - tokStart) - contentOff));
-        let e = Math.max(s, Math.min(textLen, (localEnd - tokStart) - contentOff));
-        if (s <= 0 && e >= textLen) {
+        let contentStart = tokStart + contentOff;
+        if (fullyCovered) {
           tok._sel = true;
-        } else if (e > s) {
-          tok._sel = { splitStart: s, splitEnd: e };
+        } else {
+          let s = Math.max(0, Math.min(textLen, localStart - contentStart));
+          let e = Math.max(0, Math.min(textLen, localEnd - contentStart));
+          if (e > s) tok._sel = { splitStart: s, splitEnd: e };
         }
-      } else if (tok.tokens && tok.tokens.length > 0) {
-        let childOff = 0;
-        let fc = tok.tokens[0].raw;
-        if (fc) { let idx = tok.raw.indexOf(fc); if (idx >= 0) childOff = idx; }
-        
-        let childStart = Math.max(0, localStart - tokStart - childOff);
-        let childEnd = Math.min(rawLen - childOff, localEnd - tokStart - childOff);
-        walkInlineTokens(tok.tokens, 0, childStart, childEnd);
       } else {
         tok._sel = true;
+        if (!fullyCovered && tok.tokens && tok.tokens.length) {
+          let childOff = 0;
+          let fc = tok.tokens[0].raw;
+          if (fc) { let idx = tok.raw.indexOf(fc); if (idx >= 0) childOff = idx; }
+          walkInlineTokens(tok.tokens, childOff, Math.max(0, localStart - tokStart), Math.min(rawLen, localEnd - tokStart));
+        }
       }
     }
     offsetNow = tokEnd;
@@ -79,9 +64,12 @@ let isBlockContainer = (token) => {
   return token.type === 'paragraph' ||
          token.type === 'heading' ||
          token.type === 'list' ||
-         token.type === 'list_item' ||
+         token.type === 'listitem' ||
          token.type === 'table' ||
+         token.type === 'tablerow' ||
+         token.type === 'tablecell' ||
          token.type === 'blockquote' ||
+         token.type === 'code' ||
          token.type === 'space';
 };
 
@@ -100,12 +88,8 @@ let markPartial = (token, localStart, localEnd) => {
       }
       o = ite;
     }
-  } else if (token.type === 'list_item' && token.tokens) {
-    // Find content start offset (skip bullet/number prefix like "- " or "1. ")
-    let sumChildRaws = token.tokens.reduce((s, t) => s + (t.raw ? t.raw.length : 0), 0);
-    let trailingNl = token.raw.endsWith('\n') ? 1 : 0;
-    let prefixLen = Math.max(0, token.raw.length - sumChildRaws - trailingNl);
-    let o = prefixLen;
+  } else if (token.type === 'listitem' && token.tokens) {
+    let o = 0;
     for (let child of token.tokens) {
       let rl = child.raw ? child.raw.length : 0;
       let cs = o, ce = o + rl;
@@ -113,50 +97,6 @@ let markPartial = (token, localStart, localEnd) => {
         markPartial(child, Math.max(0, localStart - cs), Math.min(rl, localEnd - cs));
       }
       o = ce;
-    }
-  } else if (token.type === 'table') {
-    // Tables have .header/.rows but NO .tokens — parse cell positions from the raw string
-    let rawLines = token.raw.split('\n');
-    let lineOffset = 0;
-    let dataRowIdx = 0;
-    for (let li = 0; li < rawLines.length; li++) {
-      let line = rawLines[li];
-      let lineLen = line.length + (li < rawLines.length - 1 ? 1 : 0);
-      let lineStart = lineOffset;
-      let lineEnd = lineOffset + lineLen;
-      let isHeader = li === 0;
-      let isSeparator = li === 1;
-      if (!isSeparator && line.length > 0 && lineStart < localEnd && lineEnd > localStart) {
-        let cells = isHeader ? token.header : (token.rows[dataRowIdx] || null);
-        if (cells) {
-          let pos = 0;
-          for (let ci = 0; ci < cells.length; ci++) {
-            let pipePos = line.indexOf('|', pos);
-            if (pipePos < 0) break;
-            let ccs = pipePos + 1;
-            let nPipe = line.indexOf('|', ccs);
-            if (nPipe < 0) nPipe = line.length;
-            let ts = ccs; while (ts < nPipe && line[ts] === ' ') ts++;
-            let te = nPipe; while (te > ts && line[te - 1] === ' ') te--;
-            pos = nPipe;
-            let absCellStart = lineOffset + ts;
-            let absCellEnd = lineOffset + te;
-            if (absCellStart < localEnd && absCellEnd > localStart && cells[ci]) {
-              let cell = cells[ci];
-              if (cell.tokens && cell.tokens.length > 0) {
-                let cellLen = te - ts;
-                walkInlineTokens(
-                  cell.tokens, 0,
-                  Math.max(0, localStart - absCellStart),
-                  Math.min(cellLen, localEnd - absCellStart)
-                );
-              }
-            }
-          }
-        }
-      }
-      if (!isHeader && !isSeparator && line.length > 0) dataRowIdx++;
-      lineOffset += lineLen;
     }
   } else if (token.tokens && token.tokens.length > 0 && !inlineTokenTypes.has(token.tokens[0].type)) {
     let o = 0;
@@ -195,12 +135,18 @@ let markPartial = (token, localStart, localEnd) => {
   }
 };
 
-export let renderWithSelection = (md, selStart, selEnd) => {
+let escapeHtml = (value) => {
+  return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+};
+
+let renderWithSelection = (md, selStart, selEnd) => {
   // Normalize Windows line endings to \n and adjust selection indices accordingly
   let cleanMd = "";
+  let map = [];
   for (let i = 0; i < md.length; i++) {
     if (md[i] !== '\r') {
       cleanMd += md[i];
+      map.push(i);
     }
   }
   // Helper to translate offset from original md to cleanMd
@@ -215,7 +161,7 @@ export let renderWithSelection = (md, selStart, selEnd) => {
   
   let cleanStart = translateOffset(selStart);
   let cleanEnd = translateOffset(selEnd);
-
+  
   let options = { headerIds: false, mangle: false };
   if (cleanStart == null || cleanEnd == null || cleanStart === cleanEnd) {
     return marked.parse(cleanMd, { ...options, renderer });
@@ -238,8 +184,6 @@ export let renderWithSelection = (md, selStart, selEnd) => {
       } else {
         if (tokenStart >= cleanStart && contentEnd <= cleanEnd) {
           token._sel = true;
-          // Also mark partial to propagate to inline children inside paragraphs/lists/etc.
-          markPartial(token, localStart, localEnd);
         } else {
           markPartial(token, localStart, localEnd);
         }
@@ -248,10 +192,6 @@ export let renderWithSelection = (md, selStart, selEnd) => {
     offset = tokenEnd;
   }
   let selRenderer = Object.create(renderer);
-  // IMPORTANT: use unbound prototype methods so `this` stays as the marked parser context.
-  // Pre-binding with renderer[key].bind(renderer) would break list/table rendering because
-  // marked's text renderer needs `this.parseInline` which only exists on the parser.
-  let proto = Object.getPrototypeOf(renderer);
   let textWrapper = (fn) => {
     return function (token, ...args) {
       if (token && token._sel && typeof token._sel === 'object') {
@@ -279,7 +219,7 @@ export let renderWithSelection = (md, selStart, selEnd) => {
     };
   };
   let wrap = (key, wrapper) => {
-    let fn = renderer[key] || proto[key];
+    let fn = renderer[key];
     if (typeof fn === 'function') selRenderer[key] = wrapper(fn);
   };
   wrap('code', (fn) => {
@@ -349,20 +289,23 @@ export let renderWithSelection = (md, selStart, selEnd) => {
   return marked.parser(tokens, { ...options, renderer: selRenderer });
 };
 
-export let convert = (output, markdown, selStart, selEnd) => {
-  if (!output) return;
-  try {
-    let html = renderWithSelection(markdown, selStart, selEnd);
-    let sanitized;
-    if (typeof DOMPurify !== 'undefined') {
-      sanitized = DOMPurify.sanitize(html, { ADD_ATTR: ['class'] });
-    } else {
-      console.warn('[markdown-renderer] DOMPurify is not loaded — HTML output is not sanitized.');
-      sanitized = html;
-    }
-    output.innerHTML = sanitized;
-    scheduleMermaidRender(output);
-  } catch (e) {
-    output.innerHTML = '<div class="mermaid-error">Render error: ' + escapeHtml(e.message || e) + '</div>';
-  }
-};
+// Comprehensive Test Suite
+const tests = [
+  { md: "convert()\r\n", start: 0, end: 9, desc: "select convert() - paragraph" },
+  { md: "convert()\r\n", start: 3, end: 6, desc: "select ver in convert() - paragraph" },
+  { md: "## convert()\r\n", start: 6, end: 9, desc: "select ver in convert() - heading" },
+  { md: "`convert()`\r\n", start: 1, end: 10, desc: "select convert() in inline code" },
+  { md: "`convert()`\r\n", start: 4, end: 7, desc: "select ver in inline code convert()" },
+  { md: "This uses `markedjs/marked`.\r\n", start: 15, end: 21, desc: "select marked in inline code" },
+  { md: "This uses `markedjs/marked`.\r\n", start: 11, end: 28, desc: "select whole inline code" },
+  { md: "**convert()**\r\n", start: 2, end: 11, desc: "select convert() inside bold" },
+  { md: "**convert()**\r\n", start: 5, end: 8, desc: "select ver in bold convert()" }
+];
+
+for (let t of tests) {
+  console.log(`\n=== Test: ${t.desc} ===`);
+  console.log(`MD: ${JSON.stringify(t.md)}`);
+  console.log(`Selection: ${JSON.stringify(t.md.substring(t.start, t.end))} [${t.start}, ${t.end})`);
+  let out = renderWithSelection(t.md, t.start, t.end);
+  console.log(`Result: ${JSON.stringify(out)}`);
+}

@@ -41,7 +41,13 @@
 .markdown-body .highlight pre,
 .markdown-body pre code {
   background-color: var(--bg-code) !important;
-  color: var(--text-primary) !important;
+}
+
+/* Color on code, but not with !important so selection spans can override */
+.markdown-body code,
+.markdown-body tt,
+.markdown-body pre code {
+  color: var(--text-primary);
 }
 
 .markdown-body a {
@@ -68,7 +74,7 @@
 
 .markdown-body blockquote {
   border-left-color: var(--color-primary) !important;
-  color: var(--text-secondary) !important;
+  color: var(--text-primary) !important;
 }
 
 .markdown-body hr {
@@ -80,6 +86,10 @@
 .markdown-body h1,
 .markdown-body h2 {
   border-bottom: 1px solid var(--border-default) !important;
+}
+
+.markdown-body h6 {
+  color: var(--text-primary) !important;
 }
 
 /* ── Mermaid SVG dynamic theme overrides ── */
@@ -229,7 +239,7 @@
 
 [data-theme="dark"] .markdown-body blockquote {
   border-left-color: var(--color-primary) !important;
-  color: var(--text-secondary) !important;
+  color: var(--text-primary) !important;
 }
 
 [data-theme="dark"] .markdown-body hr {
@@ -263,19 +273,35 @@
 }
 
 /* ── Selection overrides for elements with their own background ── */
+
+/* Whole fenced block selected → highlight the outer pre wrapper */
+.markdown-body div.preview-selection > pre,
 .markdown-body pre.preview-selection {
   background-color: var(--selection-bg) !important;
   color: var(--selection-text) !important;
 }
+
+/* Code inside a selected pre inherits cleanly */
+.markdown-body div.preview-selection > pre code,
 .markdown-body pre.preview-selection code {
   background-color: transparent !important;
   color: inherit !important;
 }
+
+/* Per-line spans inside fenced blocks — just the bg band, text stays as-is */
+.markdown-body pre code span.preview-selection {
+  background-color: var(--selection-bg) !important;
+  color: var(--selection-text) !important;
+}
+
+/* Inline code selected */
 code.preview-selection {
   background-color: var(--selection-bg) !important;
   color: var(--selection-text) !important;
 }
-code .preview-selection {
+
+/* Partial inline-code selection (span inside code) */
+code span.preview-selection {
   background-color: var(--selection-bg) !important;
   color: var(--selection-text) !important;
 }
