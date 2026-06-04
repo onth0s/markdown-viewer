@@ -7,18 +7,98 @@
     <script>
       (function(){
         try {
-      // NOTE: The storage keys below are intentionally hardcoded here — ES modules
-      // load asynchronously so js/common/constants.js is not yet available when this
-      // script runs. Keep these keys in sync with js/common/constants.js.
           var BOOT_THEME_KEY = 'com.markdownlivepreview_theme';
+          var BRIGHTNESS_KEY = 'mdv_brightness';
           var raw = localStorage.getItem(BOOT_THEME_KEY);
-          var useDark = raw !== 'light';
+          var brightnessRaw = localStorage.getItem(BRIGHTNESS_KEY);
+          var brightness = brightnessRaw !== null ? parseInt(brightnessRaw, 10) : (raw === 'light' ? 25 : 75);
+          var useDark = brightness >= 50;
           document.documentElement.setAttribute('data-theme', useDark ? 'dark' : 'light');
+
+          var COLOR_MAP = {
+            'color-primary': [47, 49, 59, 64],
+            'color-primary-hover': [46, 56, 64, 69],
+            'color-primary-active': [49, 42, 55, 57],
+            'color-primary-subtle': [73, 96, 36, 18],
+            'bg-app': [11, 97, 29, 11],
+            'bg-surface': [0, 100, 31, 15],
+            'bg-header': [24, 47, 32, 24],
+            'bg-editor': [0, 100, 31, 15],
+            'bg-preview': [0, 100, 31, 15],
+            'bg-code': [67, 92, 42, 20],
+            'border-default': [22, 88, 30, 25],
+            'border-muted': [15, 94, 28, 20],
+            'text-primary': [13, 16, 40, 93],
+            'text-secondary': [9, 38, 9, 58],
+            'text-tertiary': [9, 58, 11, 44],
+            'text-on-primary': [0, 100, 0, 100],
+            'text-link': [47, 49, 59, 64],
+            'syntax-heading': [47, 49, 59, 64],
+            'syntax-bold': [13, 16, 40, 93],
+            'syntax-italic': [13, 16, 40, 93],
+            'syntax-code': [47, 49, 59, 64],
+            'syntax-fence': [8, 43, 11, 44],
+            'syntax-link': [47, 49, 59, 64],
+            'syntax-image': [47, 49, 80, 72],
+            'syntax-quote': [8, 43, 11, 44],
+            'syntax-list': [47, 49, 59, 64],
+            'syntax-hr': [22, 88, 30, 25],
+            'syntax-table': [13, 16, 40, 93],
+            'syntax-table-sep': [22, 88, 30, 25],
+            'syntax-strike': [8, 43, 11, 44],
+            'selection-bg': [75, 88, 43, 29],
+            'selection-text': [13, 16, 40, 93],
+            'scrollbar-thumb': [13, 80, 25, 30],
+            'scrollbar-thumb-hover': [8, 70, 20, 36],
+            'divider': [22, 88, 30, 25],
+            'divider-hover': [10, 75, 25, 30],
+            'divider-active': [6, 58, 20, 36],
+            'toggle-bg': [13, 80, 39, 18],
+            'toggle-knob': [0, 100, 40, 93],
+            'toggle-icon': [9, 38, 9, 58],
+            'caret-color': [13, 16, 40, 93]
+          };
+
+          var doc = document.documentElement;
+          for (var name in COLOR_MAP) {
+            if (COLOR_MAP.hasOwnProperty(name)) {
+              var config = COLOR_MAP[name];
+              var sLight = config[0], lLight = config[1];
+              var sDark = config[2], lDark = config[3];
+              var sMid = (sLight + sDark) / 2;
+              var lMid = 50;
+              var s, l;
+
+              if (brightness <= 25) {
+                var t = brightness / 25;
+                s = t * sLight;
+                l = 100 - t * (100 - lLight);
+              } else if (brightness <= 50) {
+                var t = (brightness - 25) / 25;
+                s = sLight + t * (sMid - sLight);
+                l = lLight + t * (lMid - lLight);
+              } else if (brightness <= 75) {
+                var t = (brightness - 50) / 25;
+                s = sMid + t * (sDark - sMid);
+                l = lMid + t * (lDark - lMid);
+              } else {
+                var t = (brightness - 75) / 25;
+                s = sDark - t * sDark;
+                l = lDark - t * lDark;
+              }
+              doc.style.setProperty('--' + name + '-s', Math.round(s) + '%');
+              doc.style.setProperty('--' + name + '-l', Math.round(l) + '%');
+            }
+          }
 
           var SCROLL_KEY = 'mdv_scroll_sync';
           var scrollRaw = localStorage.getItem(SCROLL_KEY);
           var syncOn = scrollRaw !== 'false';
           document.documentElement.setAttribute('data-sync', syncOn ? 'on' : 'off');
+
+          var HUE_KEY = 'mdv_hue';
+          var hueRaw = localStorage.getItem(HUE_KEY);
+          document.documentElement.style.setProperty('--hue', hueRaw !== null ? hueRaw : 228);
 
           var SWAP_KEY = 'mdv_swapped';
           if (localStorage.getItem(SWAP_KEY) === 'true') {
@@ -52,9 +132,18 @@
             <div id="wrench-button" title="Settings">
               <img src="svg/wrench.svg" alt="" width="14" height="14">
               <div id="wrench-popup">
-                <p>Placeholder setting A</p>
-                <p>Placeholder setting B</p>
-                <p>Placeholder setting C</p>
+                <div class="wrench-section">
+                  <label class="wrench-label" for="hue-slider">Accent hue</label>
+                  <div class="hue-slider-wrap">
+                    <input type="range" id="hue-slider" min="0" max="359" step="1">
+                  </div>
+                </div>
+                <div class="wrench-section">
+                  <label class="wrench-label" for="brightness-slider">Theme brightness</label>
+                  <div class="brightness-slider-wrap">
+                    <input type="range" id="brightness-slider" min="0" max="100" step="1">
+                  </div>
+                </div>
               </div>
             </div>
             <div id="copy-button" title="Copy">

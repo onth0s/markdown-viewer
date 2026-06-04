@@ -72,7 +72,7 @@
 }
 
 [data-theme="light"] #preview-custom-scrollbar-thumb {
-  background: #a0a6b2;
+  background: hsl(var(--hue), 8%, 66%);
 }
 
 #preview-custom-scrollbar-thumb:hover {

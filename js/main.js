@@ -1,4 +1,12 @@
 import { defaultInputFallback, PREVIEW_CSS_LIGHT, PREVIEW_CSS_DARK } from './common/constants.js';
+import { getHue, applyHue, saveHue, DEFAULT_HUE } from './common/color-engine.js';
+import {
+  getBrightness,
+  applyBrightness,
+  saveBrightness,
+  DEFAULT_LIGHT_BRIGHTNESS,
+  DEFAULT_DARK_BRIGHTNESS
+} from './common/theme-engine.js';
 import {
   saveLastContent,
   loadLastContent,
@@ -121,19 +129,32 @@ let setTheme = (enabled) => {
   document.documentElement.setAttribute('data-theme', enabled ? 'dark' : 'light');
 };
 
-let initThemeToggle = (settings) => {
-  setTheme(settings);
-  setPreviewCss(settings);
+let initThemeToggle = () => {
+  let brightness = getBrightness();
+  setTheme(brightness >= 50);
+  setPreviewCss(brightness >= 50);
+  applyBrightness(brightness);
+
   let toggle = document.querySelector('.theme-toggle');
   if (!toggle) return;
   toggle.addEventListener('click', async () => {
-    let isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-    let checked = !isDark;
+    let currentB = getBrightness();
+    let checked = currentB < 50;
+    let newB = checked ? DEFAULT_DARK_BRIGHTNESS : DEFAULT_LIGHT_BRIGHTNESS;
+
     let ratio = (previewEl.scrollHeight - previewEl.clientHeight) > 0
       ? previewEl.scrollTop / (previewEl.scrollHeight - previewEl.clientHeight)
       : 0;
+
+    applyBrightness(newB);
+    saveBrightness(newB);
     setTheme(checked);
-    saveThemeSettings(checked);
+
+    let brightnessSlider = document.getElementById('brightness-slider');
+    if (brightnessSlider) {
+      brightnessSlider.value = newB;
+    }
+
     await setPreviewCss(checked);
     await renderMermaidDiagrams(outputEl);
     if ((previewEl.scrollHeight - previewEl.clientHeight) > 0) {
@@ -190,7 +211,85 @@ let bootstrap = () => {
       wrenchBtn.classList.toggle('open');
       if (opening) positionPopup();
     });
+    wrenchPopup.addEventListener('click', (e) => { e.stopPropagation(); });
     document.addEventListener('click', () => wrenchBtn.classList.remove('open'));
+  }
+
+  // Hue slider
+  const hueSlider = document.getElementById('hue-slider');
+  if (hueSlider) {
+    hueSlider.value = getHue();
+    hueSlider.addEventListener('input', () => {
+      applyHue(hueSlider.value);
+    });
+    hueSlider.addEventListener('change', () => {
+      saveHue(hueSlider.value);
+    });
+    // Click the label → reset to default
+    let hueLabel = document.querySelector('.wrench-label[for="hue-slider"]');
+    if (hueLabel) {
+      hueLabel.addEventListener('click', (e) => {
+        e.preventDefault();
+        hueSlider.value = DEFAULT_HUE;
+        applyHue(DEFAULT_HUE);
+        saveHue(DEFAULT_HUE);
+      });
+    }
+  }
+
+  // Brightness slider
+  const brightnessSlider = document.getElementById('brightness-slider');
+  if (brightnessSlider) {
+    brightnessSlider.value = getBrightness();
+    brightnessSlider.addEventListener('input', async () => {
+      let val = parseInt(brightnessSlider.value, 10);
+      applyBrightness(val);
+
+      let isDark = val >= 50;
+      let currentTheme = document.documentElement.getAttribute('data-theme');
+      let newTheme = isDark ? 'dark' : 'light';
+      if (currentTheme !== newTheme) {
+        setTheme(isDark);
+        let ratio = (previewEl.scrollHeight - previewEl.clientHeight) > 0
+          ? previewEl.scrollTop / (previewEl.scrollHeight - previewEl.clientHeight)
+          : 0;
+        await setPreviewCss(isDark);
+        await renderMermaidDiagrams(outputEl);
+        if ((previewEl.scrollHeight - previewEl.clientHeight) > 0) {
+          previewEl.scrollTop = ratio * (previewEl.scrollHeight - previewEl.clientHeight);
+        }
+      }
+    });
+
+    brightnessSlider.addEventListener('change', () => {
+      let val = parseInt(brightnessSlider.value, 10);
+      saveBrightness(val);
+    });
+
+    // Reset label click handler based on proximity
+    let brightnessLabel = document.querySelector('.wrench-label[for="brightness-slider"]');
+    if (brightnessLabel) {
+      brightnessLabel.addEventListener('click', async (e) => {
+        e.preventDefault();
+        let val = parseInt(brightnessSlider.value, 10);
+        let targetVal = val < 50 ? DEFAULT_LIGHT_BRIGHTNESS : DEFAULT_DARK_BRIGHTNESS;
+
+        brightnessSlider.value = targetVal;
+        applyBrightness(targetVal);
+        saveBrightness(targetVal);
+
+        let isDark = targetVal >= 50;
+        setTheme(isDark);
+        let ratio = (previewEl.scrollHeight - previewEl.clientHeight) > 0
+          ? previewEl.scrollTop / (previewEl.scrollHeight - previewEl.clientHeight)
+          : 0;
+        await setPreviewCss(isDark);
+        await renderMermaidDiagrams(outputEl);
+        if ((previewEl.scrollHeight - previewEl.clientHeight) > 0) {
+          previewEl.scrollTop = ratio * (previewEl.scrollHeight - previewEl.clientHeight);
+        }
+      });
+    }
   }
 
   // 2. Setup Scrollbars
@@ -259,7 +358,7 @@ let bootstrap = () => {
 
   // 6. Setup toggles
   initScrollBarSyncToggle(loadScrollBarSettings());
-  initThemeToggle(loadThemeSettings());
+  initThemeToggle();
 
   // 7. Attach scroll/unload listener for state preservation
   if (editorEl) editorEl.addEventListener('scroll', persistScrollPositions, { passive: true });
