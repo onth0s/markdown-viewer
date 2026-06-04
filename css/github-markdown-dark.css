@@ -834,7 +834,7 @@
 }
 
 .markdown-body body:has(:modal) {
-  padding-right: var(--dialog-scrollgutter) !important;
+  padding-right: 17px !important;
 }
 
 .markdown-body .pl-c {

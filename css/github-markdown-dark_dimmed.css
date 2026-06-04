@@ -1,4 +1,9 @@
 /*dark_dimmed */
+:root {
+  --borderColor-accent-emphasis: #316dca;
+  --fgColor-danger: #e5534b;
+  --bgColor-danger-muted: #5c0e1126;
+}
 .markdown-body {
   color-scheme: dark;
   /** Ideal for movement that starts on the page and ends off the page. */

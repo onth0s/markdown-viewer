@@ -165,7 +165,7 @@ let renderMermaidDiagrams = (theme) => {
 let convert = (markdown) => {
   try {
     let html = marked.parse(markdown, { headerIds: false, mangle: false, renderer });
-    let sanitized = DOMPurify.sanitize(html);
+    let sanitized = typeof DOMPurify !== 'undefined' ? DOMPurify.sanitize(html) : html;
     output.innerHTML = sanitized;
     scheduleMermaidRender();
   } catch (e) {
@@ -248,7 +248,7 @@ let getLightMarkdownCss = () => {
   return exportLightCssPromise;
 };
 
-let exportPreviewToPdf = () => {
+let exportPreviewToPdf = async () => {
   let previewWrapper = document.querySelector('#preview-wrapper');
   if (!previewWrapper) return;
   if (typeof window.html2pdf !== 'function') {
@@ -256,7 +256,10 @@ let exportPreviewToPdf = () => {
     return;
   }
   let restoreDark = getMermaidTheme() === 'dark';
-  renderMermaidDiagrams('default').then(() => getLightMarkdownCss()).then((lightCss) => {
+  try {
+    let lightCss = '';
+    try { lightCss = await getLightMarkdownCss(); } catch (e) {}
+    await renderMermaidDiagrams('default');
     let options = {
       margin: 10,
       filename: 'markdown-preview.pdf',
@@ -281,10 +284,13 @@ let exportPreviewToPdf = () => {
       },
       jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
-    window.html2pdf().set(options).from(previewWrapper).save()
-      .catch((err) => console.error('PDF export failed', err))
-      .finally(() => { if (restoreDark) renderMermaidDiagrams(); });
-  });
+    await window.html2pdf().set(options).from(previewWrapper).save();
+  } catch (err) {
+    console.error('PDF export failed', err);
+    window.alert('PDF export failed: ' + (err.message || err));
+  } finally {
+    if (restoreDark) renderMermaidDiagrams();
+  }
 };
 
 document.querySelector('#export-button').addEventListener('click', (e) => {
@@ -410,6 +416,7 @@ let setupDivider = () => {
 };
 
 let lastContent = loadLastContent();
+initMermaid();
 if (lastContent) {
   presetValue(lastContent);
 } else {

@@ -17,9 +17,8 @@ html, body {
 }
 
 body {
-  display: flex;
-  flex-direction: column;
-  height:100vh;
+  height: 100vh;
+  overflow: hidden;
 }
 
 h1, h2, h3, h4, h5, h6, p {
@@ -167,7 +166,7 @@ header input[type="checkbox"] {
 
 
 #container {
-  flex-grow: 1;
+  height: 100%;
   overflow: hidden;
   width: 100%;
   margin: 0 auto;
@@ -177,7 +176,8 @@ header input[type="checkbox"] {
 }
 
 #editor-wrapper {
-  height: 100%;
+  flex: 1;
+  overflow: hidden;
   padding: 0;
 }
 
@@ -250,7 +250,12 @@ header input[type="checkbox"] {
   width: 100%;
 }
 
-.editor-pane,
+.editor-pane {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
 .preview-pane {
   height: 100%;
 }
