@@ -17,8 +17,144 @@ const PREVIEW_CSS_DARK = 'css/github-markdown-dark_dimmed.css';
 
 let editor = document.getElementById('editor');
 let editorHighlight = document.getElementById('editor-highlight');
+let caretIndicator = document.getElementById('caret-indicator');
+let customScrollbar = document.getElementById('custom-scrollbar');
+let customScrollbarThumb = document.getElementById('custom-scrollbar-thumb');
 let output = document.getElementById('output');
-let preview = document.getElementById('preview');
+let preview = document.getElementById('preview-wrapper');
+
+let updateCustomScrollbar = () => {
+  if (!editor || !customScrollbarThumb) return;
+  let scrollRatio = editor.scrollTop / (editor.scrollHeight - editor.clientHeight || 1);
+  let thumbRatio = editor.clientHeight / editor.scrollHeight;
+  let trackHeight = customScrollbar.clientHeight;
+  let thumbHeight = Math.max(20, thumbRatio * trackHeight);
+  let maxTop = trackHeight - thumbHeight;
+  let top = scrollRatio * maxTop;
+  customScrollbarThumb.style.height = thumbHeight + 'px';
+  customScrollbarThumb.style.top = top + 'px';
+};
+
+let updateCaretIndicator = () => {
+  if (!caretIndicator || !editor) return;
+  let pos = editor.selectionStart;
+  let text = editor.value.substring(0, pos);
+  let caretLine = text.split('\n').length - 1;
+  let totalLines = editor.value.split('\n').length;
+  let trackHeight = customScrollbar ? customScrollbar.clientHeight : editor.clientHeight;
+  let top = totalLines <= 1 ? 0 : (caretLine / (totalLines - 1)) * trackHeight;
+  caretIndicator.style.top = top + 'px';
+};
+
+let initCustomScrollbar = () => {
+  if (!customScrollbar || !editor) return;
+  let isDragging = false;
+  let dragStartY = 0;
+  let dragStartScroll = 0;
+
+  customScrollbarThumb.addEventListener('mousedown', (e) => {
+    isDragging = true;
+    dragStartY = e.clientY;
+    dragStartScroll = editor.scrollTop;
+    e.preventDefault();
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+    let trackHeight = customScrollbar.clientHeight;
+    let thumbHeight = customScrollbarThumb.clientHeight;
+    let maxTop = trackHeight - thumbHeight;
+    let deltaY = e.clientY - dragStartY;
+    let maxScroll = editor.scrollHeight - editor.clientHeight;
+    let scrollDelta = (deltaY / maxTop) * maxScroll;
+    editor.scrollTop = dragStartScroll + scrollDelta;
+  });
+
+  document.addEventListener('mouseup', () => { isDragging = false; });
+
+  customScrollbar.addEventListener('click', (e) => {
+    if (e.target === customScrollbarThumb) return;
+    let rect = customScrollbar.getBoundingClientRect();
+    let clickY = e.clientY - rect.top;
+    let trackHeight = customScrollbar.clientHeight;
+    let ratio = clickY / trackHeight;
+    editor.scrollTop = ratio * (editor.scrollHeight - editor.clientHeight);
+  });
+
+  editor.addEventListener('scroll', () => {
+    updateCustomScrollbar();
+    updateCaretIndicator();
+  });
+
+  updateCustomScrollbar();
+  updateCaretIndicator();
+};
+
+let initPreviewCustomScrollbar = () => {
+  let previewEl = document.getElementById('preview-wrapper');
+  let previewTrack = document.getElementById('preview-custom-scrollbar');
+  let previewThumb = document.getElementById('preview-custom-scrollbar-thumb');
+  if (!previewEl || !previewTrack || !previewThumb) return;
+
+  let isDragging = false;
+  let dragStartY = 0;
+  let dragStartScroll = 0;
+
+  let update = () => {
+    let max = previewEl.scrollHeight - previewEl.clientHeight;
+    if (max <= 0) { previewThumb.style.height = '0px'; return; }
+    let ratio = previewEl.scrollTop / max;
+    let trackH = previewTrack.clientHeight;
+    let availH = trackH - 28;
+    let thumbH = Math.max(20, (previewEl.clientHeight / previewEl.scrollHeight) * availH);
+    let maxTop = availH - thumbH;
+    previewThumb.style.height = thumbH + 'px';
+    previewThumb.style.top = (14 + ratio * maxTop) + 'px';
+  };
+
+  previewThumb.addEventListener('mousedown', (e) => {
+    isDragging = true;
+    dragStartY = e.clientY;
+    dragStartScroll = previewEl.scrollTop;
+    e.preventDefault();
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+    let trackH = previewTrack.clientHeight;
+    let thumbH = previewThumb.clientHeight;
+    let maxTop = trackH - 28 - thumbH;
+    let delta = e.clientY - dragStartY;
+    let maxScroll = previewEl.scrollHeight - previewEl.clientHeight;
+    previewEl.scrollTop = dragStartScroll + (delta / maxTop) * maxScroll;
+  });
+
+  document.addEventListener('mouseup', () => { isDragging = false; });
+
+  previewTrack.addEventListener('click', (e) => {
+    if (e.target === previewThumb || e.target.classList.contains('scrollbar-arrow')) return;
+    let rect = previewTrack.getBoundingClientRect();
+    let clickY = e.clientY - rect.top;
+    let ratio = clickY / previewTrack.clientHeight;
+    previewEl.scrollTop = ratio * (previewEl.scrollHeight - previewEl.clientHeight);
+  });
+
+  let scrollInterval = null;
+  previewTrack.querySelectorAll('.scrollbar-arrow').forEach((arrow) => {
+    let dir = arrow.dataset.dir === 'up' ? -1 : 1;
+    let step = () => { previewEl.scrollTop += dir * 40; };
+    arrow.addEventListener('mousedown', (e) => {
+      e.stopPropagation();
+      step();
+      scrollInterval = setInterval(step, 80);
+    });
+    arrow.addEventListener('mouseup', () => { clearInterval(scrollInterval); });
+    arrow.addEventListener('mouseleave', () => { clearInterval(scrollInterval); });
+  });
+
+  previewEl.addEventListener('scroll', update);
+  update();
+};
 
 let escapeHtml = (value) => {
   return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
@@ -218,11 +354,17 @@ editor.addEventListener('input', () => {
   syncHighlight();
   convert(editor.value);
   saveLastContent(editor.value);
+  updateCaretIndicator();
+  updateCustomScrollbar();
 });
 
 editor.addEventListener('scroll', () => {
   editorHighlight.scrollTop = editor.scrollTop;
 });
+
+editor.addEventListener('keyup', updateCaretIndicator);
+editor.addEventListener('click', updateCaretIndicator);
+editor.addEventListener('mouseup', updateCaretIndicator);
 
 let activePane = 'editor';
 
@@ -410,16 +552,16 @@ let initThemeToggle = (settings) => {
   toggle.addEventListener('click', async () => {
     let isDark = document.documentElement.getAttribute('data-theme') === 'dark';
     let checked = !isDark;
-    let preview = document.getElementById('preview');
-    let ratio = (preview.scrollHeight - preview.clientHeight) > 0
-      ? preview.scrollTop / (preview.scrollHeight - preview.clientHeight)
+    let pv = document.getElementById('preview-wrapper');
+    let ratio = (pv.scrollHeight - pv.clientHeight) > 0
+      ? pv.scrollTop / (pv.scrollHeight - pv.clientHeight)
       : 0;
     setTheme(checked);
     saveThemeSettings(checked);
     await setPreviewCss(checked);
     await renderMermaidDiagrams();
-    if ((preview.scrollHeight - preview.clientHeight) > 0) {
-      preview.scrollTop = ratio * (preview.scrollHeight - preview.clientHeight);
+    if ((pv.scrollHeight - pv.clientHeight) > 0) {
+      pv.scrollTop = ratio * (pv.scrollHeight - pv.clientHeight);
     }
   });
 };
@@ -451,10 +593,11 @@ let applyScrollRatio = (el, ratio) => {
 
 let saveScrollPositions = () => {
   try {
-    let preview = document.getElementById('preview');
+    let pv = document.getElementById('preview-wrapper');
     let payload = JSON.stringify({
       editor: computeScrollRatio(editor),
-      preview: computeScrollRatio(preview)
+      preview: computeScrollRatio(pv),
+      caret: editor.selectionStart
     });
     localStorage.setItem(STORAGE_SCROLL_POS_KEY, payload);
   } catch (e) {}
@@ -543,8 +686,12 @@ let onContentReady = (content) => {
   if (savedScrolls) {
     applyScrollRatio(editor, savedScrolls.editor);
     editorHighlight.scrollTop = editor.scrollTop;
+    if (savedScrolls.caret != null && savedScrolls.caret <= editor.value.length) {
+      editor.setSelectionRange(savedScrolls.caret, savedScrolls.caret);
+    }
+    updateCaretIndicator();
     renderMermaidDiagrams().then(() => {
-      applyScrollRatio(document.getElementById('preview'), savedScrolls.preview);
+      applyScrollRatio(document.getElementById('preview-wrapper'), savedScrolls.preview);
     });
   }
 };
@@ -559,7 +706,7 @@ if (lastContent) {
 }
 
 editor.addEventListener('scroll', saveScrollPositions, { passive: true });
-document.getElementById('preview').addEventListener('scroll', saveScrollPositions, { passive: true });
+document.getElementById('preview-wrapper').addEventListener('scroll', saveScrollPositions, { passive: true });
 window.addEventListener('beforeunload', saveScrollPositions);
 
 let scrollBarSettings = loadScrollBarSettings();
@@ -569,6 +716,8 @@ let themeSettings = loadThemeSettings();
 initThemeToggle(themeSettings);
 
 setupDivider();
+initCustomScrollbar();
+initPreviewCustomScrollbar();
 
 const STORAGE_SWAP_KEY = 'mdv_swapped';
 

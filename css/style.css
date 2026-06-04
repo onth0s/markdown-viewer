@@ -424,6 +424,23 @@ header input[type="checkbox"] {
   color: var(--selection-text);
 }
 
+/* ── Caret Position Indicator ── */
+#caret-indicator {
+  position: absolute;
+  right: 0;
+  width: 12px;
+  height: 2px;
+  background-color: var(--caret-color);
+  pointer-events: none;
+  z-index: 10;
+  opacity: 0.8;
+}
+
+[data-theme="dark"] #caret-indicator {
+  background-color: var(--color-primary);
+  opacity: 0.9;
+}
+
 /* ── Syntax Highlighting (Light) ── */
 .hl-h1, .hl-h2, .hl-h3, .hl-h4, .hl-h5, .hl-h6,
 .hl-hash { color: var(--syntax-heading); }
@@ -444,10 +461,6 @@ header input[type="checkbox"] {
 .hl-code-content { color: var(--syntax-table); }
 
 /* ── Preview ── */
-#preview-wrapper {
-  padding: 8px 16px 70vh 16px;
-  font-family: 'Roboto', Helvetica, Arial, sans-serif;
-}
 
 .column {
   width: 50%;
@@ -461,6 +474,7 @@ header input[type="checkbox"] {
   overflow-y: scroll;
   overscroll-behavior: none;
   white-space: normal;
+  position: relative;
 }
 
 .markdown-body .mermaid {
@@ -506,6 +520,25 @@ header input[type="checkbox"] {
 .preview-pane {
   height: 100%;
   background-color: var(--bg-preview);
+  position: relative;
+  overflow: hidden;
+}
+
+#preview.column {
+  overflow: hidden;
+  white-space: normal;
+}
+
+#preview-wrapper {
+  padding: 8px 16px 70vh 16px;
+  font-family: 'Roboto', Helvetica, Arial, sans-serif;
+  overflow-y: scroll;
+  height: 100%;
+  scrollbar-width: none;
+}
+
+#preview-wrapper::-webkit-scrollbar {
+  display: none;
 }
 
 .split-divider {
@@ -525,31 +558,129 @@ header input[type="checkbox"] {
 }
 
 /* ── Scrollbar ── */
-::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+#editor {
+  overflow-y: scroll;
+  scrollbar-width: none;
 }
 
-::-webkit-scrollbar-track {
-  background: transparent;
+#editor::-webkit-scrollbar {
+  display: none;
 }
 
-::-webkit-scrollbar-thumb {
+#editor-highlight::-webkit-scrollbar {
+  display: none;
+}
+
+#preview {
+  scrollbar-width: none;
+}
+
+#preview::-webkit-scrollbar {
+  display: none;
+}
+
+#custom-scrollbar {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 12px;
+  height: 100%;
+  background: var(--bg-editor);
+  z-index: 5;
+}
+
+#custom-scrollbar-thumb {
+  position: absolute;
+  top: 0;
+  right: 2px;
+  width: 8px;
   background: var(--scrollbar-thumb);
-  border-radius: 5px;
+  border-radius: 0;
 }
 
-::-webkit-scrollbar-thumb:hover {
+#custom-scrollbar-thumb:hover {
   background: var(--scrollbar-thumb-hover);
 }
 
-::-webkit-scrollbar-corner {
-  background: transparent;
+#caret-indicator {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: var(--caret-color);
+  pointer-events: none;
+  z-index: 6;
+  opacity: 0.8;
 }
 
-* {
-  scrollbar-color: var(--scrollbar-thumb) transparent;
-  scrollbar-width: thin;
+[data-theme="dark"] #caret-indicator {
+  background-color: var(--color-primary);
+  opacity: 0.9;
+}
+
+#preview-custom-scrollbar {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 14px;
+  height: 100%;
+  background: var(--bg-preview);
+  z-index: 5;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.preview-pane:hover #preview-custom-scrollbar {
+  opacity: 1;
+}
+
+#preview-custom-scrollbar-thumb {
+  position: absolute;
+  top: 14px;
+  right: 3px;
+  width: 8px;
+  background: var(--scrollbar-thumb);
+  border-radius: 4px;
+  cursor: grab;
+  opacity: 0.6;
+  transition: opacity 0.2s, background 0.2s;
+}
+
+[data-theme="light"] #preview-custom-scrollbar-thumb {
+  background: #a0a6b2;
+}
+
+#preview-custom-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+  opacity: 1;
+}
+
+.scrollbar-arrow {
+  position: absolute;
+  right: 0;
+  width: 14px;
+  height: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 7px;
+  color: var(--scrollbar-thumb);
+  cursor: pointer;
+  user-select: none;
+  z-index: 6;
+  transition: color 0.15s;
+}
+
+.scrollbar-arrow:hover {
+  color: var(--color-primary);
+}
+
+.scrollbar-arrow-up {
+  top: 0;
+}
+
+.scrollbar-arrow-down {
+  bottom: 0;
 }
 
 /* ── Override GitHub Markdown CSS backgrounds ── */
