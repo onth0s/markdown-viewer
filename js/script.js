@@ -93,6 +93,7 @@ const PREVIEW_CSS_DARK = 'css/github-markdown-dark_dimmed.css';
 let editor = document.getElementById('editor');
 let editorHighlight = document.getElementById('editor-highlight');
 let output = document.getElementById('output');
+let preview = document.getElementById('preview');
 
 let escapeHtml = (value) => {
   return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
@@ -300,17 +301,43 @@ editor.addEventListener('scroll', () => {
   editorHighlight.scrollTop = editor.scrollTop;
 });
 
+let activePane = 'editor';
+
+let setActivePane = (pane) => { activePane = pane; };
+
+document.getElementById('edit').addEventListener('pointerenter', () => setActivePane('editor'));
+document.getElementById('preview').addEventListener('pointerenter', () => setActivePane('preview'));
+editor.addEventListener('focus', () => setActivePane('editor'));
+
+let syncPaneToPane = (source, target) => {
+  let max = source.scrollHeight - source.clientHeight;
+  if (max <= 0) return;
+  if (source.scrollTop <= 1) {
+    source.scrollTop = 0;
+    target.scrollTop = 0;
+    return;
+  }
+  if (source.scrollTop >= max - 1) {
+    source.scrollTop = max;
+    target.scrollTop = target.scrollHeight;
+    return;
+  }
+  let ratio = source.scrollTop / max;
+  let targetMax = target.scrollHeight - target.clientHeight;
+  if (targetMax <= 0) return;
+  target.scrollTop = ratio * targetMax;
+};
+
 editor.addEventListener('scroll', () => {
   if (!scrollBarSync) return;
-  let scrollTop = editor.scrollTop;
-  let scrollHeight = editor.scrollHeight;
-  let height = editor.clientHeight;
-  let maxScrollTop = scrollHeight - height;
-  if (maxScrollTop <= 0) return;
-  let ratio = scrollTop / maxScrollTop;
-  let preview = document.getElementById('preview');
-  let targetY = (preview.scrollHeight - preview.clientHeight) * ratio;
-  preview.scrollTo(0, targetY);
+  if (activePane !== 'editor') return;
+  syncPaneToPane(editor, preview);
+});
+
+preview.addEventListener('scroll', () => {
+  if (!scrollBarSync) return;
+  if (activePane !== 'preview') return;
+  syncPaneToPane(preview, editor);
 });
 
 let setSyncScroll = (enabled) => {
