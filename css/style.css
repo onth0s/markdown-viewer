@@ -249,6 +249,14 @@ header input[type="checkbox"] {
   caret-color: #e6edf3;
 }
 
+#editor::selection {
+  background: rgba(0,0,0,0.08);
+}
+
+[data-theme="dark"] #editor::selection {
+  background: rgba(255,255,255,0.08);
+}
+
 /* Syntax highlight colors - pure color only */
 .hl-h1 { color: #0550ae; }
 .hl-h2 { color: #0550ae; }
