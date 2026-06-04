@@ -59,7 +59,7 @@ _You **can** combine them_
 
 ## Links
 
-You may be using [Markdown Live Preview](https://markdownlivepreview.com/).
+You may be using [Markdown Viewer](https://markdownlivepreview.com/).
 
 ## Blockquotes
 

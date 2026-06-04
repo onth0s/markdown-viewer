@@ -1,6 +1,6 @@
-# Markdown Live Preview
+# Markdown Viewer
 
-[Markdown Live Preview](https://markdownlivepreview.com/) is a tiny web tool to preview Markdown formatted text.
+[Markdown Viewer](https://markdownlivepreview.com/) is a tiny web tool to preview Markdown formatted text.
 
 ## Setup
 
@@ -21,4 +21,4 @@ $ make dev
 ```
 
 ## License
-See the [LICENSE](https://github.com/tanabe/markdown-live-preview/blob/master/LICENSE) file in this repo.
+See the [LICENSE](https://github.com/tanabe/markdown-viewer/blob/master/LICENSE) file in this repo.
