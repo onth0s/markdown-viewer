@@ -23,6 +23,7 @@ import { initMermaid, renderMermaidDiagrams } from './preview/mermaid-renderer.j
 import { convert } from './preview/markdown-renderer.js';
 import { initPreviewCustomScrollbar } from './preview/scrollbars.js';
 import { initCopyButton, initDownloadButton, initPdfButton } from './preview/actions.js';
+import { initDynamicSvg, updateThemedLogos } from './common/logo-engine.js';
 
 // DOM elements
 const editorEl = document.getElementById('editor');
@@ -149,6 +150,7 @@ let initThemeToggle = () => {
     applyBrightness(newB);
     saveBrightness(newB);
     setTheme(checked);
+    updateThemedLogos();
 
     let brightnessSlider = document.getElementById('brightness-slider');
     if (brightnessSlider) {
@@ -193,6 +195,7 @@ let bootstrap = () => {
   setupDivider();
   initSwapButton();
   initMermaid();
+  initDynamicSvg();
 
   // Wrench popup toggle
   const wrenchBtn = document.getElementById('wrench-button');
@@ -221,6 +224,7 @@ let bootstrap = () => {
     hueSlider.value = getHue();
     hueSlider.addEventListener('input', () => {
       applyHue(hueSlider.value);
+      updateThemedLogos();
     });
     hueSlider.addEventListener('change', () => {
       saveHue(hueSlider.value);
@@ -232,6 +236,7 @@ let bootstrap = () => {
         e.preventDefault();
         hueSlider.value = DEFAULT_HUE;
         applyHue(DEFAULT_HUE);
+        updateThemedLogos();
         saveHue(DEFAULT_HUE);
       });
     }
@@ -244,6 +249,7 @@ let bootstrap = () => {
     brightnessSlider.addEventListener('input', async () => {
       let val = parseInt(brightnessSlider.value, 10);
       applyBrightness(val);
+      updateThemedLogos();
 
       let isDark = val >= 50;
       let currentTheme = document.documentElement.getAttribute('data-theme');
@@ -276,6 +282,7 @@ let bootstrap = () => {
 
         brightnessSlider.value = targetVal;
         applyBrightness(targetVal);
+        updateThemedLogos();
         saveBrightness(targetVal);
 
         let isDark = targetVal >= 50;
@@ -310,12 +317,15 @@ let bootstrap = () => {
       convert(outputEl, value);
       saveLastContent(value);
       if (previewScrollbar) previewScrollbar.update();
+      updateThemedLogos();
     },
     onSelectionChange: (start, end) => {
       if (start !== end) {
         convert(outputEl, editorEl.value, start, end);
+        updateThemedLogos();
       } else if (outputEl.querySelector('.preview-selection')) {
         convert(outputEl, editorEl.value);
+        updateThemedLogos();
       }
     }
   });
@@ -333,11 +343,18 @@ let bootstrap = () => {
       if (savedScrolls.caret != null && savedScrolls.caret <= editorEl.value.length) {
         editorEl.setSelectionRange(savedScrolls.caret, savedScrolls.caret);
       }
-      if (editorController) editorController.updateHighlight();
+      if (editorController) {
+        editorController.updateHighlight();
+        editorController.updateScrollbars();
+      }
       renderMermaidDiagrams(outputEl).then(() => {
         applyScrollRatio(previewEl, savedScrolls.preview);
         if (previewScrollbar) previewScrollbar.update();
+        updateThemedLogos();
       });
+    } else if (editorController) {
+      editorController.updateScrollbars();
+      updateThemedLogos();
     }
   };
 

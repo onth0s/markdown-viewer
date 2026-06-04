@@ -118,6 +118,31 @@ export let applyBrightness = (brightness) => {
     doc.style.setProperty(`--${name}-s`, `${s}%`);
     doc.style.setProperty(`--${name}-l`, `${l}%`);
   }
+
+  // Apply clamped variables to the settings popup to limit its slider response
+  let clampedBrightness = Math.max(25, Math.min(75, brightness));
+  let popupEl = document.getElementById('wrench-popup');
+  if (popupEl) {
+    for (let [name, config] of Object.entries(COLOR_MAP)) {
+      let [s, l] = interpolateColor(clampedBrightness, config.light, config.dark);
+      popupEl.style.setProperty(`--${name}`, `hsl(var(--hue), ${s}%, ${l}%)`);
+    }
+  }
+
+  // Navbar logo: keep dark mode values (>=50), scale lightness to 75% at brightness 25 (<50). Clamped to [25, 75].
+  let logoS, logoL;
+  if (clampedBrightness >= 50) {
+    [logoS, logoL] = interpolateColor(clampedBrightness, COLOR_MAP['color-primary'].light, COLOR_MAP['color-primary'].dark);
+  } else {
+    let t = Math.min(1, clampedBrightness / 25);
+    logoS = Math.round(t * COLOR_MAP['color-primary'].light[0]);
+    logoL = Math.round(50 + ((50 - clampedBrightness) / 50) * 50);
+  }
+  doc.style.setProperty('--nav-logo-color', `hsl(var(--hue), ${logoS}%, ${logoL}%)`);
+
+  // Wrench icon: clamp to standard [25, 75] range so it keeps 16% lightness (visible grey) at max brightness (white header)
+  let [iconS, iconL] = interpolateColor(clampedBrightness, COLOR_MAP['text-primary'].light, COLOR_MAP['text-primary'].dark);
+  doc.style.setProperty('--nav-icon-color', `hsl(var(--hue), ${iconS}%, ${iconL}%)`);
 };
 
 /** Save brightness to local storage and update corresponding legacy theme state */

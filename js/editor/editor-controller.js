@@ -53,6 +53,9 @@ export let initEditorController = ({
   });
   editor.addEventListener('mousedown', () => setTimeout(handleSelectionUpdate, 0));
   editor.addEventListener('mouseup', () => setTimeout(handleSelectionUpdate, 0));
+  editor.addEventListener('focus', () => {
+    updateCaretIndicator(editor, customScrollbar, caretIndicator);
+  });
 
   let caretRafPending = false;
   editor.addEventListener('mousemove', (e) => {
@@ -66,6 +69,7 @@ export let initEditorController = ({
   });
   editor.addEventListener('select', handleSelectionUpdate);
   editor.addEventListener('blur', () => {
+    updateCaretIndicator(editor, customScrollbar, caretIndicator);
     if (onSelectionChange) {
       onSelectionChange(editor.selectionStart, editor.selectionStart);
     }
@@ -79,9 +83,15 @@ export let initEditorController = ({
       syncHighlight(editor, editorHighlight);
       editor.focus();
       if (onInput) onInput(value);
+      updateCaretIndicator(editor, customScrollbar, caretIndicator);
+      updateCustomScrollbar(editor, customScrollbar, customScrollbarThumb);
     },
     updateHighlight: () => {
       syncHighlight(editor, editorHighlight);
+    },
+    updateScrollbars: () => {
+      updateCaretIndicator(editor, customScrollbar, caretIndicator);
+      updateCustomScrollbar(editor, customScrollbar, customScrollbarThumb);
     }
   };
 };

@@ -14,6 +14,14 @@ export let updateCustomScrollbar = (editor, customScrollbar, customScrollbarThum
 
 export let updateCaretIndicator = (editor, customScrollbar, caretIndicator) => {
   if (!caretIndicator || !editor) return;
+
+  let hasFocus = document.activeElement === editor;
+  if (!hasFocus) {
+    caretIndicator.classList.remove('visible');
+    return;
+  }
+
+  caretIndicator.classList.add('visible');
   let start = editor.selectionStart;
   let end = editor.selectionEnd;
   let text = editor.value;

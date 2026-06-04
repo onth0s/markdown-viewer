@@ -73,7 +73,97 @@
 
 .markdown-body hr {
   background-color: var(--border-default) !important;
-  border-color: var(--border-default) !important;
+  border: 0 !important;
+  height: 0.25em !important;
+}
+
+.markdown-body h1,
+.markdown-body h2 {
+  border-bottom: 1px solid var(--border-default) !important;
+}
+
+/* ── Mermaid SVG dynamic theme overrides ── */
+#preview-wrapper .markdown-body .mermaid svg,
+#preview-wrapper .markdown-body .mermaid svg text,
+#preview-wrapper .markdown-body .mermaid svg .label,
+#preview-wrapper .markdown-body .mermaid svg .label foreignObject,
+#preview-wrapper .markdown-body .mermaid svg .messageText,
+#preview-wrapper .markdown-body .mermaid svg .noteText,
+#preview-wrapper .markdown-body .mermaid svg .loopText,
+#preview-wrapper .markdown-body .mermaid svg .sectionText,
+#preview-wrapper .markdown-body .mermaid svg tspan,
+#preview-wrapper .markdown-body .mermaid svg span,
+#preview-wrapper .markdown-body .mermaid svg div {
+  fill: var(--text-primary) !important;
+  color: var(--text-primary) !important;
+}
+
+#preview-wrapper .markdown-body .mermaid svg rect,
+#preview-wrapper .markdown-body .mermaid svg circle,
+#preview-wrapper .markdown-body .mermaid svg ellipse,
+#preview-wrapper .markdown-body .mermaid svg polygon,
+#preview-wrapper .markdown-body .mermaid svg .node rect,
+#preview-wrapper .markdown-body .mermaid svg .node circle,
+#preview-wrapper .markdown-body .mermaid svg .node ellipse,
+#preview-wrapper .markdown-body .mermaid svg .node polygon,
+#preview-wrapper .markdown-body .mermaid svg .node path,
+#preview-wrapper .markdown-body .mermaid svg .actor,
+#preview-wrapper .markdown-body .mermaid svg rect.actor,
+#preview-wrapper .markdown-body .mermaid svg .note rect,
+#preview-wrapper .markdown-body .mermaid svg .note path,
+#preview-wrapper .markdown-body .mermaid svg .classGroup rect,
+#preview-wrapper .markdown-body .mermaid svg .stateGroup rect,
+#preview-wrapper .markdown-body .mermaid svg .stateGroup circle,
+#preview-wrapper .markdown-body .mermaid svg .entityBox,
+#preview-wrapper .markdown-body .mermaid svg .attributeBox {
+  fill: var(--bg-app) !important;
+  stroke: var(--border-default) !important;
+}
+
+#preview-wrapper .markdown-body .mermaid svg .edgePath .path,
+#preview-wrapper .markdown-body .mermaid svg .edgePath path,
+#preview-wrapper .markdown-body .mermaid svg line,
+#preview-wrapper .markdown-body .mermaid svg .messageLine0,
+#preview-wrapper .markdown-body .mermaid svg .messageLine1,
+#preview-wrapper .markdown-body .mermaid svg .loopLine,
+#preview-wrapper .markdown-body .mermaid svg .relation,
+#preview-wrapper .markdown-body .mermaid svg .relation-path,
+#preview-wrapper .markdown-body .mermaid svg .relationshipLine,
+#preview-wrapper .markdown-body .mermaid svg .transition,
+#preview-wrapper .markdown-body .mermaid svg .tick line,
+#preview-wrapper .markdown-body .mermaid svg .grid line,
+#preview-wrapper .markdown-body .mermaid svg .flowchart-link {
+  stroke: var(--text-secondary) !important;
+  fill: none !important;
+}
+
+#preview-wrapper .markdown-body .mermaid svg marker path,
+#preview-wrapper .markdown-body .mermaid svg .arrowheadPath,
+#preview-wrapper .markdown-body .mermaid svg .marker,
+#preview-wrapper .markdown-body .mermaid svg .arrowMarkerPath {
+  fill: var(--text-secondary) !important;
+  stroke: none !important;
+}
+
+#preview-wrapper .markdown-body .mermaid svg foreignObject {
+  overflow: visible !important;
+}
+
+#preview-wrapper .markdown-body .mermaid svg .edgeLabel p {
+  background-color: transparent !important;
+  background: transparent !important;
+}
+
+#preview-wrapper .markdown-body .mermaid svg .labelBkg {
+  background-color: var(--bg-preview) !important;
+  background: var(--bg-preview) !important;
+  color: var(--text-primary) !important;
+  padding: 0 4px !important;
+}
+
+#preview-wrapper .markdown-body .mermaid svg .edgeLabel rect {
+  fill: var(--bg-preview) !important;
+  opacity: 1 !important;
 }
 
 .markdown-body .anchor {
@@ -144,7 +234,8 @@
 
 [data-theme="dark"] .markdown-body hr {
   background-color: var(--border-default) !important;
-  border-color: var(--border-default) !important;
+  border: 0 !important;
+  height: 0.25em !important;
 }
 
 [data-theme="dark"] .markdown-body .anchor {

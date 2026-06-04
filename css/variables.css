@@ -158,6 +158,8 @@
   --toggle-icon: hsl(var(--hue), var(--toggle-icon-s), var(--toggle-icon-l));
 
   --caret-color: hsl(var(--hue), var(--caret-color-s), var(--caret-color-l));
+  --nav-logo-color: hsl(var(--hue), 13%, 16%);
+  --nav-icon-color: hsl(var(--hue), 13%, 16%);
 
   color-scheme: light;
 }
@@ -255,6 +257,8 @@
 
   --caret-color-s: 40%;
   --caret-color-l: 93%;
+  --nav-logo-color: hsl(var(--hue), 40%, 93%);
+  --nav-icon-color: hsl(var(--hue), 40%, 93%);
 
   color-scheme: dark;
 }

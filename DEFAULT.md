@@ -37,7 +37,7 @@ _You **can** combine them_
 
 ## Images
 
-![This is an alt text.](./logo.png)
+![This is an alt text.](./markdown-preview-logo.svg)
 
 ## Links
 

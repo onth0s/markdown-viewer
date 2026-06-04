@@ -185,8 +185,9 @@ header input[type="checkbox"] {
 }
 
 #wrench-button > svg {
+  color: var(--nav-icon-color);
   opacity: 0.45;
-  transition: opacity 0.15s;
+  transition: opacity 0.15s, color 0.3s;
   display: block;
 }
 
@@ -222,7 +223,7 @@ header input[type="checkbox"] {
   height: 28px;
   padding: 0 10px;
   font-size: 11px;
-  color: var(--text-secondary);
+  color: var(--text-primary);
   white-space: nowrap;
   cursor: pointer;
   border-radius: 4px;
@@ -247,7 +248,7 @@ header input[type="checkbox"] {
   display: block;
   font-size: 10px;
   color: var(--text-secondary);
-  opacity: 0.55;
+  opacity: 0.85;
   margin-bottom: 6px;
   padding: 0 4px;
   user-select: none;

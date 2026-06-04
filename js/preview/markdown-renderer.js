@@ -16,6 +16,15 @@ renderer.code = (token) => {
   return '<pre class="mermaid">' + escapeHtml(token.text) + '</pre>\n';
 };
 
+let renderImage = renderer.image.bind(renderer);
+renderer.image = (token) => {
+  let href = token.href || '';
+  if (href.endsWith('markdown-preview-logo.svg') || href.endsWith('logo.png')) {
+    return `<img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="${escapeHtml(token.text || '')}" class="themed-logo" data-original-src="${href}">`;
+  }
+  return renderImage(token);
+};
+
 let inlineTokenTypes = new Set(['text','strong','em','del','codespan','br','link','image','checkbox']);
 let hasInlineChildren = (t) => t.tokens && t.tokens.length > 0 && inlineTokenTypes.has(t.tokens[0].type);
 

@@ -73,19 +73,27 @@
   background-color: var(--caret-color);
   pointer-events: none;
   z-index: 10;
+  opacity: 0;
+  transition: opacity 0.15s ease-in-out;
+}
+
+#caret-indicator.visible {
   opacity: 0.8;
 }
 
-#caret-indicator.selection-active {
+#caret-indicator.visible.selection-active {
   opacity: 0.5;
 }
 
 [data-theme="dark"] #caret-indicator {
   background-color: var(--color-primary);
+}
+
+[data-theme="dark"] #caret-indicator.visible {
   opacity: 0.9;
 }
 
-[data-theme="dark"] #caret-indicator.selection-active {
+[data-theme="dark"] #caret-indicator.visible.selection-active {
   opacity: 0.5;
 }
 
