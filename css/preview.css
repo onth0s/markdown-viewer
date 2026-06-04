@@ -35,15 +35,20 @@
 }
 
 .markdown-body pre,
+.markdown-body code,
+.markdown-body tt,
 .markdown-body .highlight,
 .markdown-body .highlight pre,
 .markdown-body pre code {
   background-color: var(--bg-code) !important;
+  color: var(--text-primary) !important;
 }
 
-.markdown-body code {
-  background-color: var(--bg-code) !important;
+.markdown-body a {
+  color: var(--text-link) !important;
 }
+
+
 
 .markdown-body table,
 .markdown-body table th,
