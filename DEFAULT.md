@@ -37,7 +37,7 @@ _You **can** combine them_
 
 ## Images
 
-![This is an alt text.](/logo.png "This is a sample image.")
+![This is an alt text.](./logo.png)
 
 ## Links
 
