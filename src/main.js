@@ -327,9 +327,6 @@ This web site is using ${"`"}markedjs/marked${"`"}.
     };
 
     let initThemeToggle = (settings) => {
-        let checkbox = document.querySelector('#theme-checkbox');
-        if (!checkbox) return;
-        checkbox.checked = settings;
         setTheme(settings);
 
         // set Monaco editor theme to match page theme
@@ -339,8 +336,12 @@ This web site is using ${"`"}markedjs/marked${"`"}.
         // set preview css to match theme
         setPreviewCss(settings);
 
-        checkbox.addEventListener('change', (event) => {
-            let checked = event.currentTarget.checked;
+        let toggle = document.querySelector('.theme-toggle');
+        if (!toggle) return;
+
+        toggle.addEventListener('click', () => {
+            let isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            let checked = !isDark;
             setTheme(checked);
             saveThemeSettings(checked);
             setPreviewCss(checked);

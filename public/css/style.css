@@ -87,31 +87,44 @@ header input[type="checkbox"] {
     margin-top: 0px;
 }
 
-#github {
-    padding-right: 32px;
+.theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 12px;
+    cursor: pointer;
+    vertical-align: middle;
+    line-height: 1;
 }
 
-#github img {
-  display: block;
-  width: 16px;
+.theme-toggle-slider {
+    position: relative;
+    width: 36px;
+    height: 20px;
+    background-color: #888;
+    border-radius: 10px;
+    display: inline-block;
 }
 
-#github a {
-  display: block;
-  width: 16px;
+.theme-toggle-knob {
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background-color: #fff;
+    top: 2px;
+    left: 2px;
+    display: block;
+    transition: left 0.15s;
 }
 
-footer {
-  padding: 8px;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  background-color: #fff;
-  color: #fff;
-  text-align: center;
-  justify-content: center;
-  align-items: center;
+.theme-toggle-knob path {
+    fill: #555;
 }
+
+[data-theme="light"] .theme-toggle-knob {
+    left: 18px;
+}
+
 
 #container {
   flex-grow: 1;
@@ -229,6 +242,3 @@ footer {
   background: #768390;
 }
 
-[data-theme="dark"] footer {
-  background-color: #333;
-}
