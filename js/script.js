@@ -36,7 +36,7 @@ let highlightMd = (txt) => {
 
     if (m) {
       let fenceMarker = m[1];
-      let lang = m[2] ? ' <span class="hl-fence-lang">' + m[2] + '</span>' : '';
+      let lang = m[2] ? '<span class="hl-fence-lang">' + m[2] + '</span>' : '';
       let open = '<span class="hl-fence hl-fence-open">' + m[1] + '</span>' + lang;
 
       let codeLines = [];
@@ -51,11 +51,11 @@ let highlightMd = (txt) => {
         : '';
 
       result.push(
-        '<div class="hl-fenced-block">' +
-        open +
-        '<div class="hl-code-content">' + codeLines.join('\n') + '</div>' +
+        '<span class="hl-fenced-block">' +
+        open + '\n' +
+        (codeLines.length > 0 ? '<span class="hl-code-content">' + codeLines.join('\n') + '</span>\n' : '') +
         close +
-        '</div>'
+        '</span>'
       );
       i++;
       continue;
