@@ -28,6 +28,15 @@
   flex-direction: row-reverse;
 }
 
+[data-fullscreen] #edit,
+[data-fullscreen] #split-divider {
+  display: none;
+}
+
+[data-fullscreen] #preview {
+  flex: 1;
+}
+
 .editor-pane {
   display: flex;
   flex-direction: column;

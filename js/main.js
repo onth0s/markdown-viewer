@@ -25,6 +25,7 @@ import { initPreviewCustomScrollbar } from './preview/scrollbars.js';
 import { setupFullscreenOverlay } from './common/scroll-utils.js';
 import { initCopyButton, initDownloadButton, initPdfButton } from './preview/actions.js';
 import { initDynamicSvg, updateThemedLogos } from './common/logo-engine.js';
+import { SelectionEngine } from './selection/selection-engine.js';
 
 // DOM elements
 const editorEl = document.getElementById('editor');
@@ -310,7 +311,23 @@ let bootstrap = () => {
     setupFullscreenOverlay(previewFullscreenOverlayEl, previewPaneContainer);
   }
 
-  // 3. Init Editor Controller
+  const fullscreenBtn = previewFullscreenOverlayEl && previewFullscreenOverlayEl.querySelector('.fullscreen-popup-btn');
+  if (fullscreenBtn) {
+    fullscreenBtn.addEventListener('click', () => {
+      let isFullscreen = document.documentElement.hasAttribute('data-fullscreen');
+      if (isFullscreen) {
+        document.documentElement.removeAttribute('data-fullscreen');
+        window.dispatchEvent(new Event('resize'));
+      } else {
+        document.documentElement.setAttribute('data-fullscreen', '');
+      }
+    });
+  }
+
+  // 3. Init Selection Engine
+  const selectionEngine = new SelectionEngine(outputEl);
+
+  // 4. Init Editor Controller
   const editorController = initEditorController({
     editor: editorEl,
     editorHighlight: editorHighlightEl,
@@ -320,28 +337,24 @@ let bootstrap = () => {
     scrollOverlay: editorOverlayEl,
     onInput: (value) => {
       convert(outputEl, value);
+      selectionEngine.setMarkdown(value);
       saveLastContent(value);
       if (previewScrollbar) previewScrollbar.update();
       updateThemedLogos();
     },
     onSelectionChange: (start, end) => {
-      if (start !== end) {
-        convert(outputEl, editorEl.value, start, end);
-        updateThemedLogos();
-      } else if (outputEl.querySelector('.preview-selection')) {
-        convert(outputEl, editorEl.value);
-        updateThemedLogos();
-      }
+      selectionEngine.updateSelection(start, end);
     }
   });
 
-  // 4. Load content and apply positions
+  // 5. Load content and apply positions
   let savedScrolls = loadScrollPositions();
   
   let onContentReady = (content) => {
     if (editorController) {
       editorController.presetValue(content);
     }
+    selectionEngine.setMarkdown(content);
     if (savedScrolls && editorEl && previewEl) {
       applyScrollRatio(editorEl, savedScrolls.editor);
       if (editorHighlightEl) editorHighlightEl.scrollTop = editorEl.scrollTop;

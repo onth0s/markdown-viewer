@@ -295,13 +295,13 @@
 }
 
 /* Inline code selected */
-code.preview-selection {
+.markdown-body code.preview-selection {
   background-color: var(--selection-bg) !important;
   color: var(--selection-text) !important;
 }
 
 /* Partial inline-code selection (span inside code) */
-code span.preview-selection {
+.markdown-body code span.preview-selection {
   background-color: var(--selection-bg) !important;
   color: var(--selection-text) !important;
 }
