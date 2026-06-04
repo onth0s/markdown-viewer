@@ -54,3 +54,29 @@ export let setupScrollOverlay = (overlayEl, scrollEl) => {
     bottomBtn.addEventListener('click', () => { scrollEl.scrollTop = scrollEl.scrollHeight; });
   }
 };
+
+export let setupFullscreenOverlay = (overlayEl, wrapperEl) => {
+  if (!overlayEl || !wrapperEl) return;
+  let PROXIMITY_THRESHOLD = 60;
+
+  let show = () => { overlayEl.classList.add('visible'); };
+  let hide = () => { overlayEl.classList.remove('visible'); };
+
+  wrapperEl.addEventListener('mousemove', (e) => {
+    let rect = wrapperEl.getBoundingClientRect();
+    let mouseY = e.clientY - rect.top;
+    let mouseX = e.clientX - rect.left;
+    let nearLeft = mouseX <= PROXIMITY_THRESHOLD;
+    let nearTop = mouseY <= PROXIMITY_THRESHOLD;
+
+    if (nearLeft && nearTop) {
+      show();
+    } else {
+      hide();
+    }
+  });
+
+  wrapperEl.addEventListener('mouseleave', () => { hide(); });
+  overlayEl.addEventListener('mouseenter', () => { show(); });
+  overlayEl.addEventListener('mouseleave', () => { hide(); });
+};

@@ -22,6 +22,7 @@ import { initEditorController } from './editor/editor-controller.js';
 import { initMermaid, renderMermaidDiagrams } from './preview/mermaid-renderer.js';
 import { convert } from './preview/markdown-renderer.js';
 import { initPreviewCustomScrollbar } from './preview/scrollbars.js';
+import { setupFullscreenOverlay } from './common/scroll-utils.js';
 import { initCopyButton, initDownloadButton, initPdfButton } from './preview/actions.js';
 import { initDynamicSvg, updateThemedLogos } from './common/logo-engine.js';
 
@@ -37,6 +38,7 @@ const previewTrackEl = document.getElementById('preview-custom-scrollbar');
 const previewThumbEl = document.getElementById('preview-custom-scrollbar-thumb');
 const editorOverlayEl = document.getElementById('editor-scroll-overlay');
 const previewOverlayEl = document.getElementById('preview-scroll-overlay');
+const previewFullscreenOverlayEl = document.getElementById('preview-fullscreen-popup');
 
 let scrollBarSync = false;
 let activePane = 'editor';
@@ -303,6 +305,9 @@ let bootstrap = () => {
   const previewScrollbar = initPreviewCustomScrollbar(previewEl, previewTrackEl, previewThumbEl);
   if (previewScrollbar && previewOverlayEl) {
     previewScrollbar.setupOverlay(previewOverlayEl);
+  }
+  if (previewFullscreenOverlayEl && previewPaneContainer) {
+    setupFullscreenOverlay(previewFullscreenOverlayEl, previewPaneContainer);
   }
 
   // 3. Init Editor Controller
