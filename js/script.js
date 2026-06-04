@@ -424,13 +424,20 @@ let initThemeToggle = (settings) => {
   setPreviewCss(settings);
   let toggle = document.querySelector('.theme-toggle');
   if (!toggle) return;
-  toggle.addEventListener('click', () => {
+  toggle.addEventListener('click', async () => {
     let isDark = document.documentElement.getAttribute('data-theme') === 'dark';
     let checked = !isDark;
+    let preview = document.getElementById('preview');
+    let ratio = (preview.scrollHeight - preview.clientHeight) > 0
+      ? preview.scrollTop / (preview.scrollHeight - preview.clientHeight)
+      : 0;
     setTheme(checked);
     saveThemeSettings(checked);
     setPreviewCss(checked);
-    renderMermaidDiagrams();
+    await renderMermaidDiagrams();
+    if ((preview.scrollHeight - preview.clientHeight) > 0) {
+      preview.scrollTop = ratio * (preview.scrollHeight - preview.clientHeight);
+    }
   });
 };
 

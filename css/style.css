@@ -242,7 +242,6 @@ header input[type="checkbox"] {
   display: block;
   overscroll-behavior: none;
   position: relative;
-  -webkit-text-fill-color: transparent;
 }
 
 [data-theme="dark"] #editor {
@@ -250,11 +249,13 @@ header input[type="checkbox"] {
 }
 
 #editor::selection {
-  background: #accef7;
+  background: #b4d5ff;
+  color: transparent;
 }
 
 [data-theme="dark"] #editor::selection {
-  background: #264f78;
+  background: #3b5b7a;
+  color: transparent;
 }
 
 /* Syntax highlight colors - pure color only */
