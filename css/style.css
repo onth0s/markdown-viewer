@@ -50,7 +50,7 @@ img {
 
 header {
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
   padding: 8px 16px;
   width: 100%;
@@ -58,6 +58,11 @@ header {
   font-size: 12px;
   color: #fff;
   box-sizing: border-box;
+}
+
+header .nav-logo {
+  height: 20px;
+  display: block;
 }
 
 header a:link, header a:hover, header a:visited, header a:active {
