@@ -85,6 +85,7 @@ This web site is using \`markedjs/marked\`.
 const STORAGE_THEME_KEY = 'com.markdownlivepreview_theme';
 const STORAGE_CONTENT_KEY = 'mdv_last_content';
 const STORAGE_SCROLL_KEY = 'mdv_scroll_sync';
+const STORAGE_SCROLL_POS_KEY = 'mdv_scroll_positions';
 
 const PREVIEW_CSS_LIGHT = 'css/github-markdown-light.css';
 const PREVIEW_CSS_DARK = 'css/github-markdown-dark_dimmed.css';
@@ -471,6 +472,39 @@ let saveScrollBarSettings = (settings) => {
   try { localStorage.setItem(STORAGE_SCROLL_KEY, settings ? 'true' : 'false'); } catch (e) {}
 };
 
+let computeScrollRatio = (el) => {
+  if (!el) return 0;
+  let max = el.scrollHeight - el.clientHeight;
+  if (max <= 0) return 0;
+  return Math.max(0, Math.min(1, el.scrollTop / max));
+};
+
+let applyScrollRatio = (el, ratio) => {
+  if (!el || ratio == null) return;
+  let max = el.scrollHeight - el.clientHeight;
+  if (max <= 0) return;
+  el.scrollTop = ratio * max;
+};
+
+let saveScrollPositions = () => {
+  try {
+    let preview = document.getElementById('preview');
+    let payload = JSON.stringify({
+      editor: computeScrollRatio(editor),
+      preview: computeScrollRatio(preview)
+    });
+    localStorage.setItem(STORAGE_SCROLL_POS_KEY, payload);
+  } catch (e) {}
+};
+
+let loadScrollPositions = () => {
+  try {
+    let raw = localStorage.getItem(STORAGE_SCROLL_POS_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch (e) { return null; }
+};
+
 let initScrollBarSync = (settings) => {
   setSyncScroll(settings);
   let toggle = document.querySelector('.sync-toggle');
@@ -544,6 +578,19 @@ if (lastContent) {
 } else {
   presetValue(defaultInput);
 }
+
+let savedScrolls = loadScrollPositions();
+if (savedScrolls) {
+  applyScrollRatio(editor, savedScrolls.editor);
+  editorHighlight.scrollTop = editor.scrollTop;
+  renderMermaidDiagrams().then(() => {
+    applyScrollRatio(document.getElementById('preview'), savedScrolls.preview);
+  });
+}
+
+editor.addEventListener('scroll', saveScrollPositions, { passive: true });
+document.getElementById('preview').addEventListener('scroll', saveScrollPositions, { passive: true });
+window.addEventListener('beforeunload', saveScrollPositions);
 
 let scrollBarSettings = loadScrollBarSettings();
 initScrollBarSync(scrollBarSettings);
