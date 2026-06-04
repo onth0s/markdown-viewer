@@ -1,0 +1,109 @@
+/* ── Editor ── */
+#editor-wrapper {
+  flex: 1;
+  overflow: hidden;
+  padding: 0;
+  position: relative;
+  background-color: var(--bg-editor);
+}
+
+#editor-highlight {
+  margin: 0;
+  padding: 12px 16px 70vh 16px;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  overflow-y: scroll;
+  scrollbar-gutter: stable;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  pointer-events: none;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  font-family: 'Monaco', 'Consolas', 'Courier New', monospace;
+  font-size: 14px;
+  line-height: 1.5;
+  tab-size: 4;
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+}
+
+#editor-highlight::-webkit-scrollbar {
+  display: none;
+}
+
+#editor {
+  width: 100%;
+  height: 100%;
+  resize: none;
+  border: none;
+  outline: none;
+  padding: 12px 16px 70vh 16px;
+  font-family: 'Monaco', 'Consolas', 'Courier New', monospace;
+  font-size: 14px;
+  line-height: 1.5;
+  tab-size: 4;
+  background: transparent;
+  color: transparent;
+  caret-color: var(--caret-color);
+  box-sizing: border-box;
+  display: block;
+  overscroll-behavior: none;
+  overflow-y: scroll;
+  position: relative;
+  z-index: 2;
+}
+
+#editor::selection {
+  background: var(--selection-bg);
+  color: var(--selection-text);
+}
+
+/* ── Caret / Selection Position Indicator ── */
+#caret-indicator {
+  position: absolute;
+  right: 0;
+  width: 12px;
+  height: 2px;
+  background-color: var(--caret-color);
+  pointer-events: none;
+  z-index: 10;
+  opacity: 0.8;
+}
+
+#caret-indicator.selection-active {
+  opacity: 0.5;
+}
+
+[data-theme="dark"] #caret-indicator {
+  background-color: var(--color-primary);
+  opacity: 0.9;
+}
+
+[data-theme="dark"] #caret-indicator.selection-active {
+  opacity: 0.5;
+}
+
+/* ── Syntax Highlighting ── */
+.hl-h1, .hl-h2, .hl-h3, .hl-h4, .hl-h5, .hl-h6,
+.hl-hash { color: var(--syntax-heading); }
+.hl-em, .hl-strong, .hl-em-strong { color: var(--syntax-bold); }
+.hl-code { color: var(--syntax-code); }
+.hl-fence, .hl-fence-lang { color: var(--syntax-fence); }
+.hl-link, .hl-link-text { color: var(--syntax-link); }
+.hl-link-url { color: var(--syntax-fence); }
+.hl-image, .hl-img-alt { color: var(--syntax-image); }
+.hl-img-url { color: var(--syntax-fence); }
+.hl-quote { color: var(--syntax-quote); }
+.hl-list-marker { color: var(--syntax-list); }
+.hl-hr { color: var(--syntax-hr); }
+.hl-strike { color: var(--syntax-strike); }
+.hl-table-sep { color: var(--syntax-table-sep); }
+.hl-table { color: var(--syntax-table); }
+.hl-fenced-block { color: var(--syntax-table); }
+.hl-code-content { color: var(--syntax-table); }

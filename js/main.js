@@ -1,0 +1,271 @@
+import { defaultInputFallback, PREVIEW_CSS_LIGHT, PREVIEW_CSS_DARK } from './common/constants.js';
+import {
+  saveLastContent,
+  loadLastContent,
+  loadThemeSettings,
+  saveThemeSettings,
+  loadScrollBarSettings,
+  saveScrollBarSettings,
+  saveScrollPositions,
+  loadScrollPositions
+} from './common/storage.js';
+import { setupDivider, initSwapButton } from './common/ui-divider.js';
+import { initEditorController } from './editor/editor-controller.js';
+import { initMermaid, renderMermaidDiagrams } from './preview/mermaid-renderer.js';
+import { convert } from './preview/markdown-renderer.js';
+import { initPreviewCustomScrollbar } from './preview/scrollbars.js';
+import { initCopyButton, initDownloadButton, initPdfButton } from './preview/actions.js';
+
+// DOM elements
+const editorEl = document.getElementById('editor');
+const editorHighlightEl = document.getElementById('editor-highlight');
+const caretIndicatorEl = document.getElementById('caret-indicator');
+const customScrollbarEl = document.getElementById('custom-scrollbar');
+const customScrollbarThumbEl = document.getElementById('custom-scrollbar-thumb');
+const outputEl = document.getElementById('output');
+const previewEl = document.getElementById('preview-wrapper');
+const previewTrackEl = document.getElementById('preview-custom-scrollbar');
+const previewThumbEl = document.getElementById('preview-custom-scrollbar-thumb');
+const editorOverlayEl = document.getElementById('editor-scroll-overlay');
+const previewOverlayEl = document.getElementById('preview-scroll-overlay');
+
+let scrollBarSync = false;
+let activePane = 'editor';
+
+let setActivePane = (pane) => { activePane = pane; };
+
+// Setup pane focus listeners
+const editPaneContainer = document.getElementById('edit');
+const previewPaneContainer = document.getElementById('preview');
+
+if (editPaneContainer) editPaneContainer.addEventListener('pointerenter', () => setActivePane('editor'));
+if (previewPaneContainer) previewPaneContainer.addEventListener('pointerenter', () => setActivePane('preview'));
+if (editorEl) editorEl.addEventListener('focus', () => setActivePane('editor'));
+
+// Scroll Synchronization Logic
+let syncPaneToPane = (source, target) => {
+  let max = source.scrollHeight - source.clientHeight;
+  if (max <= 0) return;
+  if (source.scrollTop <= 1) {
+    source.scrollTop = 0;
+    target.scrollTop = 0;
+    return;
+  }
+  if (source.scrollTop >= max - 1) {
+    source.scrollTop = max;
+    target.scrollTop = target.scrollHeight;
+    return;
+  }
+  let ratio = source.scrollTop / max;
+  let targetMax = target.scrollHeight - target.clientHeight;
+  if (targetMax <= 0) return;
+  target.scrollTop = ratio * targetMax;
+};
+
+if (editorEl && previewEl) {
+  editorEl.addEventListener('scroll', () => {
+    if (!scrollBarSync) return;
+    if (activePane !== 'editor') return;
+    syncPaneToPane(editorEl, previewEl);
+  });
+
+  previewEl.addEventListener('scroll', () => {
+    if (!scrollBarSync) return;
+    if (activePane !== 'preview') return;
+    syncPaneToPane(previewEl, editorEl);
+  });
+}
+
+let setSyncScroll = (enabled) => {
+  document.documentElement.setAttribute('data-sync', enabled ? 'on' : 'off');
+  scrollBarSync = enabled;
+  if (enabled && editorEl && previewEl) {
+    syncPaneToPane(editorEl, previewEl);
+  }
+};
+
+let initScrollBarSyncToggle = (settings) => {
+  setSyncScroll(settings);
+  let toggle = document.querySelector('.sync-toggle');
+  if (!toggle) return;
+  toggle.addEventListener('click', () => {
+    let isOn = document.documentElement.getAttribute('data-sync') === 'on';
+    let checked = !isOn;
+    scrollBarSync = checked;
+    setSyncScroll(checked);
+    saveScrollBarSettings(checked);
+  });
+};
+
+// Theme Toggling Logic
+let setPreviewCss = (useDark) => {
+  let link = document.getElementById('gh-markdown-link');
+  let desired = useDark ? PREVIEW_CSS_DARK : PREVIEW_CSS_LIGHT;
+  if (!link) {
+    let newLink = document.createElement('link');
+    newLink.id = 'gh-markdown-link';
+    newLink.rel = 'stylesheet';
+    newLink.href = desired;
+    document.head.appendChild(newLink);
+    return Promise.resolve();
+  }
+  if (link.getAttribute('href') === desired) return Promise.resolve();
+  return new Promise((resolve) => {
+    let loaded = () => { link.removeEventListener('load', loaded); requestAnimationFrame(resolve); };
+    link.addEventListener('load', loaded);
+    link.setAttribute('href', desired);
+  });
+};
+
+let setTheme = (enabled) => {
+  document.documentElement.setAttribute('data-theme', enabled ? 'dark' : 'light');
+};
+
+let initThemeToggle = (settings) => {
+  setTheme(settings);
+  setPreviewCss(settings);
+  let toggle = document.querySelector('.theme-toggle');
+  if (!toggle) return;
+  toggle.addEventListener('click', async () => {
+    let isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    let checked = !isDark;
+    let ratio = (previewEl.scrollHeight - previewEl.clientHeight) > 0
+      ? previewEl.scrollTop / (previewEl.scrollHeight - previewEl.clientHeight)
+      : 0;
+    setTheme(checked);
+    saveThemeSettings(checked);
+    await setPreviewCss(checked);
+    await renderMermaidDiagrams(outputEl);
+    if ((previewEl.scrollHeight - previewEl.clientHeight) > 0) {
+      previewEl.scrollTop = ratio * (previewEl.scrollHeight - previewEl.clientHeight);
+    }
+  });
+};
+
+// State preservation
+let computeScrollRatio = (el) => {
+  if (!el) return 0;
+  let max = el.scrollHeight - el.clientHeight;
+  if (max <= 0) return 0;
+  return Math.max(0, Math.min(1, el.scrollTop / max));
+};
+
+let applyScrollRatio = (el, ratio) => {
+  if (!el || ratio == null) return;
+  let max = el.scrollHeight - el.clientHeight;
+  if (max <= 0) return;
+  el.scrollTop = ratio * max;
+};
+
+let persistScrollPositions = () => {
+  if (!editorEl || !previewEl) return;
+  saveScrollPositions(
+    computeScrollRatio(editorEl),
+    computeScrollRatio(previewEl),
+    editorEl.selectionStart
+  );
+};
+
+// Bootstrap function
+let bootstrap = () => {
+  // 1. Init UI components
+  setupDivider();
+  initSwapButton();
+  initMermaid();
+
+  // Wrench popup toggle
+  const wrenchBtn = document.getElementById('wrench-button');
+  const wrenchPopup = document.getElementById('wrench-popup');
+  if (wrenchBtn && wrenchPopup) {
+    let positionPopup = () => {
+      let header = document.querySelector('header');
+      let btnRect = wrenchBtn.getBoundingClientRect();
+      let navBottom = header ? header.getBoundingClientRect().bottom : btnRect.bottom;
+      wrenchPopup.style.top = (navBottom + 4) + 'px';
+      wrenchPopup.style.left = btnRect.left + 'px';
+    };
+    wrenchBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      let opening = !wrenchBtn.classList.contains('open');
+      wrenchBtn.classList.toggle('open');
+      if (opening) positionPopup();
+    });
+    document.addEventListener('click', () => wrenchBtn.classList.remove('open'));
+  }
+
+  // 2. Setup Scrollbars
+  const previewScrollbar = initPreviewCustomScrollbar(previewEl, previewTrackEl, previewThumbEl);
+  if (previewScrollbar && previewOverlayEl) {
+    previewScrollbar.setupOverlay(previewOverlayEl);
+  }
+
+  // 3. Init Editor Controller
+  const editorController = initEditorController({
+    editor: editorEl,
+    editorHighlight: editorHighlightEl,
+    customScrollbar: customScrollbarEl,
+    customScrollbarThumb: customScrollbarThumbEl,
+    caretIndicator: caretIndicatorEl,
+    scrollOverlay: editorOverlayEl,
+    onInput: (value) => {
+      convert(outputEl, value);
+      saveLastContent(value);
+      if (previewScrollbar) previewScrollbar.update();
+    },
+    onSelectionChange: (start, end) => {
+      if (start !== end) {
+        convert(outputEl, editorEl.value, start, end);
+      } else if (outputEl.querySelector('.preview-selection')) {
+        convert(outputEl, editorEl.value);
+      }
+    }
+  });
+
+  // 4. Load content and apply positions
+  let savedScrolls = loadScrollPositions();
+  
+  let onContentReady = (content) => {
+    if (editorController) {
+      editorController.presetValue(content);
+    }
+    if (savedScrolls && editorEl && previewEl) {
+      applyScrollRatio(editorEl, savedScrolls.editor);
+      if (editorHighlightEl) editorHighlightEl.scrollTop = editorEl.scrollTop;
+      if (savedScrolls.caret != null && savedScrolls.caret <= editorEl.value.length) {
+        editorEl.setSelectionRange(savedScrolls.caret, savedScrolls.caret);
+      }
+      if (editorController) editorController.updateHighlight();
+      renderMermaidDiagrams(outputEl).then(() => {
+        applyScrollRatio(previewEl, savedScrolls.preview);
+        if (previewScrollbar) previewScrollbar.update();
+      });
+    }
+  };
+
+  let lastContent = loadLastContent();
+  if (lastContent) {
+    onContentReady(lastContent);
+  } else {
+    fetch('DEFAULT.md')
+      .then(r => r.ok ? r.text() : Promise.reject(new Error('HTTP ' + r.status)))
+      .then(text => onContentReady(text))
+      .catch(() => onContentReady(defaultInputFallback));
+  }
+
+  // 5. Setup Action Buttons
+  initCopyButton(editorEl);
+  initDownloadButton(editorEl);
+  initPdfButton(previewEl, outputEl);
+
+  // 6. Setup toggles
+  initScrollBarSyncToggle(loadScrollBarSettings());
+  initThemeToggle(loadThemeSettings());
+
+  // 7. Attach scroll/unload listener for state preservation
+  if (editorEl) editorEl.addEventListener('scroll', persistScrollPositions, { passive: true });
+  if (previewEl) previewEl.addEventListener('scroll', persistScrollPositions, { passive: true });
+  window.addEventListener('beforeunload', persistScrollPositions);
+};
+
+// Start application
+bootstrap();

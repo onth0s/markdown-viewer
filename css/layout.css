@@ -1,0 +1,75 @@
+/* ── Container & Layout ── */
+#container {
+  height: 100%;
+  width: 100%;
+  margin: 0 auto;
+  background-color: var(--bg-surface);
+  border-bottom: 1px solid var(--border-default);
+  display: flex;
+  overflow: hidden;
+}
+
+.column {
+  width: 50%;
+  padding: 0;
+  margin: 0;
+  white-space: nowrap;
+  vertical-align: top;
+}
+
+/* ── Split Layout ── */
+.split-container {
+  display: flex;
+  height: 100%;
+  width: 100%;
+}
+
+[data-swapped] .split-container {
+  flex-direction: row-reverse;
+}
+
+.editor-pane {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.preview-pane {
+  height: 100%;
+  background-color: var(--bg-preview);
+  position: relative;
+  overflow: hidden;
+}
+
+#preview.column {
+  overflow: hidden;
+  white-space: normal;
+}
+
+#preview-wrapper {
+  padding: 8px 16px 70vh 16px;
+  font-family: 'Roboto', Helvetica, Arial, sans-serif;
+  overflow-y: scroll;
+  height: 100%;
+  scrollbar-width: none;
+}
+
+#preview-wrapper::-webkit-scrollbar {
+  display: none;
+}
+
+.split-divider {
+  width: 5px;
+  background: var(--divider);
+  cursor: col-resize;
+  z-index: 1;
+  transition: background-color 0.15s;
+}
+
+.split-divider.hover {
+  background: var(--divider-hover);
+}
+
+.split-divider.active {
+  background: var(--divider-active);
+}

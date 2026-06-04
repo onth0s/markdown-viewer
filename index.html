@@ -7,6 +7,9 @@
     <script>
       (function(){
         try {
+      // NOTE: The storage keys below are intentionally hardcoded here — ES modules
+      // load asynchronously so js/common/constants.js is not yet available when this
+      // script runs. Keep these keys in sync with js/common/constants.js.
           var BOOT_THEME_KEY = 'com.markdownlivepreview_theme';
           var raw = localStorage.getItem(BOOT_THEME_KEY);
           var useDark = raw !== 'light';
@@ -46,6 +49,14 @@
         <header>
           <div id="menu-items">
             <div><a href="/"><img src="logo.png" alt="Markdown Viewer" class="nav-logo"></a></div>
+            <div id="wrench-button" title="Settings">
+              <img src="svg/wrench.svg" alt="" width="14" height="14">
+              <div id="wrench-popup">
+                <p>Placeholder setting A</p>
+                <p>Placeholder setting B</p>
+                <p>Placeholder setting C</p>
+              </div>
+            </div>
             <div id="copy-button" title="Copy">
               <img src="svg/copy.svg" alt="" width="20" height="20">
             </div>
@@ -108,6 +119,6 @@
     <script src="https://cdn.jsdelivr.net/npm/marked/lib/marked.umd.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <script src="js/script.js"></script>
+    <script type="module" src="js/main.js"></script>
   </body>
 </html>
