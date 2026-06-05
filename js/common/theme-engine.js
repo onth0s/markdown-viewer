@@ -152,6 +152,15 @@ export let applyBrightness = (brightness) => {
     iconL = Math.round(16 + t * (75 - 16));
   }
   doc.style.setProperty('--nav-icon-color', `hsl(var(--hue), ${iconS}%, ${iconL}%)`);
+
+  // Gradual fade for Prism tokens at extreme brightness levels [0, 25] and [75, 100]
+  let prismOpacity = 1.0;
+  if (brightness < 25) {
+    prismOpacity = brightness / 25;
+  } else if (brightness > 75) {
+    prismOpacity = (100 - brightness) / 25;
+  }
+  doc.style.setProperty('--prism-opacity', prismOpacity.toString());
 };
 
 /** Save brightness to local storage and update corresponding legacy theme state */

@@ -89,6 +89,17 @@ export let convert = (output, markdown) => {
     output.innerHTML = sanitized;
     if (typeof Prism !== 'undefined') {
       Prism.highlightAllUnder(output);
+      output.querySelectorAll('code[class*="language-"]').forEach(codeEl => {
+        let nodes = Array.from(codeEl.childNodes);
+        nodes.forEach(node => {
+          if (node.nodeType === 3) { // Text Node
+            let span = document.createElement('span');
+            span.className = 'token plain-text';
+            codeEl.insertBefore(span, node);
+            span.appendChild(node);
+          }
+        });
+      });
     }
     scheduleMermaidRender(output);
   } catch (e) {

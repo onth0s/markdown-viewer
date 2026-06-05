@@ -251,3 +251,26 @@
   background-color: var(--selection-bg) !important;
   color: var(--selection-text) !important;
 }
+
+/* ── Gradual Prism token opacity at extreme brightness levels ── */
+.markdown-body pre[class*="language-"],
+.markdown-body code[class*="language-"] {
+  background: var(--bg-code) !important;
+  border: 1px solid var(--border-default) !important;
+  box-shadow: none !important;
+  color: var(--text-primary) !important;
+  text-shadow: none !important;
+}
+
+.markdown-body pre[class*="language-"] *:not(.preview-selection),
+.markdown-body code[class*="language-"] *:not(.preview-selection) {
+  opacity: var(--prism-opacity, 1) !important;
+  text-shadow: none !important;
+}
+
+/* Ensure all elements related to active selection remain fully visible */
+.markdown-body pre code span.preview-selection,
+.markdown-body code.preview-selection,
+.markdown-body code span.preview-selection {
+  opacity: 1 !important;
+}
