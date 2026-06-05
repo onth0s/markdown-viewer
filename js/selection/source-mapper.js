@@ -92,30 +92,3 @@ export let translateOffset = (md, offset) => {
   return offset;
 };
 
-/**
- * Wraps generated HTML from a token render function with data-source-pos attributes
- *
- * @param {string} html - The rendered HTML segment
- * @param {object} token - The marked token being rendered
- * @returns {string} HTML with injected data-source-pos attribute
- */
-export let wrapWithSourcePos = (html, token) => {
-  if (!token || token.start == null || token.end == null) return html;
-  let posAttr = `data-source-pos="${token.start}-${token.end}"`;
-  
-  // Inject into the first opening HTML tag found in the output
-  let trimmed = html.trim();
-  let tagMatch = trimmed.match(/^<(\w+)([\s>])/);
-  if (tagMatch) {
-    let tagName = tagMatch[1];
-    let delimiter = tagMatch[2];
-    if (delimiter === '>') {
-      return trimmed.replace(/^<\w+/, `<${tagName} ${posAttr}`) + html.substring(trimmed.length);
-    } else {
-      return trimmed.replace(/^<\w+/, `<${tagName} ${posAttr}`) + html.substring(trimmed.length);
-    }
-  }
-  
-  // Fallback: wrap in a neutral span
-  return `<span ${posAttr}>${html}</span>`;
-};

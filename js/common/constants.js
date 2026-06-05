@@ -16,3 +16,8 @@ export const STORAGE_PANE_RATIO_KEY = 'mdv_pane_ratio';
 
 export const PREVIEW_CSS_LIGHT = 'css/github-markdown-light.css';
 export const PREVIEW_CSS_DARK = 'css/github-markdown-dark_dimmed.css';
+
+// NOTE: These Prism CDN strings are intentionally mirrored verbatim in the inline
+// <script> block of index.html (FOUC-prevention boot script). Keep in sync if changed.
+export const PRISM_CSS_LIGHT = 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-solarizedlight.min.css';
+export const PRISM_CSS_DARK  = 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css';

@@ -1,4 +1,4 @@
-export { setupScrollOverlay } from '../common/scroll-utils.js';
+
 
 export let updateCustomScrollbar = (editor, customScrollbar, customScrollbarThumb) => {
   if (!editor || !customScrollbarThumb || !customScrollbar) return;
@@ -106,5 +106,3 @@ export let initCustomScrollbar = (editor, customScrollbar, customScrollbarThumb,
   updateCustomScrollbar(editor, customScrollbar, customScrollbarThumb);
   updateCaretIndicator(editor, customScrollbar, caretIndicator);
 };
-
-

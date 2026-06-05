@@ -1,6 +1,5 @@
 /* ── Scrollbar ── */
 #editor {
-  overflow-y: scroll;
   scrollbar-width: none;
 }
 
@@ -371,7 +370,7 @@
   background: hsl(var(--hue), 8%, 66%);
 }
 
-#preview-hscrollbar-thumb::after:hover {
+#preview-hscrollbar-thumb:hover::after {
   background: var(--scrollbar-thumb-hover);
   opacity: 1;
 }
@@ -431,5 +430,3 @@
   background: var(--color-primary-subtle);
   color: var(--color-primary);
 }
-
-

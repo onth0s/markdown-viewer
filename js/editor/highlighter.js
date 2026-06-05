@@ -1,6 +1,7 @@
-export let escapeHtml = (value) => {
-  return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-};
+import { escapeHtml } from '../common/utils.js';
+
+export { escapeHtml };
+
 
 export let highlightMd = (txt) => {
   let h = escapeHtml(txt);

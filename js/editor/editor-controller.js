@@ -1,5 +1,6 @@
 import { syncHighlight, setupHighlighter } from './highlighter.js';
-import { initCustomScrollbar, updateCaretIndicator, updateCustomScrollbar, setupScrollOverlay } from './scrollbars.js';
+import { initCustomScrollbar, updateCaretIndicator, updateCustomScrollbar } from './scrollbars.js';
+import { setupScrollOverlay } from '../common/scroll-utils.js';
 
 export let initEditorController = ({
   editor,

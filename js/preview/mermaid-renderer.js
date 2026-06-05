@@ -1,4 +1,4 @@
-import { escapeHtml } from '../editor/highlighter.js';
+import { escapeHtml } from '../common/utils.js';
 
 /* global mermaid */
 

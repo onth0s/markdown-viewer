@@ -133,4 +133,3 @@ export let initPreviewHorizontalScrollbar = (previewEl, hscrollbarEl, hThumbEl) 
     }
   };
 };
-

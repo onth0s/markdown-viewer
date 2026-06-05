@@ -1,6 +1,6 @@
-import { escapeHtml } from '../editor/highlighter.js';
+import { escapeHtml } from '../common/utils.js';
 import { scheduleMermaidRender } from './mermaid-renderer.js';
-import { enrichTokensWithPositions, wrapWithSourcePos } from '../selection/source-mapper.js';
+import { enrichTokensWithPositions } from '../selection/source-mapper.js';
 
 /* global marked, DOMPurify */
 
@@ -19,6 +19,30 @@ renderer.image = (token) => {
     return `<img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="${escapeHtml(token.text || '')}" class="themed-logo" data-original-src="${href}">`;
   }
   return renderImage(token);
+};
+
+/**
+ * Injects a data-source-pos attribute into the first opening HTML tag of a
+ * rendered HTML string, linking it back to the source markdown offset range.
+ *
+ * @param {string} html  - Rendered HTML segment
+ * @param {object} token - The marked token being rendered
+ * @returns {string} HTML with injected data-source-pos attribute
+ */
+let wrapWithSourcePos = (html, token) => {
+  if (!token || token.start == null || token.end == null) return html;
+  let posAttr = `data-source-pos="${token.start}-${token.end}"`;
+
+  // Inject into the first opening HTML tag found in the output
+  let trimmed = html.trim();
+  let tagMatch = trimmed.match(/^<(\w+)([\s>])/);
+  if (tagMatch) {
+    let tagName = tagMatch[1];
+    return trimmed.replace(/^<\w+/, `<${tagName} ${posAttr}`) + html.substring(trimmed.length);
+  }
+
+  // Fallback: wrap in a neutral span
+  return `<span ${posAttr}>${html}</span>`;
 };
 
 // Decorate the renderer to automatically attach data-source-pos to all HTML tags
