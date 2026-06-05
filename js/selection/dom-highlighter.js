@@ -56,8 +56,22 @@ export let applyHighlight = (container, markdown, selStart, selEnd) => {
       let fullyCovered = start >= selStart && end <= selEnd;
 
       if (fullyCovered) {
-        // If it's a block or container, we can just apply the class
+        // Apply the class for container-level background fill.
         el.classList.add('preview-selection');
+
+        // For leaf elements (no data-source-pos children) also wrap every text
+        // node individually. This is necessary because Prism syntax-token CSS
+        // rules have specificity (0,2,0) — e.g. .token.keyword — which beats
+        // our .preview-selection * rule at (0,1,0). Without text-node wrapping
+        // the selection colour is silently overridden for syntax-highlighted
+        // code blocks, making characters appear "missing" on Ctrl-A.
+        let hasSourceChildren = el.querySelector('[data-source-pos]');
+        if (!hasSourceChildren) {
+          let domText = el.textContent || '';
+          if (domText) {
+            highlightTextRange(el, 0, domText.length);
+          }
+        }
       } else {
         // Partially covered. Check if it has any children with data-source-pos.
         // If it does, we let the children handle their own partial selections.

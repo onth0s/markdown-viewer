@@ -128,7 +128,7 @@ let bootstrap = () => {
     if (editorController) {
       editorController.presetValue(content);
     }
-    selectionEngine.setMarkdown(content);
+    selectionEngine.setMarkdown(editorEl ? editorEl.value : content);
     if (savedScrolls && editorEl && previewEl) {
       applyScrollRatio(editorEl, savedScrolls.editor);
       if (editorHighlightEl) editorHighlightEl.scrollTop = editorEl.scrollTop;

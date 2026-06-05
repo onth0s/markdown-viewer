@@ -83,7 +83,7 @@ export let initEditorController = ({
       editor.scrollTop = 0;
       syncHighlight(editor, editorHighlight);
       editor.focus();
-      if (onInput) onInput(value);
+      if (onInput) onInput(editor.value);
       updateCaretIndicator(editor, customScrollbar, caretIndicator);
       updateCustomScrollbar(editor, customScrollbar, customScrollbarThumb);
     },

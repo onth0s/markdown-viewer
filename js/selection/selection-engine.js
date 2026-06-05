@@ -17,7 +17,8 @@ export class SelectionEngine {
    * @param {string} markdown
    */
   setMarkdown(markdown) {
-    this.markdown = (markdown || '').replace(/\r/g, '');
+    this.rawMarkdown = markdown || '';
+    this.markdown = this.rawMarkdown.replace(/\r/g, '');
   }
 
   /**
@@ -32,8 +33,8 @@ export class SelectionEngine {
     }
 
     // Translate absolute offsets to clean line offsets
-    let cleanStart = translateOffset(this.markdown, start);
-    let cleanEnd = translateOffset(this.markdown, end);
+    let cleanStart = translateOffset(this.rawMarkdown, start);
+    let cleanEnd = translateOffset(this.rawMarkdown, end);
 
     this.selStart = start;
     this.selEnd = end;

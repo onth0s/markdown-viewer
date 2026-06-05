@@ -81,14 +81,20 @@ export let enrichTokensWithPositions = (tokens, baseOffset = 0) => {
 
 /**
  * Normalizes Windows carriage returns (\r\n) in the selection offsets
- * to match the line-normalized markdown clean offsets. Since everything
- * in the pipeline now uses normalized line endings, this is a pass-through.
+ * to match the line-normalized markdown clean offsets.
  *
  * @param {string} md - Original raw markdown
  * @param {number} offset - Offset in original markdown
  * @returns {number} Offset in normalized markdown
  */
 export let translateOffset = (md, offset) => {
-  return offset;
+  if (!md) return offset;
+  let cleanOffset = 0;
+  for (let i = 0; i < offset && i < md.length; i++) {
+    if (md[i] !== '\r') {
+      cleanOffset++;
+    }
+  }
+  return cleanOffset;
 };
 
