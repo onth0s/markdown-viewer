@@ -63,6 +63,9 @@ export let convert = (output, markdown) => {
       sanitized = html;
     }
     output.innerHTML = sanitized;
+    if (typeof Prism !== 'undefined') {
+      Prism.highlightAllUnder(output);
+    }
     scheduleMermaidRender(output);
   } catch (e) {
     output.innerHTML = '<div class="mermaid-error">Render error: ' + escapeHtml(e.message || e) + '</div>';

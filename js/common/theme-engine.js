@@ -140,8 +140,17 @@ export let applyBrightness = (brightness) => {
   }
   doc.style.setProperty('--nav-logo-color', `hsl(var(--hue), ${logoS}%, ${logoL}%)`);
 
-  // Wrench icon: clamp to standard [25, 75] range so it keeps 16% lightness (visible grey) at max brightness (white header)
-  let [iconS, iconL] = interpolateColor(clampedBrightness, COLOR_MAP['text-primary'].light, COLOR_MAP['text-primary'].dark);
+  // Wrench icon / navbar icons:
+  let iconS, iconL;
+  if (brightness >= 50) {
+    let clampedB = Math.min(75, brightness);
+    [iconS, iconL] = interpolateColor(clampedB, COLOR_MAP['text-primary'].light, COLOR_MAP['text-primary'].dark);
+  } else {
+    let bVal = Math.max(0, brightness);
+    iconS = COLOR_MAP['text-primary'].light[0];
+    let t = Math.min(1, bVal / 25);
+    iconL = Math.round(16 + t * (75 - 16));
+  }
   doc.style.setProperty('--nav-icon-color', `hsl(var(--hue), ${iconS}%, ${iconL}%)`);
 };
 

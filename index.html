@@ -125,14 +125,16 @@
           var tpSMid = (tpSLight + tpSDark) / 2;
           var tpLMid = 50;
           var iconS, iconL;
-          if (clamped <= 50) {
-            var t = (clamped - 25) / 25;
-            iconS = tpSLight + t * (tpSMid - tpSLight);
-            iconL = tpLLight + t * (tpLMid - tpLLight);
-          } else {
-            var t = (clamped - 50) / 25;
+          if (brightness >= 50) {
+            var clampedB = Math.min(75, brightness);
+            var t = (clampedB - 50) / 25;
             iconS = tpSMid + t * (tpSDark - tpSMid);
             iconL = tpLMid + t * (tpLDark - tpLMid);
+          } else {
+            var bVal = Math.max(0, brightness);
+            iconS = tpSLight;
+            var t = Math.min(1, bVal / 25);
+            iconL = Math.round(16 + t * (75 - 16));
           }
 
           doc.style.setProperty('--nav-logo-color', 'hsl(' + hue + ', ' + Math.round(logoS) + '%, ' + Math.round(logoL) + '%)');
@@ -152,6 +154,16 @@
           link.rel = 'stylesheet';
           link.href = href;
           document.head.appendChild(link);
+
+          var PRISM_CSS_LIGHT = 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-solarizedlight.min.css';
+          var PRISM_CSS_DARK = 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css';
+          var prismHref = useDark ? PRISM_CSS_DARK : PRISM_CSS_LIGHT;
+
+          var prismLink = document.createElement('link');
+          prismLink.id = 'prism-theme-link';
+          prismLink.rel = 'stylesheet';
+          prismLink.href = prismHref;
+          document.head.appendChild(prismLink);
         } catch (e) {}
       })();
     </script>
@@ -281,6 +293,8 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.4.0/purify.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/lib/marked.umd.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script type="module" src="js/main.js"></script>

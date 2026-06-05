@@ -29,6 +29,16 @@
 }
 
 /* ── Override GitHub Markdown CSS backgrounds ── */
+.markdown-body img.themed-logo {
+  max-width: 10vh;
+}
+
+.markdown-body pre.mermaid {
+  max-width: 80% !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
 .markdown-body {
   background-color: var(--bg-preview) !important;
   color: var(--text-primary) !important;

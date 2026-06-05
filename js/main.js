@@ -121,6 +121,16 @@ let initScrollBarSyncToggle = (settings) => {
 let setPreviewCss = (useDark) => {
   let link = document.getElementById('gh-markdown-link');
   let desired = useDark ? PREVIEW_CSS_DARK : PREVIEW_CSS_LIGHT;
+
+  let prismLink = document.getElementById('prism-theme-link');
+  let PRISM_CSS_LIGHT = 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-solarizedlight.min.css';
+  let PRISM_CSS_DARK = 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css';
+  let desiredPrism = useDark ? PRISM_CSS_DARK : PRISM_CSS_LIGHT;
+
+  if (prismLink) {
+    prismLink.setAttribute('href', desiredPrism);
+  }
+
   if (!link) {
     let newLink = document.createElement('link');
     newLink.id = 'gh-markdown-link';
