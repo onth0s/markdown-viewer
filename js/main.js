@@ -22,7 +22,8 @@ import { initEditorController } from './editor/editor-controller.js';
 import { initMermaid, renderMermaidDiagrams } from './preview/mermaid-renderer.js';
 import { convert } from './preview/markdown-renderer.js';
 import { initPreviewCustomScrollbar } from './preview/scrollbars.js';
-import { setupFullscreenOverlay } from './common/scroll-utils.js';
+import { initPreviewHorizontalScrollbar } from './preview/hscrollbar.js';
+import { setupFullscreenOverlay, setupClearallOverlay } from './common/scroll-utils.js';
 import { initCopyButton, initDownloadButton, initPdfButton } from './preview/actions.js';
 import { initDynamicSvg, updateThemedLogos } from './common/logo-engine.js';
 import { SelectionEngine } from './selection/selection-engine.js';
@@ -37,9 +38,12 @@ const outputEl = document.getElementById('output');
 const previewEl = document.getElementById('preview-wrapper');
 const previewTrackEl = document.getElementById('preview-custom-scrollbar');
 const previewThumbEl = document.getElementById('preview-custom-scrollbar-thumb');
+const previewHScrollbarEl = document.getElementById('preview-hscrollbar');
+const previewHThumbEl = document.getElementById('preview-hscrollbar-thumb');
 const editorOverlayEl = document.getElementById('editor-scroll-overlay');
 const previewOverlayEl = document.getElementById('preview-scroll-overlay');
 const previewFullscreenOverlayEl = document.getElementById('preview-fullscreen-popup');
+const editorClearallOverlayEl = document.getElementById('editor-clearall-popup');
 
 let scrollBarSync = false;
 let activePane = 'editor';
@@ -51,7 +55,11 @@ const editPaneContainer = document.getElementById('edit');
 const previewPaneContainer = document.getElementById('preview');
 
 if (editPaneContainer) editPaneContainer.addEventListener('pointerenter', () => setActivePane('editor'));
-if (previewPaneContainer) previewPaneContainer.addEventListener('pointerenter', () => setActivePane('preview'));
+if (previewPaneContainer) {
+  previewPaneContainer.addEventListener('pointerenter', () => setActivePane('preview'));
+  
+
+}
 if (editorEl) editorEl.addEventListener('focus', () => setActivePane('editor'));
 
 // Scroll Synchronization Logic
@@ -307,8 +315,16 @@ let bootstrap = () => {
   if (previewScrollbar && previewOverlayEl) {
     previewScrollbar.setupOverlay(previewOverlayEl);
   }
+  const previewHScrollbar = initPreviewHorizontalScrollbar(previewEl, previewHScrollbarEl, previewHThumbEl);
+  const previewHOverlayEl = document.getElementById('preview-hscroll-overlay');
+  if (previewHScrollbar && previewHOverlayEl) {
+    previewHScrollbar.setupOverlay(previewHOverlayEl);
+  }
   if (previewFullscreenOverlayEl && previewPaneContainer) {
     setupFullscreenOverlay(previewFullscreenOverlayEl, previewPaneContainer);
+  }
+  if (editorClearallOverlayEl && editPaneContainer) {
+    setupClearallOverlay(editorClearallOverlayEl, editPaneContainer);
   }
 
   const fullscreenBtn = previewFullscreenOverlayEl && previewFullscreenOverlayEl.querySelector('.fullscreen-popup-btn');
@@ -321,6 +337,14 @@ let bootstrap = () => {
       } else {
         document.documentElement.setAttribute('data-fullscreen', '');
       }
+    });
+  }
+
+  const clearallBtn = editorClearallOverlayEl && editorClearallOverlayEl.querySelector('.clearall-popup-btn');
+  if (clearallBtn) {
+    clearallBtn.addEventListener('click', () => {
+      localStorage.clear();
+      location.reload();
     });
   }
 
@@ -340,6 +364,7 @@ let bootstrap = () => {
       selectionEngine.setMarkdown(value);
       saveLastContent(value);
       if (previewScrollbar) previewScrollbar.update();
+      if (previewHScrollbar) previewHScrollbar.update();
       updateThemedLogos();
     },
     onSelectionChange: (start, end) => {
@@ -368,6 +393,7 @@ let bootstrap = () => {
       renderMermaidDiagrams(outputEl).then(() => {
         applyScrollRatio(previewEl, savedScrolls.preview);
         if (previewScrollbar) previewScrollbar.update();
+        if (previewHScrollbar) previewHScrollbar.update();
         updateThemedLogos();
       });
     } else if (editorController) {

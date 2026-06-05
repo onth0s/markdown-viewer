@@ -80,3 +80,29 @@ export let setupFullscreenOverlay = (overlayEl, wrapperEl) => {
   overlayEl.addEventListener('mouseenter', () => { show(); });
   overlayEl.addEventListener('mouseleave', () => { hide(); });
 };
+
+export let setupClearallOverlay = (overlayEl, wrapperEl) => {
+  if (!overlayEl || !wrapperEl) return;
+  let PROXIMITY_THRESHOLD = 60;
+
+  let show = () => { overlayEl.classList.add('visible'); };
+  let hide = () => { overlayEl.classList.remove('visible'); };
+
+  wrapperEl.addEventListener('mousemove', (e) => {
+    let rect = wrapperEl.getBoundingClientRect();
+    let mouseY = e.clientY - rect.top;
+    let mouseX = e.clientX - rect.left;
+    let nearLeft = mouseX <= PROXIMITY_THRESHOLD;
+    let nearBottom = mouseY >= rect.height - PROXIMITY_THRESHOLD;
+
+    if (nearLeft && nearBottom) {
+      show();
+    } else {
+      hide();
+    }
+  });
+
+  wrapperEl.addEventListener('mouseleave', () => { hide(); });
+  overlayEl.addEventListener('mouseenter', () => { show(); });
+  overlayEl.addEventListener('mouseleave', () => { hide(); });
+};

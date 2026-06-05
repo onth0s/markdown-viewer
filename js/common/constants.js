@@ -12,6 +12,7 @@ export const STORAGE_CONTENT_KEY = 'mdv_last_content';
 export const STORAGE_SCROLL_KEY = 'mdv_scroll_sync';
 export const STORAGE_SCROLL_POS_KEY = 'mdv_scroll_positions';
 export const STORAGE_SWAP_KEY = 'mdv_swapped';
+export const STORAGE_PANE_RATIO_KEY = 'mdv_pane_ratio';
 
 export const PREVIEW_CSS_LIGHT = 'css/github-markdown-light.css';
 export const PREVIEW_CSS_DARK = 'css/github-markdown-dark_dimmed.css';

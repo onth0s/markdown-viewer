@@ -7,13 +7,11 @@ export let clearHighlights = (container) => {
   if (!container) return;
 
   // 1. Remove elements with class 'preview-selection' that were added as wrapper spans
-  let highlights = container.querySelectorAll('span.preview-selection');
-  let parentsToNormalize = new Set();
+  let highlights = container.querySelectorAll('span.preview-selection:not([data-source-pos])');
 
   for (let span of highlights) {
     let parent = span.parentNode;
     if (parent) {
-      parentsToNormalize.add(parent);
       // Replace the span with its child nodes (the text node)
       while (span.firstChild) {
         parent.insertBefore(span.firstChild, span);
@@ -22,10 +20,8 @@ export let clearHighlights = (container) => {
     }
   }
 
-  // Normalize to merge split text nodes back together
-  for (let parent of parentsToNormalize) {
-    parent.normalize();
-  }
+  // Normalize the entire container DOM to merge all adjacent text nodes cleanly
+  container.normalize();
 
   // 2. Remove the 'preview-selection' class from block/inline containers that were fully highlighted
   let selectedContainers = container.querySelectorAll('.preview-selection');
@@ -139,7 +135,6 @@ function highlightTextRange(element, startOffset, endOffset) {
           parent.removeChild(node);
         }
       }
-      break; // Only highlight the first matching range to avoid double highlights
     }
 
     currentOffset = nodeEnd;

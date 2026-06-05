@@ -3,7 +3,8 @@ import {
   STORAGE_CONTENT_KEY,
   STORAGE_SCROLL_KEY,
   STORAGE_SCROLL_POS_KEY,
-  STORAGE_SWAP_KEY
+  STORAGE_SWAP_KEY,
+  STORAGE_PANE_RATIO_KEY
 } from './constants.js';
 
 export let saveLastContent = (content) => {
@@ -69,4 +70,17 @@ export let saveSwappedState = (swapped) => {
   try {
     localStorage.setItem(STORAGE_SWAP_KEY, swapped ? 'true' : 'false');
   } catch (e) {}
+};
+
+export let savePaneRatio = (ratio) => {
+  try { localStorage.setItem(STORAGE_PANE_RATIO_KEY, String(ratio)); } catch (e) {}
+};
+
+export let loadPaneRatio = () => {
+  try {
+    let raw = localStorage.getItem(STORAGE_PANE_RATIO_KEY);
+    if (raw === null) return null;
+    let v = parseFloat(raw);
+    return isNaN(v) ? null : Math.max(0.1, Math.min(0.9, v));
+  } catch (e) { return null; }
 };

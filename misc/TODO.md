@@ -1,2 +1,0 @@
-- resize panes and reload, it does weird shit, doesn't update properly
-- horizontal scrollbar on the Preview pane, should match the same exact styling on it (and appear on proximity as it does too)

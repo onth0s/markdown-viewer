@@ -1,77 +1,116 @@
-# Markdown syntax guide
+# ☄️ Markdown Stress Test Arena
 
-## Headers
+This document contains highly complex nested markdown structures to stress test rendering correctness, custom scrollbar synchronization, logo styling engine, Mermaid rendering, and the visual selection highlights.
 
-# This is a Heading h1
-## This is a Heading h2
-###### This is a Heading h6
+---
 
-## Emphasis
+## 🏗️ Deeply Nested Grid Layouts & Formatting
 
-*This text will be italic*  
-_This will also be italic_
+> [!NOTE]
+> This section combines nested blockquotes, multi-level lists, task items, text styling combinations, and escapes.
 
-**This text will be bold**  
-__This will also be bold__
+> Outer Blockquote level 1
+> > Inner Blockquote level 2
+> > * **Unordered List Level 1** containing a link: [Google](https://google.com)
+> >   * _Italicized level 2_ with some `inline code`
+> >     1. **`Bold Codespan`** within an ordered item
+> >     2. Checkbox stress test:
+> >        - [x] Completed task item with **bold** *italic* ~~strike-through~~ text
+> >        - [ ] Uncompleted task item containing escaped characters: `\*not italic\*` and `\\` slash
+> >        - [ ] Nested codespan: `` `word1 `word2` word3` ``
 
-_You **can** combine them_
+---
 
-## Lists
+## 📊 Matrix & Tables with Inline Nesting
 
-### Unordered
+This table tests nested block rendering within cells. Each cell contains multiple formatting styles.
 
-* Item 1
-* Item 2
-* Item 2a
-* Item 2b
-  * Item 3a
-    * Item 3b1
+| Character Range | Nested Element Types | Expected Preview Result | Status |
+| :--- | :---: | :--- | :---: |
+| `0-25` | **Bold**, _Italics_, ~~Strike~~ | Full **combined** _formatting_ in cell | [x] OK |
+| `26-100` | Inline `code` + [Link](https://google.com) | Clean wrapping inside cell boundary | [ ] Pending |
+| `101-200` | Escaped delimiters `\|` and `\` | Delimiter character `|` rendered cleanly | [x] OK |
+| `201+` | Image + Alt logo replacement | ![Logo Replacement Test](./markdown-preview-logo.svg) | [x] Active |
 
-### Ordered
+---
 
-1. Item 1
-2. Item 2
-3. Item 3
-    1. Item 3a
-    2. Item 3b
+## 🧜‍♀️ Mermaid Rendering Stress Test
 
-## Images
+This tests the async loading, scaling, theme mapping, and selection highlighting behavior of the Mermaid engine.
 
-![This is an alt text.](./markdown-preview-logo.svg)
+### Sequence Flow Chart
 
-## Links
-
-You may be using [Markdown Viewer](https://onth0s.github.io/markdown-viewer/).
-
-## Blockquotes
-
-> Markdown is a lightweight markup language with plain-text-formatting syntax, created in 2004 by John Gruber with Aaron Swartz.
->
->> Markdown is often used to format readme files, for writing messages in online discussion forums, and to create rich text using a plain text editor.
-
-## Tables
-
-| Left columns  | Right columns |
-| ------------- |:-------------:|
-| left foo      | right foo     |
-| left bar      | right bar     |
-| left baz      | right baz     |
-
-## Blocks of code
-
-```
-let message = 'Hello world';
-alert(message);
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Editor as Editor Controller
+    participant Engine as Selection Engine
+    participant DOM as DOM Highlighter
+    participant Preview as Preview Panel
+    
+    Editor->>Engine: Selection Change (cleanStart, cleanEnd)
+    Note over Editor,Engine: Translates Carriage Returns (\r)
+    Engine->>DOM: clearHighlights()
+    DOM->>Preview: Unwraps highlight spans & calls normalize()
+    Engine->>DOM: applyHighlight(markdown, cleanStart, cleanEnd)
+    DOM->>Preview: Traverses node offsets & surrounds range in span
 ```
 
-## Mermaid diagrams
+### Complex Tree Diagram
+
 ```mermaid
 graph TD
-  A[Start] --> B{Decision}
-  B -->|Yes| C[Finish]
-  B -->|No| D[Alternate]
+    Root[App Root] --> Theme[Theme Engine]
+    Root --> Scroll[Scroll Synchronizer]
+    Root --> Editor[Editor Panel]
+    Root --> Render[Markdown Renderer]
+
+    Theme --> DarkMode{Light/Dark State}
+    DarkMode -->|>= 50| Dark[Dark Theme]
+    DarkMode -->|< 50| Light[Light Theme]
+
+    Editor --> Highlighter[Syntax Highlighter]
+    Editor --> ScrollOverlay[Scroll Overlays]
+    Editor --> Caret[Caret Indicator]
+
+    Render --> SourceMapper[Source Position Mapper]
+    SourceMapper --> HTML[HTML with data-source-pos]
+    HTML --> DOM[Dynamic Selection Highlighter]
 ```
 
-## Inline code
+---
 
-This web site is using `markedjs/marked`.
+## 💻 Codespans, Multi-Line Code, and Escape sequences
+
+This section evaluates the raw code block parsers and selections over escape symbols.
+
+### Double-Backtick Codespans
+- Double backtick wrapper: `` `word1` `` inside `` `word2` ``.
+- Complex escape characters: `\` \` \` \` \` \` \`
+- Raw HTML blocks inside markdown:
+  ```html
+  <div class="test-class" style="color: var(--text-primary); background: var(--bg-code);">
+    <p>HTML element rendered inside markdown blocks.</p>
+  </div>
+  ```
+
+### Advanced Syntax Highlight Block
+```javascript
+// Test JS Highlight Syntax inside the code parser
+const stressTestSelection = (start, end) => {
+  const elements = document.querySelectorAll('[data-source-pos]');
+  elements.forEach(el => {
+    const pos = el.getAttribute('data-source-pos');
+    if (pos) {
+      const [s, e] = pos.split('-').map(Number);
+      console.log(`Intersecting offset check: ${s} to ${e} against ${start}-${end}`);
+    }
+  });
+};
+```
+
+---
+
+## 🏁 End of Stress Test
+Final paragraph with miscellaneous characters: ~!@#$%^&*()_+{}|:"<>?-=[]\;',./.
+Check selection mapping over this line.

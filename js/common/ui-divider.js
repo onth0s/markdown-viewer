@@ -1,7 +1,6 @@
-import { loadSwappedState, saveSwappedState } from './storage.js';
+import { loadSwappedState, saveSwappedState, savePaneRatio, loadPaneRatio } from './storage.js';
 
 export let setupDivider = () => {
-  let lastLeftRatio = 0.5;
   let divider = document.getElementById('split-divider');
   let leftPane = document.getElementById('edit');
   let rightPane = document.getElementById('preview');
@@ -10,15 +9,34 @@ export let setupDivider = () => {
 
   if (!divider || !leftPane || !rightPane || !container) return;
 
+  // Restore persisted ratio or fall back to 50/50
+  let lastLeftRatio = loadPaneRatio() ?? 0.5;
+
+  let applyRatio = (ratio) => {
+    let cr = container.getBoundingClientRect();
+    let dw = divider.offsetWidth;
+    let avail = cr.width - dw;
+    leftPane.style.width = (avail * ratio) + 'px';
+    rightPane.style.width = (avail * (1 - ratio)) + 'px';
+  };
+
+  // Apply immediately on load so panes are never mis-sized after reload
+  // Use rAF so the container has finished painting its own width first
+  requestAnimationFrame(() => applyRatio(lastLeftRatio));
+
   divider.addEventListener('mouseenter', () => divider.classList.add('hover'));
   divider.addEventListener('mouseleave', () => { if (!isDragging) divider.classList.remove('hover'); });
-  divider.addEventListener('mousedown', () => { isDragging = true; divider.classList.add('active'); document.body.style.cursor = 'col-resize'; });
-  divider.addEventListener('dblclick', () => {
-    let cr = container.getBoundingClientRect();
-    let half = (cr.width - divider.offsetWidth) / 2;
-    leftPane.style.width = half + 'px';
-    rightPane.style.width = half + 'px';
+  divider.addEventListener('mousedown', () => {
+    isDragging = true;
+    divider.classList.add('active');
+    document.body.style.cursor = 'col-resize';
   });
+  divider.addEventListener('dblclick', () => {
+    lastLeftRatio = 0.5;
+    applyRatio(lastLeftRatio);
+    savePaneRatio(lastLeftRatio);
+  });
+
   document.addEventListener('mousemove', (e) => {
     if (!isDragging) return;
     e.preventDefault();
@@ -32,26 +50,27 @@ export let setupDivider = () => {
     rightPane.style.width = (cr.width - leftW - dw) + 'px';
     lastLeftRatio = leftW / (cr.width - dw);
   });
+
   document.addEventListener('mouseup', () => {
     if (isDragging) {
       isDragging = false;
       divider.classList.remove('active', 'hover');
       document.body.style.cursor = 'default';
+      savePaneRatio(lastLeftRatio);
     }
   });
+
   document.addEventListener('mouseleave', () => {
     if (isDragging) {
       isDragging = false;
       divider.classList.remove('active', 'hover');
       document.body.style.cursor = 'default';
+      savePaneRatio(lastLeftRatio);
     }
   });
+
   window.addEventListener('resize', () => {
-    let cr = container.getBoundingClientRect();
-    let dw = divider.offsetWidth;
-    let avail = cr.width - dw;
-    leftPane.style.width = (avail * lastLeftRatio) + 'px';
-    rightPane.style.width = (avail * (1 - lastLeftRatio)) + 'px';
+    applyRatio(lastLeftRatio);
   });
 };
 
