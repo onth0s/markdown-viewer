@@ -274,3 +274,8 @@
 .markdown-body code span.preview-selection {
   opacity: 1 !important;
 }
+
+/* ── Preview checkbox fading at extreme brightness ── */
+.markdown-body input[type="checkbox"] {
+  opacity: var(--prism-opacity, 1) !important;
+}

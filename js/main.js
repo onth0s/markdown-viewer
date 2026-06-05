@@ -19,6 +19,7 @@ import { initPreviewCustomScrollbar } from './preview/scrollbars.js';
 import { initPreviewHorizontalScrollbar } from './preview/hscrollbar.js';
 import { initCopyButton, initDownloadButton, initPdfButton } from './preview/actions.js';
 import { SelectionEngine } from './selection/selection-engine.js';
+import { wrapEmojis } from './common/emoji-helper.js';
 
 // ── DOM elements ──────────────────────────────────────────────────────────────
 const editorEl                  = document.getElementById('editor');
@@ -169,7 +170,10 @@ let bootstrap = () => {
   scrollSync.initScrollBarSyncToggle(loadScrollBarSettings());
   initThemeToggle(previewEl, outputEl, renderMermaidDiagrams);
 
-  // 10. Persist scroll positions on scroll and unload
+  // 10. Wrap any existing UI emojis
+  wrapEmojis(document.body);
+
+  // 11. Persist scroll positions on scroll and unload
   if (editorEl) editorEl.addEventListener('scroll', persistScrollPositions, { passive: true });
   if (previewEl) previewEl.addEventListener('scroll', persistScrollPositions, { passive: true });
   window.addEventListener('beforeunload', persistScrollPositions);

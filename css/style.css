@@ -5,3 +5,8 @@
 @import "editor.css";
 @import "preview.css";
 @import "scrollbars.css";
+
+/* ── Global Emoji fading at extreme brightness ── */
+.emoji-wrapper {
+  opacity: var(--prism-opacity, 1) !important;
+}

@@ -1,6 +1,7 @@
 import { escapeHtml } from '../common/utils.js';
 import { scheduleMermaidRender } from './mermaid-renderer.js';
 import { enrichTokensWithPositions } from '../selection/source-mapper.js';
+import { wrapEmojis } from '../common/emoji-helper.js';
 
 /* global marked, DOMPurify */
 
@@ -101,6 +102,7 @@ export let convert = (output, markdown) => {
         });
       });
     }
+    wrapEmojis(output);
     scheduleMermaidRender(output);
   } catch (e) {
     output.innerHTML = '<div class="mermaid-error">Render error: ' + escapeHtml(e.message || e) + '</div>';
