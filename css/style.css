@@ -1,12 +1,1230 @@
-@import "variables.css";
-@import "reset.css";
-@import "layout.css";
-@import "header.css";
-@import "editor.css";
-@import "preview.css";
-@import "scrollbars.css";
+@font-face {
+  font-family: 'Monaco';
+  src: url('../fonts/monaco-subset.woff') format('woff'),
+       url('../fonts/monaco.ttf') format('truetype');
+  font-display: swap;
+}
 
-/* ── Global Emoji fading at extreme brightness ── */
-.emoji-wrapper {
+@font-face {
+  font-family: 'Roboto';
+  src: url('../fonts/roboto-subset.woff') format('woff'),
+       url('../fonts/Roboto.ttf') format('truetype');
+  font-display: swap;
+}
+
+/* ── Hue Engine — Light Theme (Defaults) ────────────────────────────────── */
+:root {
+  --hue: 228; /* fallback; overridden by boot script + color-engine.js */
+
+  /* S & L Component Tokens (Light defaults) */
+  --color-primary-s:        47%;
+  --color-primary-l:        49%;
+  --color-primary-hover-s:  46%;
+  --color-primary-hover-l:  56%;
+  --color-primary-active-s: 49%;
+  --color-primary-active-l: 42%;
+  --color-primary-subtle-s: 73%;
+  --color-primary-subtle-l: 96%;
+
+  --bg-app-s:     11%;
+  --bg-app-l:     97%;
+  --bg-surface-s: 0%;
+  --bg-surface-l: 100%;
+  --bg-header-s:  24%;
+  --bg-header-l:  47%;
+  --bg-editor-s:  0%;
+  --bg-editor-l:  100%;
+  --bg-preview-s: 0%;
+  --bg-preview-l: 100%;
+  --bg-code-s:    67%;
+  --bg-code-l:    92%;
+
+  --border-default-s: 22%;
+  --border-default-l: 88%;
+  --border-muted-s:   15%;
+  --border-muted-l:   94%;
+
+  --text-primary-s:    13%;
+  --text-primary-l:    16%;
+  --text-secondary-s:  9%;
+  --text-secondary-l:  38%;
+  --text-tertiary-s:   9%;
+  --text-tertiary-l:   56%;
+  --text-on-primary-s: 0%;
+  --text-on-primary-l: 100%;
+  --text-link-s:       47%;
+  --text-link-l:       49%;
+
+  --syntax-heading-s:   47%;
+  --syntax-heading-l:   49%;
+  --syntax-bold-s:      13%;
+  --syntax-bold-l:      16%;
+  --syntax-italic-s:    13%;
+  --syntax-italic-l:    16%;
+  --syntax-code-s:      47%;
+  --syntax-code-l:      49%;
+  --syntax-fence-s:     8%;
+  --syntax-fence-l:     43%;
+  --syntax-link-s:      47%;
+  --syntax-link-l:      49%;
+  --syntax-image-s:     47%;
+  --syntax-image-l:     49%;
+  --syntax-quote-s:     8%;
+  --syntax-quote-l:     43%;
+  --syntax-list-s:      47%;
+  --syntax-list-l:      49%;
+  --syntax-hr-s:        22%;
+  --syntax-hr-l:        88%;
+  --syntax-table-s:     13%;
+  --syntax-table-l:     16%;
+  --syntax-table-sep-s: 22%;
+  --syntax-table-sep-l: 88%;
+  --syntax-strike-s:    8%;
+  --syntax-strike-l:    43%;
+
+  --selection-bg-s:   75%;
+  --selection-bg-l:   88%;
+  --selection-text-s: 13%;
+  --selection-text-l: 16%;
+
+  --scrollbar-thumb-s:       13%;
+  --scrollbar-thumb-l:       80%;
+  --scrollbar-thumb-hover-s: 8%;
+  --scrollbar-thumb-hover-l: 70%;
+
+  --divider-s:        22%;
+  --divider-l:        88%;
+  --divider-hover-s:  10%;
+  --divider-hover-l:  75%;
+  --divider-active-s: 6%;
+  --divider-active-l: 58%;
+
+  --toggle-bg-s:   13%;
+  --toggle-bg-l:   80%;
+  --toggle-knob-s: 0%;
+  --toggle-knob-l: 100%;
+  --toggle-icon-s: 9%;
+  --toggle-icon-l: 38%;
+
+  --caret-color-s: 13%;
+  --caret-color-l: 16%;
+
+  /* Color Variable Declarations (resolved via components above) */
+  --color-primary:        hsl(var(--hue), var(--color-primary-s), var(--color-primary-l));
+  --color-primary-hover:  hsl(var(--hue), var(--color-primary-hover-s), var(--color-primary-hover-l));
+  --color-primary-active: hsl(var(--hue), var(--color-primary-active-s), var(--color-primary-active-l));
+  --color-primary-subtle: hsl(var(--hue), var(--color-primary-subtle-s), var(--color-primary-subtle-l));
+
+  --bg-app:     hsl(var(--hue), var(--bg-app-s), var(--bg-app-l));
+  --bg-surface: hsl(var(--hue), var(--bg-surface-s), var(--bg-surface-l));
+  --bg-header:  hsl(var(--hue), var(--bg-header-s), var(--bg-header-l));
+  --bg-editor:  hsl(var(--hue), var(--bg-editor-s), var(--bg-editor-l));
+  --bg-preview: hsl(var(--hue), var(--bg-preview-s), var(--bg-preview-l));
+  --bg-code:    hsl(var(--hue), var(--bg-code-s), var(--bg-code-l));
+
+  --border-default: hsl(var(--hue), var(--border-default-s), var(--border-default-l));
+  --border-muted:   hsl(var(--hue), var(--border-muted-s), var(--border-muted-l));
+
+  --text-primary:    hsl(var(--hue), var(--text-primary-s), var(--text-primary-l));
+  --text-secondary:  hsl(var(--hue), var(--text-secondary-s), var(--text-secondary-l));
+  --text-tertiary:   hsl(var(--hue), var(--text-tertiary-s), var(--text-tertiary-l));
+  --text-on-primary: hsl(var(--hue), var(--text-on-primary-s), var(--text-on-primary-l));
+  --text-link:       hsl(var(--hue), var(--text-link-s), var(--text-link-l));
+
+  --syntax-heading:   hsl(var(--hue), var(--syntax-heading-s), var(--syntax-heading-l));
+  --syntax-bold:      hsl(var(--hue), var(--syntax-bold-s), var(--syntax-bold-l));
+  --syntax-italic:    hsl(var(--hue), var(--syntax-italic-s), var(--syntax-italic-l));
+  --syntax-code:      hsl(var(--hue), var(--syntax-code-s), var(--syntax-code-l));
+  --syntax-fence:     hsl(var(--hue), var(--syntax-fence-s), var(--syntax-fence-l));
+  --syntax-link:      hsl(var(--hue), var(--syntax-link-s), var(--syntax-link-l));
+  --syntax-image:     hsl(var(--hue), var(--syntax-image-s), var(--syntax-image-l));
+  --syntax-quote:     hsl(var(--hue), var(--syntax-quote-s), var(--syntax-quote-l));
+  --syntax-list:      hsl(var(--hue), var(--syntax-list-s), var(--syntax-list-l));
+  --syntax-hr:        hsl(var(--hue), var(--syntax-hr-s), var(--syntax-hr-l));
+  --syntax-table:     hsl(var(--hue), var(--syntax-table-s), var(--syntax-table-l));
+  --syntax-table-sep: hsl(var(--hue), var(--syntax-table-sep-s), var(--syntax-table-sep-l));
+  --syntax-strike:    hsl(var(--hue), var(--syntax-strike-s), var(--syntax-strike-l));
+
+  --selection-bg:   hsl(var(--hue), var(--selection-bg-s), var(--selection-bg-l));
+  --selection-text: hsl(var(--hue), var(--selection-text-s), var(--selection-text-l));
+
+  --scrollbar-thumb:       hsl(var(--hue), var(--scrollbar-thumb-s), var(--scrollbar-thumb-l));
+  --scrollbar-thumb-hover: hsl(var(--hue), var(--scrollbar-thumb-hover-s), var(--scrollbar-thumb-hover-l));
+
+  --divider:        hsl(var(--hue), var(--divider-s), var(--divider-l));
+  --divider-hover:  hsl(var(--hue), var(--divider-hover-s), var(--divider-hover-l));
+  --divider-active: hsl(var(--hue), var(--divider-active-s), var(--divider-active-l));
+
+  --toggle-bg:   hsl(var(--hue), var(--toggle-bg-s), var(--toggle-bg-l));
+  --toggle-knob: hsl(var(--hue), var(--toggle-knob-s), var(--toggle-knob-l));
+  --toggle-icon: hsl(var(--hue), var(--toggle-icon-s), var(--toggle-icon-l));
+
+  --caret-color: hsl(var(--hue), var(--caret-color-s), var(--caret-color-l));
+  --nav-logo-color: hsl(var(--hue), 13%, 16%);
+  --nav-icon-color: hsl(var(--hue), 13%, 16%);
+
+  color-scheme: light;
+}
+
+/* ── Hue Engine — Dark Theme Overrides ──────────────────────────────────── */
+[data-theme="dark"] {
+  --color-primary-s:        59%;
+  --color-primary-l:        64%;
+  --color-primary-hover-s:  64%;
+  --color-primary-hover-l:  69%;
+  --color-primary-active-s: 55%;
+  --color-primary-active-l: 57%;
+  --color-primary-subtle-s: 36%;
+  --color-primary-subtle-l: 18%;
+
+  --bg-app-s:     29%;
+  --bg-app-l:     11%;
+  --bg-surface-s: 31%;
+  --bg-surface-l: 15%;
+  --bg-header-s:  32%;
+  --bg-header-l:  24%;
+  --bg-editor-s:  31%;
+  --bg-editor-l:  15%;
+  --bg-preview-s: 31%;
+  --bg-preview-l: 15%;
+  --bg-code-s:    42%;
+  --bg-code-l:    20%;
+
+  --border-default-s: 30%;
+  --border-default-l: 25%;
+  --border-muted-s:   28%;
+  --border-muted-l:   20%;
+
+  --text-primary-s:    40%;
+  --text-primary-l:    93%;
+  --text-secondary-s:  9%;
+  --text-secondary-l:  58%;
+  --text-tertiary-s:   11%;
+  --text-tertiary-l:   44%;
+  --text-on-primary-s: 0%;
+  --text-on-primary-l: 100%;
+  --text-link-s:       59%;
+  --text-link-l:       64%;
+
+  --syntax-heading-s:   59%;
+  --syntax-heading-l:   64%;
+  --syntax-bold-s:      40%;
+  --syntax-bold-l:      93%;
+  --syntax-italic-s:    40%;
+  --syntax-italic-l:    93%;
+  --syntax-code-s:      59%;
+  --syntax-code-l:      64%;
+  --syntax-fence-s:     11%;
+  --syntax-fence-l:     44%;
+  --syntax-link-s:      59%;
+  --syntax-link-l:      64%;
+  --syntax-image-s:     80%;
+  --syntax-image-l:     72%;
+  --syntax-quote-s:     11%;
+  --syntax-quote-l:     44%;
+  --syntax-list-s:      59%;
+  --syntax-list-l:      64%;
+  --syntax-hr-s:        30%;
+  --syntax-hr-l:        25%;
+  --syntax-table-s:     40%;
+  --syntax-table-l:     93%;
+  --syntax-table-sep-s: 30%;
+  --syntax-table-sep-l: 25%;
+  --syntax-strike-s:    11%;
+  --syntax-strike-l:    44%;
+
+  --selection-bg-s:   43%;
+  --selection-bg-l:   29%;
+  --selection-text-s: 40%;
+  --selection-text-l: 93%;
+
+  --scrollbar-thumb-s:       25%;
+  --scrollbar-thumb-l:       30%;
+  --scrollbar-thumb-hover-s: 20%;
+  --scrollbar-thumb-hover-l: 36%;
+
+  --divider-s:        30%;
+  --divider-l:        25%;
+  --divider-hover-s:  25%;
+  --divider-hover-l:  30%;
+  --divider-active-s: 20%;
+  --divider-active-l: 36%;
+
+  --toggle-bg-s:   39%;
+  --toggle-bg-l:   18%;
+  --toggle-knob-s: 40%;
+  --toggle-knob-l: 93%;
+  --toggle-icon-s: 9%;
+  --toggle-icon-l: 58%;
+
+  --caret-color-s: 40%;
+  --caret-color-l: 93%;
+  --nav-logo-color: hsl(var(--hue), 40%, 93%);
+  --nav-icon-color: hsl(var(--hue), 40%, 93%);
+
+  color-scheme: dark;
+}
+/* ── Reset & Base ── */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  height: 100vh;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  font-family: 'Roboto', Helvetica, Arial, sans-serif;
+  font-size: 1em;
+  line-height: 1.5;
+  color: var(--text-primary);
+  background-color: var(--bg-app);
+  overscroll-behavior: none;
+}
+
+h1, h2, h3, h4, h5, h6, p {
+  font-size: 1em;
+  margin: 0;
+  padding: 0;
+  font-weight: normal;
+}
+
+p {
+  margin: 1em;
+}
+
+a:link, a:visited, a:hover, a:active {
+  text-decoration: none;
+}
+
+img {
+  border: none;
+}
+
+::selection {
+  background: var(--selection-bg);
+  color: var(--selection-text);
+}
+
+.preview-selection,
+.preview-selection * {
+  background-color: var(--selection-bg) !important;
+  color: var(--selection-text) !important;
+  text-decoration: inherit !important;
+}
+/* ── Container & Layout ── */
+#container {
+  height: 100%;
+  width: 100%;
+  margin: 0 auto;
+  background-color: var(--bg-surface);
+  border-bottom: 1px solid var(--border-default);
+  display: flex;
+  overflow: hidden;
+}
+
+.column {
+  width: 50%;
+  padding: 0;
+  margin: 0;
+  white-space: nowrap;
+  vertical-align: top;
+}
+
+/* ── Split Layout ── */
+.split-container {
+  display: flex;
+  height: 100%;
+  width: 100%;
+}
+
+[data-swapped] .split-container {
+  flex-direction: row-reverse;
+}
+
+[data-fullscreen] #edit,
+[data-fullscreen] #split-divider {
+  display: none;
+}
+
+[data-fullscreen] #preview {
+  flex: 1;
+}
+
+.editor-pane {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.preview-pane {
+  height: 100%;
+  background-color: var(--bg-preview);
+  position: relative;
+  overflow: hidden;
+}
+
+#preview.column {
+  overflow: hidden;
+  white-space: normal;
+}
+
+#preview-wrapper {
+  padding: 8px 16px 70vh 16px;
+  font-family: 'Roboto', Helvetica, Arial, sans-serif;
+  overflow-y: scroll;
+  overflow-x: auto;
+  height: 100%;
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) transparent;
+}
+
+#preview-wrapper::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+  background: transparent;
+}
+
+#preview-wrapper::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 4px;
+}
+
+#preview-wrapper::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}
+
+.split-divider {
+  width: 5px;
+  background: var(--divider);
+  cursor: col-resize;
+  z-index: 1;
+  transition: background-color 0.15s;
+}
+
+.split-divider.hover {
+  background: var(--divider-hover);
+}
+
+.split-divider.active {
+  background: var(--divider-active);
+}
+/* ── Header ── */
+header {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 8px 16px;
+  width: 100%;
+  background-color: var(--bg-header);
+  font-size: 12px;
+  color: var(--text-on-primary);
+  box-sizing: border-box;
+}
+
+header .nav-logo {
+  height: 28px;
+  display: block;
+}
+
+header a:link, header a:hover, header a:visited, header a:active {
+  color: var(--text-on-primary);
+}
+
+header a:hover {
+  text-decoration: underline;
+}
+
+#menu-items {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+/* ── Nav Buttons ── */
+#copy-button,
+#export-button,
+#download-button {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  opacity: 0.85;
+  transition: opacity 0.15s;
+}
+
+#copy-button:hover,
+#export-button:hover,
+#download-button:hover {
+  opacity: 1;
+}
+
+#copy-button {
+  margin-left: auto;
+}
+
+#swap-button {
+  margin-left: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  opacity: 0.85;
+  transition: opacity 0.15s;
+}
+
+#swap-button:hover {
+  opacity: 1;
+}
+
+#export-button {
+  margin-left: 16px;
+}
+
+#download-button {
+  margin-left: 16px;
+}
+
+/* ── Sync Button ── */
+#sync-button {
+  margin-left: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+header input[type="checkbox"] {
+  vertical-align: middle;
+  margin-right: 4px;
+  margin-top: 0;
+}
+
+/* ── Theme Toggle ── */
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 12px;
+  cursor: pointer;
+  vertical-align: middle;
+  line-height: 1;
+}
+
+.theme-toggle-slider {
+  position: relative;
+  width: 36px;
+  height: 20px;
+  background-color: var(--toggle-bg);
+  border-radius: 10px;
+  display: inline-block;
+  transition: background-color 0.2s;
+}
+
+.theme-toggle-knob {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background-color: var(--toggle-knob);
+  top: 2px;
+  left: 18px;
+  display: block;
+  transition: left 0.2s, background-color 0.2s;
+}
+
+.theme-toggle-knob path {
+  fill: var(--toggle-icon);
+}
+
+[data-theme="light"] .theme-toggle-knob {
+  left: 2px;
+  color: var(--color-primary);
+}
+
+[data-theme="light"] .sync-toggle-knob {
+  color: var(--color-primary);
+}
+
+/* ── Sync Toggle ── */
+.sync-toggle {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 12px;
+  cursor: pointer;
+  vertical-align: middle;
+  line-height: 1;
+}
+
+.sync-toggle-slider {
+  position: relative;
+  width: 36px;
+  height: 20px;
+  background-color: var(--toggle-bg);
+  border-radius: 10px;
+  display: inline-block;
+  transition: background-color 0.2s;
+}
+
+.sync-toggle-knob {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background-color: var(--toggle-knob);
+  top: 2px;
+  left: 2px;
+  display: block;
+  transition: left 0.2s, background-color 0.2s;
+}
+
+.sync-toggle-knob path {
+  stroke: var(--toggle-icon);
+}
+
+[data-sync="on"] .sync-toggle-knob {
+  left: 18px;
+}
+
+/* ── Wrench Button ── */
+#wrench-button {
+  position: relative;
+  margin-left: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+#wrench-button > svg {
+  color: var(--nav-icon-color);
+  opacity: 0.45;
+  transition: opacity 0.15s, color 0.3s;
+  display: block;
+}
+
+#wrench-button:hover > svg {
+  opacity: 0.7;
+}
+
+[data-theme="light"] #wrench-button > svg {
+  opacity: 0.7;
+}
+
+[data-theme="light"] #wrench-button:hover > svg {
+  opacity: 1;
+}
+
+#wrench-popup {
+  display: none;
+  position: fixed;
+  min-width: 210px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  padding: 4px;
+  z-index: 200;
+  flex-direction: column;
+  gap: 2px;
+}
+
+[data-theme="dark"] #wrench-popup {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+#wrench-button.open #wrench-popup {
+  display: flex;
+}
+
+#wrench-popup p {
+  margin: 0;
+  width: 100%;
+  height: 28px;
+  padding: 0 10px;
+  font-size: 11px;
+  color: var(--text-primary);
+  white-space: nowrap;
+  cursor: pointer;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  transition: background 0.1s, color 0.1s;
+  user-select: none;
+  box-sizing: border-box;
+}
+
+#wrench-popup p:hover {
+  background: var(--color-primary-subtle);
+  color: var(--color-primary);
+}
+
+/* ── Hue Slider (inside wrench popup) ── */
+.wrench-section {
+  padding: 6px 4px 4px;
+}
+
+.wrench-label {
+  display: block;
+  font-size: 10px;
+  color: var(--text-secondary);
+  opacity: 0.85;
+  margin-bottom: 6px;
+  padding: 0 4px;
+  user-select: none;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+}
+
+.hue-slider-wrap {
+  position: relative;
+  height: 20px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: linear-gradient(
+    to right,
+    hsl(0,70%,55%), hsl(30,70%,55%), hsl(60,68%,52%),
+    hsl(90,58%,44%), hsl(120,55%,42%), hsl(150,58%,44%),
+    hsl(180,58%,44%), hsl(210,68%,52%), hsl(240,70%,58%),
+    hsl(270,70%,55%), hsl(300,68%,52%), hsl(330,70%,55%), hsl(360,70%,55%)
+  );
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.18);
+}
+
+#hue-slider, #brightness-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  cursor: pointer;
+  margin: 0;
+  padding: 0;
+  border: none;
+  outline: none;
+}
+
+#hue-slider::-webkit-slider-thumb, #brightness-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2.5px solid rgba(0,0,0,0.22);
+  box-shadow: 0 1px 5px rgba(0,0,0,0.32);
+  cursor: grab;
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+
+#hue-slider:active::-webkit-slider-thumb, #brightness-slider:active::-webkit-slider-thumb {
+  cursor: grabbing;
+  transform: scale(1.12);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.38);
+}
+
+#hue-slider::-moz-range-thumb, #brightness-slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2.5px solid rgba(0,0,0,0.22);
+  box-shadow: 0 1px 5px rgba(0,0,0,0.32);
+  cursor: grab;
+}
+
+#hue-slider::-moz-range-track, #brightness-slider::-moz-range-track {
+  background: transparent;
+}
+
+.brightness-slider-wrap {
+  position: relative;
+  height: 20px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: linear-gradient(
+    to right,
+    #ffffff 0%,
+    hsl(var(--hue), 20%, 90%) 25%,
+    hsl(var(--hue), 40%, 50%) 50%,
+    hsl(var(--hue), 30%, 15%) 75%,
+    #000000 100%
+  );
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.18);
+}
+
+/* ── Editor ── */
+#editor-wrapper {
+  flex: 1;
+  overflow: hidden;
+  padding: 0;
+  position: relative;
+  background-color: var(--bg-editor);
+}
+
+#editor-highlight {
+  margin: 0;
+  padding: 12px 16px 70vh 16px;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  overflow-y: scroll;
+  scrollbar-gutter: stable;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  pointer-events: none;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  font-family: 'Monaco', 'Consolas', 'Courier New', monospace;
+  font-size: 14px;
+  line-height: 1.5;
+  tab-size: 4;
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+}
+
+#editor-highlight::-webkit-scrollbar {
+  display: none;
+}
+
+#editor {
+  width: 100%;
+  height: 100%;
+  resize: none;
+  border: none;
+  outline: none;
+  padding: 12px 16px 70vh 16px;
+  font-family: 'Monaco', 'Consolas', 'Courier New', monospace;
+  font-size: 14px;
+  line-height: 1.5;
+  tab-size: 4;
+  background: transparent;
+  color: transparent;
+  caret-color: var(--caret-color);
+  box-sizing: border-box;
+  display: block;
+  overscroll-behavior: none;
+  overflow-y: scroll;
+  position: relative;
+  z-index: 2;
+}
+
+#editor::selection {
+  background: var(--selection-bg);
+  color: var(--selection-text);
+}
+
+/* ── Caret / Selection Position Indicator ── */
+#caret-indicator {
+  position: absolute;
+  right: 0;
+  width: 12px;
+  height: 2px;
+  background-color: var(--caret-color);
+  pointer-events: none;
+  z-index: 10;
+  opacity: 0;
+  transition: opacity 0.15s ease-in-out;
+}
+
+#caret-indicator.visible {
+  opacity: 0.8;
+}
+
+#caret-indicator.visible.selection-active {
+  opacity: 0.5;
+}
+
+[data-theme="dark"] #caret-indicator {
+  background-color: var(--color-primary);
+}
+
+[data-theme="dark"] #caret-indicator.visible {
+  opacity: 0.9;
+}
+
+[data-theme="dark"] #caret-indicator.visible.selection-active {
+  opacity: 0.5;
+}
+
+/* ── Syntax Highlighting ── */
+.hl-h1, .hl-h2, .hl-h3, .hl-h4, .hl-h5, .hl-h6,
+.hl-hash { color: var(--syntax-heading); }
+.hl-em, .hl-strong, .hl-em-strong { color: var(--syntax-bold); }
+.hl-code { color: var(--syntax-code); }
+.hl-fence, .hl-fence-lang { color: var(--syntax-fence); }
+.hl-link, .hl-link-text { color: var(--syntax-link); }
+.hl-link-url { color: var(--syntax-fence); }
+.hl-image, .hl-img-alt { color: var(--syntax-image); }
+.hl-img-url { color: var(--syntax-fence); }
+.hl-quote { color: var(--syntax-quote); }
+.hl-list-marker { color: var(--syntax-list); }
+.hl-hr { color: var(--syntax-hr); }
+.hl-strike { color: var(--syntax-strike); }
+.hl-table-sep { color: var(--syntax-table-sep); }
+.hl-table { color: var(--syntax-table); }
+.hl-fenced-block { color: var(--syntax-table); }
+.hl-code-content { color: var(--syntax-table); }
+#preview.column {
+  overflow-y: scroll;
+  overscroll-behavior: none;
+  white-space: normal;
+  position: relative;
+}
+
+.markdown-body .mermaid {
+  overflow-x: auto;
+  padding: 16px;
+  text-align: center;
+}
+
+.markdown-body .mermaid svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+}
+
+.markdown-body .mermaid-error {
+  color: #cf222e;
+  white-space: pre-wrap;
+  text-align: left;
+}
+
+[data-theme="dark"] .markdown-body .mermaid-error {
+  color: #ff7b72;
+}
+
+/* ── Override GitHub Markdown CSS backgrounds ── */
+.markdown-body img.themed-logo {
+  max-width: 10vh;
+}
+
+.markdown-body pre.mermaid {
+  max-width: 80% !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+.markdown-body {
+  background-color: var(--bg-preview) !important;
+  color: var(--text-primary) !important;
+}
+
+.markdown-body pre,
+.markdown-body code,
+.markdown-body tt,
+.markdown-body .highlight,
+.markdown-body .highlight pre,
+.markdown-body pre code {
+  background-color: var(--bg-code) !important;
+}
+
+/* Color on code, but not with !important so selection spans can override */
+.markdown-body code,
+.markdown-body tt,
+.markdown-body pre code {
+  color: var(--text-primary);
+}
+
+.markdown-body a {
+  color: var(--text-link) !important;
+}
+
+
+
+.markdown-body table,
+.markdown-body table th,
+.markdown-body table td {
+  background-color: transparent !important;
+  border-color: var(--border-default) !important;
+}
+
+.markdown-body table tr {
+  background-color: transparent !important;
+  border-color: var(--border-default) !important;
+}
+
+.markdown-body table thead th {
+  background-color: var(--bg-app) !important;
+}
+
+.markdown-body blockquote {
+  border-left-color: var(--color-primary) !important;
+  color: var(--text-primary) !important;
+}
+
+.markdown-body hr {
+  background-color: var(--border-default) !important;
+  border: 0 !important;
+  height: 0.25em !important;
+}
+
+.markdown-body h1,
+.markdown-body h2 {
+  border-bottom: 1px solid var(--border-default) !important;
+}
+
+.markdown-body h6 {
+  color: var(--text-primary) !important;
+}
+
+/* ── Mermaid SVG dynamic theme overrides ── */
+#preview-wrapper .markdown-body .mermaid svg,
+#preview-wrapper .markdown-body .mermaid svg text,
+#preview-wrapper .markdown-body .mermaid svg .label,
+#preview-wrapper .markdown-body .mermaid svg .label foreignObject,
+#preview-wrapper .markdown-body .mermaid svg .messageText,
+#preview-wrapper .markdown-body .mermaid svg .noteText,
+#preview-wrapper .markdown-body .mermaid svg .loopText,
+#preview-wrapper .markdown-body .mermaid svg .sectionText,
+#preview-wrapper .markdown-body .mermaid svg tspan,
+#preview-wrapper .markdown-body .mermaid svg span,
+#preview-wrapper .markdown-body .mermaid svg div {
+  fill: var(--text-primary) !important;
+  color: var(--text-primary) !important;
+}
+
+#preview-wrapper .markdown-body .mermaid svg rect,
+#preview-wrapper .markdown-body .mermaid svg circle,
+#preview-wrapper .markdown-body .mermaid svg ellipse,
+#preview-wrapper .markdown-body .mermaid svg polygon,
+#preview-wrapper .markdown-body .mermaid svg .node rect,
+#preview-wrapper .markdown-body .mermaid svg .node circle,
+#preview-wrapper .markdown-body .mermaid svg .node ellipse,
+#preview-wrapper .markdown-body .mermaid svg .node polygon,
+#preview-wrapper .markdown-body .mermaid svg .node path,
+#preview-wrapper .markdown-body .mermaid svg .actor,
+#preview-wrapper .markdown-body .mermaid svg rect.actor,
+#preview-wrapper .markdown-body .mermaid svg .note rect,
+#preview-wrapper .markdown-body .mermaid svg .note path,
+#preview-wrapper .markdown-body .mermaid svg .classGroup rect,
+#preview-wrapper .markdown-body .mermaid svg .stateGroup rect,
+#preview-wrapper .markdown-body .mermaid svg .stateGroup circle,
+#preview-wrapper .markdown-body .mermaid svg .entityBox,
+#preview-wrapper .markdown-body .mermaid svg .attributeBox {
+  fill: var(--bg-app) !important;
+  stroke: var(--border-default) !important;
+}
+
+#preview-wrapper .markdown-body .mermaid svg .edgePath .path,
+#preview-wrapper .markdown-body .mermaid svg .edgePath path,
+#preview-wrapper .markdown-body .mermaid svg line,
+#preview-wrapper .markdown-body .mermaid svg .messageLine0,
+#preview-wrapper .markdown-body .mermaid svg .messageLine1,
+#preview-wrapper .markdown-body .mermaid svg .loopLine,
+#preview-wrapper .markdown-body .mermaid svg .relation,
+#preview-wrapper .markdown-body .mermaid svg .relation-path,
+#preview-wrapper .markdown-body .mermaid svg .relationshipLine,
+#preview-wrapper .markdown-body .mermaid svg .transition,
+#preview-wrapper .markdown-body .mermaid svg .tick line,
+#preview-wrapper .markdown-body .mermaid svg .grid line,
+#preview-wrapper .markdown-body .mermaid svg .flowchart-link {
+  stroke: var(--text-secondary) !important;
+  fill: none !important;
+}
+
+#preview-wrapper .markdown-body .mermaid svg marker path,
+#preview-wrapper .markdown-body .mermaid svg .arrowheadPath,
+#preview-wrapper .markdown-body .mermaid svg .marker,
+#preview-wrapper .markdown-body .mermaid svg .arrowMarkerPath {
+  fill: var(--text-secondary) !important;
+  stroke: none !important;
+}
+
+#preview-wrapper .markdown-body .mermaid svg foreignObject {
+  overflow: visible !important;
+}
+
+#preview-wrapper .markdown-body .mermaid svg .edgeLabel p {
+  background-color: transparent !important;
+  background: transparent !important;
+}
+
+#preview-wrapper .markdown-body .mermaid svg .labelBkg {
+  background-color: var(--bg-preview) !important;
+  background: var(--bg-preview) !important;
+  color: var(--text-primary) !important;
+  padding: 0 4px !important;
+}
+
+#preview-wrapper .markdown-body .mermaid svg .edgeLabel rect {
+  fill: var(--bg-preview) !important;
+  opacity: 1 !important;
+}
+
+.markdown-body .anchor {
+  background-color: transparent !important;
+}
+
+.markdown-body .octicon-link {
+  background-color: transparent !important;
+}
+
+.markdown-body .highlight .pl-en,
+.markdown-body .highlight .pl-s .pl-s1 {
+  background-color: transparent !important;
+}
+
+.markdown-body .color-fg-muted {
+  color: var(--text-secondary) !important;
+}
+
+.markdown-body .color-bg-default {
+  background-color: var(--bg-preview) !important;
+}
+
+.markdown-body .color-bg-subtle {
+  background-color: var(--bg-app) !important;
+}
+
+.markdown-body .color-border-default {
+  border-color: var(--border-default) !important;
+}
+
+
+
+
+/* ── Selection overrides for elements with their own background ── */
+
+/* Whole fenced block selected → highlight the outer pre wrapper */
+.markdown-body div.preview-selection > pre,
+.markdown-body pre.preview-selection {
+  background-color: var(--selection-bg) !important;
+  color: var(--selection-text) !important;
+}
+
+/* Code inside a selected pre inherits cleanly */
+.markdown-body div.preview-selection > pre code,
+.markdown-body pre.preview-selection code {
+  background-color: transparent !important;
+  color: inherit !important;
+}
+
+/* Per-line spans inside fenced blocks — just the bg band, text stays as-is */
+.markdown-body pre code span.preview-selection {
+  background-color: var(--selection-bg) !important;
+  color: var(--selection-text) !important;
+}
+
+/* Inline code selected */
+.markdown-body code.preview-selection {
+  background-color: var(--selection-bg) !important;
+  color: var(--selection-text) !important;
+}
+
+/* Partial inline-code selection (span inside code) */
+.markdown-body code span.preview-selection {
+  background-color: var(--selection-bg) !important;
+  color: var(--selection-text) !important;
+}
+
+/* ── Gradual Prism token opacity at extreme brightness levels ── */
+.markdown-body pre[class*="language-"],
+.markdown-body code[class*="language-"] {
+  background: var(--bg-code) !important;
+  border: 1px solid var(--border-default) !important;
+  box-shadow: none !important;
+  color: var(--text-primary) !important;
+  text-shadow: none !important;
+}
+
+.markdown-body pre[class*="language-"] *:not(.preview-selection),
+.markdown-body code[class*="language-"] *:not(.preview-selection) {
   opacity: var(--prism-opacity, 1) !important;
+  text-shadow: none !important;
+}
+
+/* Ensure all elements related to active selection remain fully visible */
+.markdown-body pre code span.preview-selection,
+.markdown-body code.preview-selection,
+.markdown-body code span.preview-selection {
+  opacity: 1 !important;
+}
+
+/* ── Preview checkbox fading at extreme brightness ── */
+.markdown-body input[type="checkbox"] {
+  opacity: var(--prism-opacity, 1) !important;
+}
+/* ── Scrollbar ── */
+#editor {
+  scrollbar-width: none;
+}
+
+#editor::-webkit-scrollbar {
+  display: none;
+}
+
+#editor-highlight::-webkit-scrollbar {
+  display: none;
+}
+
+#preview {
+  scrollbar-width: none;
+}
+
+#preview::-webkit-scrollbar {
+  display: none;
+}
+
+/* Style scrollbars on content elements (pre, code, tables) to match theme */
+.markdown-body pre,
+.markdown-body table,
+.markdown-body .mermaid,
+.markdown-body .blob-wrapper {
+  scrollbar-color: var(--scrollbar-thumb) transparent;
+  scrollbar-width: thin;
+  overscroll-behavior-x: contain;
+  overscroll-behavior-y: auto;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+}
+
+.markdown-body pre::-webkit-scrollbar,
+.markdown-body code::-webkit-scrollbar,
+.markdown-body table::-webkit-scrollbar,
+.markdown-body .mermaid::-webkit-scrollbar,
+.markdown-body .blob-wrapper::-webkit-scrollbar {
+  display: block;
+  height: 8px;
+  width: 8px;
+}
+
+.markdown-body pre::-webkit-scrollbar-track,
+.markdown-body code::-webkit-scrollbar-track,
+.markdown-body table::-webkit-scrollbar-track,
+.markdown-body .mermaid::-webkit-scrollbar-track,
+.markdown-body .blob-wrapper::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.markdown-body pre::-webkit-scrollbar-thumb,
+.markdown-body code::-webkit-scrollbar-thumb,
+.markdown-body table::-webkit-scrollbar-thumb,
+.markdown-body .mermaid::-webkit-scrollbar-thumb,
+.markdown-body .blob-wrapper::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 4px;
+  opacity: 0.6;
+}
+
+.markdown-body pre::-webkit-scrollbar-thumb:hover,
+.markdown-body code::-webkit-scrollbar-thumb:hover,
+.markdown-body table::-webkit-scrollbar-thumb:hover,
+.markdown-body .mermaid::-webkit-scrollbar-thumb:hover,
+.markdown-body .blob-wrapper::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
 }

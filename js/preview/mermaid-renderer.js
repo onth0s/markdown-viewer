@@ -6,6 +6,27 @@ import { escapeHtml } from '../common/utils.js';
  * @typedef {{ initialize: (config: object) => void, render: (id: string, text: string) => Promise<{svg: string, bindFunctions?: (el: Element) => void}> }} MermaidAPI
  */
 
+const MERMAID_CDN = 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js';
+
+let mermaidScriptPromise = null;
+
+let loadMermaidScript = () => {
+  if (window.mermaid) return Promise.resolve(window.mermaid);
+  if (mermaidScriptPromise) return mermaidScriptPromise;
+  mermaidScriptPromise = new Promise((resolve, reject) => {
+    let s = document.createElement('script');
+    s.src = MERMAID_CDN;
+    s.crossOrigin = 'anonymous';
+    s.onload = () => resolve(window.mermaid);
+    s.onerror = () => {
+      mermaidScriptPromise = null;
+      reject(new Error('Failed to load mermaid from CDN'));
+    };
+    document.head.appendChild(s);
+  });
+  return mermaidScriptPromise;
+};
+
 let mermaidRenderTimer = null;
 let mermaidRenderVersion = 0;
 
@@ -14,15 +35,14 @@ export let getMermaidTheme = () => {
 };
 
 export let configureMermaid = (theme) => {
-  if (typeof mermaid === 'undefined') {
-    console.warn('[mermaid-renderer] mermaid is not loaded — diagram rendering is unavailable.');
-    return;
-  }
+  if (typeof mermaid === 'undefined') return;
   mermaid.initialize({ startOnLoad: false, securityLevel: 'strict', theme });
 };
 
 export let initMermaid = () => {
-  configureMermaid(getMermaidTheme());
+  if (typeof window.mermaid !== 'undefined') {
+    configureMermaid(getMermaidTheme());
+  }
 };
 
 let showMermaidError = (element, error) => {
@@ -32,15 +52,20 @@ let showMermaidError = (element, error) => {
 };
 
 export let renderMermaidDiagramsNow = async (output, theme) => {
+  if (!output) return;
+  let elements = Array.from(output.querySelectorAll('.mermaid'));
+  if (elements.length === 0) return;
   if (typeof mermaid === 'undefined') {
-    console.warn('[mermaid-renderer] mermaid is not loaded — skipping diagram render.');
-    return;
+    try {
+      await loadMermaidScript();
+    } catch (e) {
+      console.warn('[mermaid-renderer] failed to load mermaid:', e);
+      return;
+    }
   }
   if (!theme) theme = getMermaidTheme();
-  if (!output) return;
   let version = ++mermaidRenderVersion;
   configureMermaid(theme);
-  let elements = Array.from(output.querySelectorAll('.mermaid'));
   for (let i = 0; i < elements.length; i++) {
     if (version !== mermaidRenderVersion) return;
     let el = elements[i];
@@ -49,7 +74,7 @@ export let renderMermaidDiagramsNow = async (output, theme) => {
     el.classList.remove('mermaid-error');
     try {
       let renderId = 'mermaid-' + Date.now() + '-' + version + '-' + i;
-      let result = await mermaid.render(renderId, source);
+      let result = await window.mermaid.render(renderId, source);
       if (version !== mermaidRenderVersion) return;
       el.innerHTML = result.svg;
       if (typeof result.bindFunctions === 'function') result.bindFunctions(el);
@@ -74,3 +99,5 @@ export let renderMermaidDiagrams = (output, theme) => {
   }
   return renderMermaidDiagramsNow(output, theme);
 };
+
+export let preloadMermaid = () => loadMermaidScript();

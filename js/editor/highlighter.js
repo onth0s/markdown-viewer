@@ -2,6 +2,18 @@ import { escapeHtml } from '../common/utils.js';
 
 export { escapeHtml };
 
+const MAX_DEPTH = 32;
+
+let countOpenSpans = (s) => {
+  let m = s.match(/<span\b/g);
+  return m ? m.length : 0;
+};
+
+let wrapIfRoom = (currentLine, wrapperClass, inner) => {
+  let depth = countOpenSpans(currentLine);
+  if (depth + 1 >= MAX_DEPTH) return inner;
+  return '<span class="' + wrapperClass + '">' + inner + '</span>';
+};
 
 export let highlightMd = (txt) => {
   let h = escapeHtml(txt);
@@ -40,39 +52,44 @@ export let highlightMd = (txt) => {
       continue;
     }
 
-    l = l.replace(/^(&gt;)+/, '<span class="hl-quote">$&</span>');
+    l = l.replace(/^(&gt;)+/, (m) => wrapIfRoom(l, 'hl-quote', m));
 
     l = l.replace(/^(\s*)([-*+]|\d{1,3}\.)(\s)/, (_, sp, mk, ws) => {
-      return sp + '<span class="hl-list-marker">' + mk + '</span>' + ws;
+      let marker = wrapIfRoom(l, 'hl-list-marker', mk);
+      return sp + marker + ws;
     });
 
-    l = l.replace(/^(-{3,}|\*{3,}|_{3,})$/, '<span class="hl-hr">$&</span>');
+    l = l.replace(/^(-{3,}|\*{3,}|_{3,})$/, (m) => wrapIfRoom(l, 'hl-hr', m));
 
-    l = l.replace(/^(\|[\s:-]+\|[\s:-]+\|)/, '<span class="hl-table-sep">$1</span>');
+    l = l.replace(/^(\|[\s:-]+\|[\s:-]+\|)/, (m) => wrapIfRoom(l, 'hl-table-sep', m));
 
-    l = l.replace(/!\[([^\]]*)\]\(([^)]*)\)/g,
-      '<span class="hl-image">![<span class="hl-img-alt">$1</span>](<span class="hl-img-url">$2</span>)</span>');
+    l = l.replace(/!\[([^\]]*)\]\(([^)]*)\)/g, (_, alt, url) => {
+      let inner = '![<span class="hl-img-alt">' + alt + '</span>](<span class="hl-img-url">' + url + '</span>)';
+      return wrapIfRoom(l, 'hl-image', inner);
+    });
 
-    l = l.replace(/\[([^\]]*)\]\(([^)]*)\)/g,
-      '<span class="hl-link">[<span class="hl-link-text">$1</span>](<span class="hl-link-url">$2</span>)</span>');
+    l = l.replace(/\[([^\]]*)\]\(([^)]*)\)/g, (_, text, url) => {
+      let inner = '[<span class="hl-link-text">' + text + '</span>](<span class="hl-link-url">' + url + '</span>)';
+      return wrapIfRoom(l, 'hl-link', inner);
+    });
 
-    l = l.replace(/(`[^`\n]+`)/g, '<span class="hl-code">$1</span>');
+    l = l.replace(/(`[^`\n]+`)/g, (m) => wrapIfRoom(l, 'hl-code', m));
 
-    l = l.replace(/(\*\*\*\S[^*]*\*\*\*)/g, '<span class="hl-em-strong">$1</span>');
-    l = l.replace(/(\*\*\S[^*]*\*\*)/g, '<span class="hl-strong">$1</span>');
-    l = l.replace(/(?<!\*)\*(\S[^*]*)\*(?!\*)/g, '<span class="hl-em">*$1*</span>');
-    l = l.replace(/(___\S[^_]*___)/g, '<span class="hl-em-strong">$1</span>');
-    l = l.replace(/(__\S[^_]*__)/g, '<span class="hl-strong">$1</span>');
-    l = l.replace(/(?<!_)_(\S[^_]*)_(?!_)/g, '<span class="hl-em">_$1_</span>');
+    l = l.replace(/(\*\*\*\S[^*]*\*\*\*)/g, (m) => wrapIfRoom(l, 'hl-em-strong', m));
+    l = l.replace(/(\*\*\S[^*]*\*\*)/g, (m) => wrapIfRoom(l, 'hl-strong', m));
+    l = l.replace(/(?<!\*)\*(\S[^*]*)\*(?!\*)/g, (_, inner) => '*' + wrapIfRoom(l, 'hl-em', inner) + '*');
+    l = l.replace(/(___\S[^_]*___)/g, (m) => wrapIfRoom(l, 'hl-em-strong', m));
+    l = l.replace(/(__\S[^_]*__)/g, (m) => wrapIfRoom(l, 'hl-strong', m));
+    l = l.replace(/(?<!_)_(\S[^_]*)_(?!_)/g, (_, inner) => '_' + wrapIfRoom(l, 'hl-em', inner) + '_');
 
-    l = l.replace(/(~~\S[^~]*~~)/g, '<span class="hl-strike">$1</span>');
+    l = l.replace(/(~~\S[^~]*~~)/g, (m) => wrapIfRoom(l, 'hl-strike', m));
 
     l = l.replace(/^(#{1,6})\s+/, (_, hashes) => {
       return '<span class="hl-hash">' + hashes + '</span> ';
     });
     l = l.replace(/^(<span class="hl-hash">[#]+<\/span> )(.+)/, (_, hash, rest) => {
       let level = (hash.match(/#/g) || []).length;
-      return hash + '<span class="hl-heading hl-h' + level + '">' + rest + '</span>';
+      return hash + wrapIfRoom(l, 'hl-heading hl-h' + level, rest);
     });
 
     result.push(l);

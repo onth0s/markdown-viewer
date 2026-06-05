@@ -88,19 +88,30 @@ export let convert = (output, markdown) => {
       sanitized = html;
     }
     output.innerHTML = sanitized;
-    if (typeof Prism !== 'undefined') {
-      Prism.highlightAllUnder(output);
-      output.querySelectorAll('code[class*="language-"]').forEach(codeEl => {
-        let nodes = Array.from(codeEl.childNodes);
-        nodes.forEach(node => {
-          if (node.nodeType === 3) { // Text Node
-            let span = document.createElement('span');
-            span.className = 'token plain-text';
-            codeEl.insertBefore(span, node);
-            span.appendChild(node);
-          }
+    let hasCode = !!output.querySelector('pre code');
+    if (hasCode) {
+      let runHighlight = () => {
+        Prism.highlightAllUnder(output);
+        output.querySelectorAll('code[class*="language-"]').forEach(codeEl => {
+          let nodes = Array.from(codeEl.childNodes);
+          nodes.forEach(node => {
+            if (node.nodeType === 3) {
+              let span = document.createElement('span');
+              span.className = 'token plain-text';
+              codeEl.insertBefore(span, node);
+              span.appendChild(node);
+            }
+          });
         });
-      });
+      };
+      if (typeof Prism !== 'undefined') {
+        runHighlight();
+      } else {
+        let prismScript = document.querySelector('script[src*="prism-core.min.js"]');
+        if (prismScript) {
+          prismScript.addEventListener('load', runHighlight, { once: true });
+        }
+      }
     }
     wrapEmojis(output);
     scheduleMermaidRender(output);

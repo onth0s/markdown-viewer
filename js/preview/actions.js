@@ -1,11 +1,32 @@
 import { PREVIEW_CSS_LIGHT } from '../common/constants.js';
 import { renderMermaidDiagrams, getMermaidTheme } from './mermaid-renderer.js';
 
-/* global html2pdf */
-
 /**
  * @typedef {{ set: (opts: object) => { from: (el: Element) => { save: () => Promise<void> } } }} Html2PdfInstance
  */
+
+const HTML2PDF_CDN = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+
+let html2pdfPromise = null;
+let loadHtml2Pdf = () => {
+  if (typeof window.html2pdf === 'function') return Promise.resolve(window.html2pdf);
+  if (html2pdfPromise) return html2pdfPromise;
+  html2pdfPromise = new Promise((resolve, reject) => {
+    let s = document.createElement('script');
+    s.src = HTML2PDF_CDN;
+    s.crossOrigin = 'anonymous';
+    s.onload = () => {
+      if (typeof window.html2pdf === 'function') resolve(window.html2pdf);
+      else reject(new Error('html2pdf global not found after load'));
+    };
+    s.onerror = () => {
+      html2pdfPromise = null;
+      reject(new Error('Failed to load html2pdf from CDN'));
+    };
+    document.head.appendChild(s);
+  });
+  return html2pdfPromise;
+};
 
 export let copyToClipboard = (text, success, error) => {
   if (navigator.clipboard) {
@@ -65,9 +86,12 @@ let getLightMarkdownCss = () => {
 
 export let exportPreviewToPdf = async (previewWrapper, outputEl) => {
   if (!previewWrapper || !outputEl) return;
-  if (typeof window.html2pdf !== 'function') {
-    console.warn('[actions] html2pdf is not loaded — PDF export is unavailable.');
-    window.alert('PDF export is not available yet. Please try again in a moment.');
+  let html2pdf;
+  try {
+    html2pdf = await loadHtml2Pdf();
+  } catch (e) {
+    console.warn('[actions] html2pdf is not loaded — PDF export is unavailable.', e);
+    window.alert('PDF export is not available. Check your network connection and try again.');
     return;
   }
   let restoreDark = getMermaidTheme() === 'dark';
@@ -99,7 +123,7 @@ export let exportPreviewToPdf = async (previewWrapper, outputEl) => {
       },
       jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
-    await window.html2pdf().set(options).from(previewWrapper).save();
+    await html2pdf().set(options).from(previewWrapper).save();
   } catch (err) {
     console.error('PDF export failed', err);
     window.alert('PDF export failed: ' + (err.message || err));

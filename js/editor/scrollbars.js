@@ -1,16 +1,10 @@
 
-
-export let updateCustomScrollbar = (editor, customScrollbar, customScrollbarThumb) => {
-  if (!editor || !customScrollbarThumb || !customScrollbar) return;
-  let scrollRatio = editor.scrollTop / (editor.scrollHeight - editor.clientHeight || 1);
-  let thumbRatio = editor.clientHeight / editor.scrollHeight;
-  let trackHeight = customScrollbar.clientHeight;
-  let thumbHeight = Math.max(20, thumbRatio * trackHeight);
-  let maxTop = trackHeight - thumbHeight;
-  let top = scrollRatio * maxTop;
-  customScrollbarThumb.style.height = thumbHeight + 'px';
-  customScrollbarThumb.style.top = top + 'px';
-};
+/**
+ * Native scrollbar (CSS) - no custom DOM/JS.
+ * This module is kept for backward compat: the imported function is a no-op.
+ * Native themed scrollbars are styled in css/scrollbars.css.
+ */
+export let updateCustomScrollbar = () => {};
 
 export let updateCaretIndicator = (editor, customScrollbar, caretIndicator) => {
   if (!caretIndicator || !editor) return;
@@ -26,7 +20,7 @@ export let updateCaretIndicator = (editor, customScrollbar, caretIndicator) => {
   let end = editor.selectionEnd;
   let text = editor.value;
   let len = text.length;
-  let trackHeight = customScrollbar ? customScrollbar.clientHeight : editor.clientHeight;
+  let trackHeight = editor.clientHeight;
 
   let lineOf = (offset) => {
     let n = 0;
@@ -63,46 +57,4 @@ export let updateCaretIndicator = (editor, customScrollbar, caretIndicator) => {
   }
 };
 
-export let initCustomScrollbar = (editor, customScrollbar, customScrollbarThumb, caretIndicator) => {
-  if (!customScrollbar || !editor || !customScrollbarThumb) return;
-  let isDragging = false;
-  let dragStartY = 0;
-  let dragStartScroll = 0;
-
-  customScrollbarThumb.addEventListener('mousedown', (e) => {
-    isDragging = true;
-    dragStartY = e.clientY;
-    dragStartScroll = editor.scrollTop;
-    e.preventDefault();
-  });
-
-  document.addEventListener('mousemove', (e) => {
-    if (!isDragging) return;
-    let trackHeight = customScrollbar.clientHeight;
-    let thumbHeight = customScrollbarThumb.clientHeight;
-    let maxTop = trackHeight - thumbHeight;
-    let deltaY = e.clientY - dragStartY;
-    let maxScroll = editor.scrollHeight - editor.clientHeight;
-    let scrollDelta = (deltaY / maxTop) * maxScroll;
-    editor.scrollTop = dragStartScroll + scrollDelta;
-  });
-
-  document.addEventListener('mouseup', () => { isDragging = false; });
-
-  customScrollbar.addEventListener('click', (e) => {
-    if (e.target === customScrollbarThumb) return;
-    let rect = customScrollbar.getBoundingClientRect();
-    let clickY = e.clientY - rect.top;
-    let trackHeight = customScrollbar.clientHeight;
-    let ratio = clickY / trackHeight;
-    editor.scrollTop = ratio * (editor.scrollHeight - editor.clientHeight);
-  });
-
-  editor.addEventListener('scroll', () => {
-    updateCustomScrollbar(editor, customScrollbar, customScrollbarThumb);
-    updateCaretIndicator(editor, customScrollbar, caretIndicator);
-  });
-
-  updateCustomScrollbar(editor, customScrollbar, customScrollbarThumb);
-  updateCaretIndicator(editor, customScrollbar, caretIndicator);
-};
+export let initCustomScrollbar = () => {};

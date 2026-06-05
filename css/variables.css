@@ -1,12 +1,14 @@
 @font-face {
   font-family: 'Monaco';
-  src: url('../monaco.ttf') format('truetype');
+  src: url('../fonts/monaco-subset.woff') format('woff'),
+       url('../fonts/monaco.ttf') format('truetype');
   font-display: swap;
 }
 
 @font-face {
   font-family: 'Roboto';
-  src: url('../Roboto.ttf') format('truetype');
+  src: url('../fonts/roboto-subset.woff') format('woff'),
+       url('../fonts/Roboto.ttf') format('truetype');
   font-display: swap;
 }
 
