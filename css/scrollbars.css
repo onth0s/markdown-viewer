@@ -84,29 +84,6 @@
   background: var(--scrollbar-thumb-hover);
 }
 
-#custom-scrollbar {
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 12px;
-  height: 100%;
-  background: var(--bg-editor);
-  z-index: 5;
-}
-
-#custom-scrollbar-thumb {
-  position: absolute;
-  top: 0;
-  right: 2px;
-  width: 8px;
-  background: var(--scrollbar-thumb);
-  border-radius: 0;
-}
-
-#custom-scrollbar-thumb:hover {
-  background: var(--scrollbar-thumb-hover);
-}
-
 #preview-custom-scrollbar {
   position: absolute;
   top: 0;
