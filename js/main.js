@@ -20,6 +20,7 @@ import { initPreviewHorizontalScrollbar } from './preview/hscrollbar.js';
 import { initCopyButton, initDownloadButton, initPdfButton } from './preview/actions.js';
 import { SelectionEngine } from './selection/selection-engine.js';
 import { wrapEmojis } from './common/emoji-helper.js';
+import { initDropLoader } from './common/drop-loader.js';
 
 // ── DOM elements ──────────────────────────────────────────────────────────────
 const editorEl                  = document.getElementById('editor');
@@ -165,6 +166,16 @@ let bootstrap = () => {
   initCopyButton(editorEl);
   initDownloadButton(editorEl);
   initPdfButton(previewEl, outputEl);
+
+  // 8b. Drag-and-drop .md files anywhere on the page
+  initDropLoader({
+    editorController,
+    onAfterLoad: () => {
+      if (previewEl) previewEl.scrollTop = 0;
+      if (previewScrollbar) previewScrollbar.update();
+      if (previewHScrollbar) previewHScrollbar.update();
+    }
+  });
 
   // 9. Toggles
   scrollSync.initScrollBarSyncToggle(loadScrollBarSettings());
