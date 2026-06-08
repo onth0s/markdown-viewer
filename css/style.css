@@ -1155,6 +1155,15 @@ header input[type="checkbox"] {
   opacity: 1 !important;
 }
 
+/* ── Emoji fade at extreme brightness levels ── */
+.emoji-wrapper {
+  opacity: var(--emoji-opacity, 1) !important;
+}
+.emoji-wrapper.preview-selection,
+.emoji-wrapper .preview-selection {
+  opacity: 1 !important;
+}
+
 /* ── Preview checkbox fading at extreme brightness ── */
 .markdown-body input[type="checkbox"] {
   opacity: var(--prism-opacity, 1) !important;

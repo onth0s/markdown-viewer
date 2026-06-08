@@ -1,6 +1,7 @@
 import { syncHighlight, setupHighlighter } from './highlighter.js';
 import { initCustomScrollbar, updateCaretIndicator, updateCustomScrollbar } from './scrollbars.js';
 import { setupScrollOverlay } from '../common/scroll-utils.js';
+import { wrapEmojis } from '../common/emoji-helper.js';
 
 export let initEditorController = ({
   editor,
@@ -35,6 +36,7 @@ export let initEditorController = ({
 
   editor.addEventListener('input', () => {
     syncHighlight(editor, editorHighlight);
+    wrapEmojis(editorHighlight);
     updateCaretIndicator(editor, customScrollbar, caretIndicator);
     updateCustomScrollbar(editor, customScrollbar, customScrollbarThumb);
     if (onInput) {
@@ -82,6 +84,7 @@ export let initEditorController = ({
       editor.value = value;
       editor.scrollTop = 0;
       syncHighlight(editor, editorHighlight);
+      wrapEmojis(editorHighlight);
       editor.focus();
       if (onInput) onInput(editor.value);
       updateCaretIndicator(editor, customScrollbar, caretIndicator);
@@ -89,6 +92,7 @@ export let initEditorController = ({
     },
     updateHighlight: () => {
       syncHighlight(editor, editorHighlight);
+      wrapEmojis(editorHighlight);
     },
     updateScrollbars: () => {
       updateCaretIndicator(editor, customScrollbar, caretIndicator);

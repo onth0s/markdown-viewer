@@ -161,6 +161,23 @@ export let applyBrightness = (brightness) => {
     prismOpacity = (100 - brightness) / 25;
   }
   doc.style.setProperty('--prism-opacity', prismOpacity.toString());
+
+  // Gradual fade for emojis at extreme brightness levels — native emoji
+  // rendering ignores CSS color, so we opacity-fade them at the extremes.
+  let emojiOpacity = 1.0;
+  if (brightness < 25) {
+    emojiOpacity = brightness / 25;
+  } else if (brightness > 75) {
+    emojiOpacity = (100 - brightness) / 25;
+  }
+  doc.style.setProperty('--emoji-opacity', emojiOpacity.toString());
+
+  // Directly apply opacity to all wrapped emojis in the DOM as a
+  // cross-browser safety net — some environments render emoji glyphs
+  // outside the normal CSS compositing pipeline.
+  document.querySelectorAll('.emoji-wrapper').forEach(el => {
+    el.style.opacity = emojiOpacity;
+  });
 };
 
 /** Save brightness to local storage and update corresponding legacy theme state */
