@@ -1,5 +1,4 @@
 #preview.column {
-  overflow-y: scroll;
   overscroll-behavior: none;
   white-space: normal;
   position: relative;

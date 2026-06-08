@@ -881,7 +881,6 @@ header input[type="checkbox"] {
 .hl-fenced-block { color: var(--syntax-table); }
 .hl-code-content { color: var(--syntax-table); }
 #preview.column {
-  overflow-y: scroll;
   overscroll-behavior: none;
   white-space: normal;
   position: relative;

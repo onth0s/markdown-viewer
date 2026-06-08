@@ -24,18 +24,22 @@
 #custom-scrollbar-thumb {
   position: absolute;
   top: 0;
-  right: 2px;
-  width: 8px;
-  background: var(--scrollbar-thumb);
+  right: 0;
+  width: 12px;
+  background: var(--caret-color);
   border-radius: 0;
   cursor: grab;
-  opacity: 0.6;
-  transition: opacity 0.2s, background 0.2s;
+  opacity: 0.8;
+  transition: opacity 0.15s ease-in-out;
 }
 
 #custom-scrollbar-thumb:hover {
-  background: var(--scrollbar-thumb-hover);
   opacity: 1;
+}
+
+[data-theme="dark"] #custom-scrollbar-thumb {
+  background: var(--color-primary);
+  opacity: 0.9;
 }
 
 /* ── Preview Custom Scrollbar ── */
