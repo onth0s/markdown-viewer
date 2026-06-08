@@ -1,1 +1,0 @@
-- make it so you can drag and drop .md files into the webapp and load them on the Editor.
