@@ -373,6 +373,7 @@ img {
 #preview.column {
   overflow: hidden;
   white-space: normal;
+  overscroll-behavior: none;
 }
 
 #preview-wrapper {
@@ -383,6 +384,7 @@ img {
   height: 100%;
   scrollbar-width: none;
   scrollbar-color: var(--scrollbar-thumb) transparent;
+  overscroll-behavior: none;
 }
 
 #preview-wrapper::-webkit-scrollbar {
@@ -1188,8 +1190,7 @@ header input[type="checkbox"] {
 .markdown-body .blob-wrapper {
   scrollbar-color: var(--scrollbar-thumb) transparent;
   scrollbar-width: thin;
-  overscroll-behavior-x: contain;
-  overscroll-behavior-y: auto;
+  overscroll-behavior: contain;
   overflow-x: auto !important;
   overflow-y: hidden !important;
 }
