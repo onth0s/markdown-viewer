@@ -61,6 +61,22 @@ export let initPreviewCustomScrollbar = (previewEl, previewTrack, previewThumb) 
 
   previewEl.addEventListener('scroll', update);
 
+  // Code blocks (<pre>) become implicit scroll containers when GitHub markdown
+  // CSS sets overflow-x: auto, which causes the browser to swallow vertical
+  // wheel events before they reach the preview wrapper. Intercept here and
+  // redirect vertical scrolls to the wrapper so natural pane scrolling is
+  // preserved. Horizontal scrolls are left alone so code blocks still pan.
+  previewEl.addEventListener('wheel', (e) => {
+    if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return; // horizontal-dominant – leave it
+    let pre = (e.target instanceof Element) ? e.target.closest('pre') : null;
+    if (!pre) return; // not over a code block – browser handles normally
+    let delta = e.deltaY;
+    if (e.deltaMode === WheelEvent.DOM_DELTA_LINE) delta *= 16;
+    if (e.deltaMode === WheelEvent.DOM_DELTA_PAGE) delta *= previewEl.clientHeight;
+    previewEl.scrollTop += delta;
+    e.preventDefault();
+  }, { passive: false });
+
   return {
     update,
     setupOverlay: (previewOverlay) => {
