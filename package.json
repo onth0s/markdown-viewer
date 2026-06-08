@@ -1,6 +1,11 @@
 {
+  "type": "module",
   "dependencies": {
     "@types/prismjs": "^1.26.6",
     "marked": "^18.0.5"
+  },
+  "devDependencies": {
+    "eslint": "^10.4.1",
+    "globals": "^17.6.0"
   }
 }

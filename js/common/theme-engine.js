@@ -15,49 +15,60 @@ export const DEFAULT_DARK_BRIGHTNESS = 75;
 // At A (0), L = 100, S = 0.
 // At B (50), L = 50. Saturation is average of Light and Dark.
 // At C (100), L = 0, S = 0.
-const COLOR_MAP = {
-  'color-primary':        { light: [47, 49], dark: [59, 64] },
-  'color-primary-hover':  { light: [46, 56], dark: [64, 69] },
-  'color-primary-active': { light: [49, 42], dark: [55, 57] },
-  'color-primary-subtle': { light: [73, 96], dark: [36, 18] },
-  'bg-app':               { light: [11, 97], dark: [29, 11] },
-  'bg-surface':           { light: [0, 100], dark: [31, 15] },
-  'bg-header':            { light: [24, 47], dark: [32, 24] },
-  'bg-editor':            { light: [0, 100], dark: [31, 15] },
-  'bg-preview':           { light: [0, 100], dark: [31, 15] },
-  'bg-code':              { light: [67, 92], dark: [42, 20] },
-  'border-default':       { light: [22, 88], dark: [30, 25] },
-  'border-muted':         { light: [15, 94], dark: [28, 20] },
-  'text-primary':         { light: [13, 16], dark: [40, 93] },
-  'text-secondary':       { light: [9, 38],  dark: [9, 58]  },
-  'text-tertiary':        { light: [9, 58],  dark: [11, 44] },
-  'text-on-primary':      { light: [0, 100], dark: [0, 100] },
-  'text-link':            { light: [47, 49], dark: [59, 64] },
-  'syntax-heading':       { light: [47, 49], dark: [59, 64] },
-  'syntax-bold':          { light: [13, 16], dark: [40, 93] },
-  'syntax-italic':        { light: [13, 16], dark: [40, 93] },
-  'syntax-code':          { light: [47, 49], dark: [59, 64] },
-  'syntax-fence':         { light: [8, 43],  dark: [11, 44] },
-  'syntax-link':          { light: [47, 49], dark: [59, 64] },
-  'syntax-image':         { light: [47, 49], dark: [80, 72] },
-  'syntax-quote':         { light: [8, 43],  dark: [11, 44] },
-  'syntax-list':          { light: [47, 49], dark: [59, 64] },
-  'syntax-hr':            { light: [22, 88], dark: [30, 25] },
-  'syntax-table':         { light: [13, 16], dark: [40, 93] },
-  'syntax-table-sep':     { light: [22, 88], dark: [30, 25] },
-  'syntax-strike':        { light: [8, 43],  dark: [11, 44] },
-  'selection-bg':         { light: [75, 88], dark: [43, 29] },
-  'selection-text':       { light: [13, 16], dark: [40, 93] },
-  'scrollbar-thumb':      { light: [13, 80], dark: [25, 30] },
-  'scrollbar-thumb-hover':{ light: [8, 70],  dark: [20, 36] },
-  'divider':              { light: [22, 88], dark: [30, 25] },
-  'divider-hover':        { light: [10, 75], dark: [25, 30] },
-  'divider-active':       { light: [6, 58],  dark: [20, 36] },
-  'toggle-bg':            { light: [13, 80], dark: [39, 18] },
-  'toggle-knob':          { light: [0, 100], dark: [40, 93] },
-  'toggle-icon':          { light: [9, 38],  dark: [9, 58]  },
-  'caret-color':          { light: [13, 16], dark: [40, 93] }
-};
+const COLOR_MAP = (() => {
+  if (typeof window !== 'undefined' && window.__INITIAL_THEME__ && window.__INITIAL_THEME__.colorMap) {
+    const rawMap = window.__INITIAL_THEME__.colorMap;
+    const resolved = {};
+    for (const key of Object.keys(rawMap)) {
+      const val = rawMap[key];
+      resolved[key] = { light: [val[0], val[1]], dark: [val[2], val[3]] };
+    }
+    return resolved;
+  }
+  return {
+    'color-primary':        { light: [47, 49], dark: [59, 64] },
+    'color-primary-hover':  { light: [46, 56], dark: [64, 69] },
+    'color-primary-active': { light: [49, 42], dark: [55, 57] },
+    'color-primary-subtle': { light: [73, 96], dark: [36, 18] },
+    'bg-app':               { light: [11, 97], dark: [29, 11] },
+    'bg-surface':           { light: [0, 100], dark: [31, 15] },
+    'bg-header':            { light: [24, 47], dark: [32, 24] },
+    'bg-editor':            { light: [0, 100], dark: [31, 15] },
+    'bg-preview':           { light: [0, 100], dark: [31, 15] },
+    'bg-code':              { light: [67, 92], dark: [42, 20] },
+    'border-default':       { light: [22, 88], dark: [30, 25] },
+    'border-muted':         { light: [15, 94], dark: [28, 20] },
+    'text-primary':         { light: [13, 16], dark: [40, 93] },
+    'text-secondary':       { light: [9, 38],  dark: [9, 58]  },
+    'text-tertiary':        { light: [9, 58],  dark: [11, 44] },
+    'text-on-primary':      { light: [0, 100], dark: [0, 100] },
+    'text-link':            { light: [47, 49], dark: [59, 64] },
+    'syntax-heading':       { light: [47, 49], dark: [59, 64] },
+    'syntax-bold':          { light: [13, 16], dark: [40, 93] },
+    'syntax-italic':        { light: [13, 16], dark: [40, 93] },
+    'syntax-code':          { light: [47, 49], dark: [59, 64] },
+    'syntax-fence':         { light: [8, 43],  dark: [11, 44] },
+    'syntax-link':          { light: [47, 49], dark: [59, 64] },
+    'syntax-image':         { light: [47, 49], dark: [80, 72] },
+    'syntax-quote':         { light: [8, 43],  dark: [11, 44] },
+    'syntax-list':          { light: [47, 49], dark: [59, 64] },
+    'syntax-hr':            { light: [22, 88], dark: [30, 25] },
+    'syntax-table':         { light: [13, 16], dark: [40, 93] },
+    'syntax-table-sep':     { light: [22, 88], dark: [30, 25] },
+    'syntax-strike':        { light: [8, 43],  dark: [11, 44] },
+    'selection-bg':         { light: [75, 88], dark: [43, 29] },
+    'selection-text':       { light: [13, 16], dark: [40, 93] },
+    'scrollbar-thumb':      { light: [13, 80], dark: [25, 30] },
+    'scrollbar-thumb-hover':{ light: [8, 70],  dark: [20, 36] },
+    'divider':              { light: [22, 88], dark: [30, 25] },
+    'divider-hover':        { light: [10, 75], dark: [25, 30] },
+    'divider-active':       { light: [6, 58],  dark: [20, 36] },
+    'toggle-bg':            { light: [13, 80], dark: [39, 18] },
+    'toggle-knob':          { light: [0, 100], dark: [40, 93] },
+    'toggle-icon':          { light: [9, 38],  dark: [9, 58]  },
+    'caret-color':          { light: [13, 16], dark: [40, 93] }
+  };
+})();
 
 /** Get stored brightness value (0-100) */
 export let getBrightness = () => {

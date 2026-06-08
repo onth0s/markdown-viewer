@@ -1,5 +1,8 @@
 import { loadSwappedState, saveSwappedState, savePaneRatio, loadPaneRatio } from './storage.js';
 
+let lastLeftRatio = 0.5;
+let applyRatioFn = null;
+
 export let setupDivider = () => {
   let divider = document.getElementById('split-divider');
   let leftPane = document.getElementById('edit');
@@ -13,9 +16,9 @@ export let setupDivider = () => {
   let isSwapped = () => document.documentElement.hasAttribute('data-swapped');
 
   // Restore persisted ratio or fall back to 50/50
-  let lastLeftRatio = loadPaneRatio() ?? 0.5;
+  lastLeftRatio = loadPaneRatio() ?? 0.5;
 
-  let applyRatio = (ratio) => {
+  applyRatioFn = (ratio) => {
     let cr = container.getBoundingClientRect();
     if (isPortrait()) {
       leftPane.style.width = '';
@@ -36,7 +39,7 @@ export let setupDivider = () => {
 
   // Apply immediately on load so panes are never mis-sized after reload
   // Use rAF so the container has finished painting its own size first
-  requestAnimationFrame(() => applyRatio(lastLeftRatio));
+  requestAnimationFrame(() => applyRatioFn(lastLeftRatio));
 
   let startDrag = () => {
     isDragging = true;
@@ -91,7 +94,7 @@ export let setupDivider = () => {
   divider.addEventListener('touchstart', (e) => { e.preventDefault(); startDrag(); }, { passive: false });
   divider.addEventListener('dblclick', () => {
     lastLeftRatio = 0.5;
-    applyRatio(lastLeftRatio);
+    if (applyRatioFn) applyRatioFn(lastLeftRatio);
     savePaneRatio(lastLeftRatio);
   });
 
@@ -114,7 +117,7 @@ export let setupDivider = () => {
   });
 
   window.addEventListener('resize', () => {
-    applyRatio(lastLeftRatio);
+    if (applyRatioFn) applyRatioFn(lastLeftRatio);
   });
 };
 
@@ -140,6 +143,8 @@ export let initSwapButton = () => {
       document.documentElement.removeAttribute('data-swapped');
     }
     // Re-apply ratio so panes reflow in the new layout
-    requestAnimationFrame(() => applyRatio(lastLeftRatio));
+    if (applyRatioFn) {
+      requestAnimationFrame(() => applyRatioFn(lastLeftRatio));
+    }
   });
 };
