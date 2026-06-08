@@ -50,6 +50,15 @@ export let initEditorController = ({
     }
   });
 
+  let editorWrapper = editor.parentElement;
+  if (editorWrapper) {
+    editorWrapper.addEventListener('wheel', (e) => {
+      let orig = editor.scrollTop;
+      editor.scrollTop += e.deltaY;
+      if (editor.scrollTop !== orig) e.preventDefault();
+    }, { passive: false });
+  }
+
   editor.addEventListener('keyup', handleSelectionUpdate);
   editor.addEventListener('keydown', () => {
     queueMicrotask(handleSelectionUpdate);

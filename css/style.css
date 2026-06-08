@@ -819,8 +819,7 @@ header input[type="checkbox"] {
   caret-color: var(--caret-color);
   box-sizing: border-box;
   display: block;
-  overscroll-behavior: none;
-  overflow-y: scroll;
+  overflow: hidden;
   position: relative;
   z-index: 2;
 }
@@ -1173,6 +1172,17 @@ header input[type="checkbox"] {
 }
 #editor-highlight::-webkit-scrollbar {
   display: none;
+}
+
+#editor {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+#editor::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
 }
 
 #preview {

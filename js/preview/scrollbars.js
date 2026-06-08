@@ -12,10 +12,11 @@ export let initPreviewCustomScrollbar = (previewEl, previewTrack, previewThumb) 
     if (max <= 0) { previewThumb.style.height = '0px'; return; }
     let ratio = previewEl.scrollTop / max;
     let trackH = previewTrack.clientHeight;
-    let thumbH = Math.max(20, (previewEl.clientHeight / previewEl.scrollHeight) * trackH);
-    let maxTop = trackH - thumbH;
+    let availH = trackH - 28;
+    let thumbH = Math.max(20, (previewEl.clientHeight / previewEl.scrollHeight) * availH);
+    let maxTop = availH - thumbH;
     previewThumb.style.height = thumbH + 'px';
-    previewThumb.style.top = (0 + ratio * maxTop) + 'px';
+    previewThumb.style.top = (14 + ratio * maxTop) + 'px';
   };
 
   previewThumb.addEventListener('mousedown', (e) => {
@@ -29,7 +30,7 @@ export let initPreviewCustomScrollbar = (previewEl, previewTrack, previewThumb) 
     if (!isDragging) return;
     let trackH = previewTrack.clientHeight;
     let thumbH = previewThumb.clientHeight;
-    let maxTop = trackH - thumbH;
+    let maxTop = trackH - 28 - thumbH;
     let delta = e.clientY - dragStartY;
     let maxScroll = previewEl.scrollHeight - previewEl.clientHeight;
     previewEl.scrollTop = dragStartScroll + (delta / maxTop) * maxScroll;
@@ -38,11 +39,24 @@ export let initPreviewCustomScrollbar = (previewEl, previewTrack, previewThumb) 
   document.addEventListener('mouseup', () => { isDragging = false; });
 
   previewTrack.addEventListener('click', (e) => {
-    if (e.target === previewThumb) return;
+    if (e.target === previewThumb || e.target.classList.contains('scrollbar-arrow')) return;
     let rect = previewTrack.getBoundingClientRect();
     let clickY = e.clientY - rect.top;
     let ratio = clickY / previewTrack.clientHeight;
     previewEl.scrollTop = ratio * (previewEl.scrollHeight - previewEl.clientHeight);
+  });
+
+  let scrollInterval = null;
+  previewTrack.querySelectorAll('.scrollbar-arrow').forEach((arrow) => {
+    let dir = arrow.dataset.dir === 'up' ? -1 : 1;
+    let step = () => { previewEl.scrollTop += dir * 40; };
+    arrow.addEventListener('mousedown', (e) => {
+      e.stopPropagation();
+      step();
+      scrollInterval = setInterval(step, 80);
+    });
+    arrow.addEventListener('mouseup', () => { clearInterval(scrollInterval); });
+    arrow.addEventListener('mouseleave', () => { clearInterval(scrollInterval); });
   });
 
   previewEl.addEventListener('scroll', update);
