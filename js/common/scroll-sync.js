@@ -21,9 +21,21 @@ export let initScrollSync = (editorEl, previewEl, editPaneContainer, previewPane
   let scrollBarSync = false;
 
   // Track which pane the cursor is in
-  if (editPaneContainer) editPaneContainer.addEventListener('pointerenter', () => { activePane = 'editor'; });
-  if (previewPaneContainer) previewPaneContainer.addEventListener('pointerenter', () => { activePane = 'preview'; });
-  if (editorEl) editorEl.addEventListener('focus', () => { activePane = 'editor'; });
+  if (editPaneContainer) {
+    editPaneContainer.addEventListener('pointerenter', () => { activePane = 'editor'; });
+    editPaneContainer.addEventListener('wheel', () => { activePane = 'editor'; }, { passive: true });
+  }
+  if (previewPaneContainer) {
+    previewPaneContainer.addEventListener('pointerenter', () => { activePane = 'preview'; });
+    previewPaneContainer.addEventListener('wheel', () => { activePane = 'preview'; }, { passive: true });
+  }
+  if (editorEl) {
+    editorEl.addEventListener('focus', () => { activePane = 'editor'; });
+    editorEl.addEventListener('wheel', () => { activePane = 'editor'; }, { passive: true });
+  }
+  if (previewEl) {
+    previewEl.addEventListener('wheel', () => { activePane = 'preview'; }, { passive: true });
+  }
 
   let syncPaneToPane = (source, target) => {
     let max = source.scrollHeight - source.clientHeight;
