@@ -140,6 +140,15 @@
           doc.style.setProperty('--nav-logo-color', 'hsl(' + hue + ', ' + Math.round(logoS) + '%, ' + Math.round(logoL) + '%)');
           doc.style.setProperty('--nav-icon-color', 'hsl(' + hue + ', ' + Math.round(iconS) + '%, ' + Math.round(iconL) + '%)');
 
+          // Emoji opacity fade at extremes
+          var emojiOpacity = 1.0;
+          if (brightness < 25) {
+            emojiOpacity = brightness / 25;
+          } else if (brightness > 75) {
+            emojiOpacity = (100 - brightness) / 25;
+          }
+          doc.style.setProperty('--emoji-opacity', emojiOpacity);
+
           var SWAP_KEY = 'mdv_swapped';
           if (localStorage.getItem(SWAP_KEY) === 'true') {
             document.documentElement.setAttribute('data-swapped', '');
@@ -261,11 +270,6 @@
         <div id="preview-wrapper">
           <div id="output" class="content markdown-body"></div>
         </div>
-        <div id="preview-hscrollbar">
-          <div class="hscrollbar-arrow hscrollbar-arrow-left" data-dir="left">&#9664;</div>
-          <div id="preview-hscrollbar-thumb"></div>
-          <div class="hscrollbar-arrow hscrollbar-arrow-right" data-dir="right">&#9654;</div>
-        </div>
         <div id="preview-custom-scrollbar">
           <div class="scrollbar-arrow scrollbar-arrow-up" data-dir="up">&#9650;</div>
           <div id="preview-custom-scrollbar-thumb"></div>
@@ -274,10 +278,6 @@
         <div id="preview-scroll-overlay" class="scroll-popup-overlay">
           <div class="scroll-popup-btn scroll-popup-top" data-dir="top">&#9650;</div>
           <div class="scroll-popup-btn scroll-popup-bottom" data-dir="bottom">&#9660;</div>
-        </div>
-        <div id="preview-hscroll-overlay" class="scroll-popup-overlay-h">
-          <div class="scroll-popup-btn-h scroll-popup-left" data-dir="left">&#9664;</div>
-          <div class="scroll-popup-btn-h scroll-popup-right" data-dir="right">&#9654;</div>
         </div>
         <div id="preview-fullscreen-popup" class="fullscreen-popup-overlay">
           <div class="fullscreen-popup-btn" title="Toggle fullscreen">

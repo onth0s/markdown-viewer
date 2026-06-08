@@ -16,7 +16,6 @@ import { initEditorController } from './editor/editor-controller.js';
 import { initMermaid, renderMermaidDiagrams } from './preview/mermaid-renderer.js';
 import { convert } from './preview/markdown-renderer.js';
 import { initPreviewCustomScrollbar } from './preview/scrollbars.js';
-import { initPreviewHorizontalScrollbar } from './preview/hscrollbar.js';
 import { initCopyButton, initDownloadButton, initPdfButton } from './preview/actions.js';
 import { SelectionEngine } from './selection/selection-engine.js';
 import { wrapEmojis } from './common/emoji-helper.js';
@@ -32,8 +31,6 @@ const outputEl                  = document.getElementById('output');
 const previewEl                 = document.getElementById('preview-wrapper');
 const previewTrackEl            = document.getElementById('preview-custom-scrollbar');
 const previewThumbEl            = document.getElementById('preview-custom-scrollbar-thumb');
-const previewHScrollbarEl       = document.getElementById('preview-hscrollbar');
-const previewHThumbEl           = document.getElementById('preview-hscrollbar-thumb');
 const editorOverlayEl           = document.getElementById('editor-scroll-overlay');
 const previewOverlayEl          = document.getElementById('preview-scroll-overlay');
 const previewFullscreenOverlayEl = document.getElementById('preview-fullscreen-popup');
@@ -84,11 +81,6 @@ let bootstrap = () => {
   if (previewScrollbar && previewOverlayEl) {
     previewScrollbar.setupOverlay(previewOverlayEl);
   }
-  const previewHScrollbar = initPreviewHorizontalScrollbar(previewEl, previewHScrollbarEl, previewHThumbEl);
-  const previewHOverlayEl = document.getElementById('preview-hscroll-overlay');
-  if (previewHScrollbar && previewHOverlayEl) {
-    previewHScrollbar.setupOverlay(previewHOverlayEl);
-  }
   if (previewFullscreenOverlayEl && previewPaneContainer) {
     setupFullscreenOverlay(previewFullscreenOverlayEl, previewPaneContainer);
   }
@@ -114,7 +106,6 @@ let bootstrap = () => {
       selectionEngine.setMarkdown(value);
       saveLastContent(value);
       if (previewScrollbar) previewScrollbar.update();
-      if (previewHScrollbar) previewHScrollbar.update();
       updateThemedLogos();
     },
     onSelectionChange: (start, end) => {
@@ -143,7 +134,6 @@ let bootstrap = () => {
       renderMermaidDiagrams(outputEl).then(() => {
         applyScrollRatio(previewEl, savedScrolls.preview);
         if (previewScrollbar) previewScrollbar.update();
-        if (previewHScrollbar) previewHScrollbar.update();
         updateThemedLogos();
       });
     } else if (editorController) {
@@ -173,7 +163,6 @@ let bootstrap = () => {
     onAfterLoad: () => {
       if (previewEl) previewEl.scrollTop = 0;
       if (previewScrollbar) previewScrollbar.update();
-      if (previewHScrollbar) previewHScrollbar.update();
     }
   });
 
