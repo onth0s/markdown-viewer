@@ -10,6 +10,7 @@ export let setupDivider = () => {
   if (!divider || !leftPane || !rightPane || !container) return;
 
   let isPortrait = () => window.innerWidth < window.innerHeight;
+  let isSwapped = () => document.documentElement.hasAttribute('data-swapped');
 
   // Restore persisted ratio or fall back to 50/50
   let lastLeftRatio = loadPaneRatio() ?? 0.5;
@@ -37,52 +38,71 @@ export let setupDivider = () => {
   // Use rAF so the container has finished painting its own size first
   requestAnimationFrame(() => applyRatio(lastLeftRatio));
 
-  divider.addEventListener('mouseenter', () => divider.classList.add('hover'));
-  divider.addEventListener('mouseleave', () => { if (!isDragging) divider.classList.remove('hover'); });
-  divider.addEventListener('mousedown', () => {
+  let startDrag = () => {
     isDragging = true;
     divider.classList.add('active');
     document.body.style.cursor = isPortrait() ? 'row-resize' : 'col-resize';
-  });
-  divider.addEventListener('dblclick', () => {
-    lastLeftRatio = 0.5;
-    applyRatio(lastLeftRatio);
-    savePaneRatio(lastLeftRatio);
-  });
+  };
 
-  document.addEventListener('mousemove', (e) => {
+  let moveDrag = (clientX, clientY) => {
     if (!isDragging) return;
-    e.preventDefault();
     let cr = container.getBoundingClientRect();
     let dw = divider.offsetWidth;
     let dh = divider.offsetHeight;
     let minSize = 100;
 
     if (isPortrait()) {
-      let offsetY = e.clientY - cr.top;
+      let offsetY = clientY - cr.top;
       let maxH = cr.height - minSize - dh;
       let topH = Math.max(minSize, Math.min(offsetY, maxH));
-      leftPane.style.height = topH + 'px';
-      rightPane.style.height = (cr.height - topH - dh) + 'px';
-      lastLeftRatio = topH / (cr.height - dh);
+
+      if (isSwapped()) {
+        // column-reverse: preview at top, editor at bottom
+        rightPane.style.height = topH + 'px';
+        leftPane.style.height = (cr.height - topH - dh) + 'px';
+        lastLeftRatio = (cr.height - topH - dh) / (cr.height - dh);
+      } else {
+        leftPane.style.height = topH + 'px';
+        rightPane.style.height = (cr.height - topH - dh) + 'px';
+        lastLeftRatio = topH / (cr.height - dh);
+      }
     } else {
-      let offsetX = e.clientX - cr.left;
+      let offsetX = clientX - cr.left;
       let maxW = cr.width - minSize - dw;
       let leftW = Math.max(minSize, Math.min(offsetX, maxW));
       leftPane.style.width = leftW + 'px';
       rightPane.style.width = (cr.width - leftW - dw) + 'px';
       lastLeftRatio = leftW / (cr.width - dw);
     }
-  });
+  };
 
-  document.addEventListener('mouseup', () => {
+  let endDrag = () => {
     if (isDragging) {
       isDragging = false;
       divider.classList.remove('active', 'hover');
       document.body.style.cursor = 'default';
       savePaneRatio(lastLeftRatio);
     }
+  };
+
+  divider.addEventListener('mouseenter', () => divider.classList.add('hover'));
+  divider.addEventListener('mouseleave', () => { if (!isDragging) divider.classList.remove('hover'); });
+  divider.addEventListener('mousedown', (e) => { e.preventDefault(); startDrag(); });
+  divider.addEventListener('touchstart', (e) => { e.preventDefault(); startDrag(); }, { passive: false });
+  divider.addEventListener('dblclick', () => {
+    lastLeftRatio = 0.5;
+    applyRatio(lastLeftRatio);
+    savePaneRatio(lastLeftRatio);
   });
+
+  document.addEventListener('mousemove', (e) => moveDrag(e.clientX, e.clientY));
+  document.addEventListener('touchmove', (e) => {
+    let t = e.touches[0];
+    if (t) { e.preventDefault(); moveDrag(t.clientX, t.clientY); }
+  }, { passive: false });
+
+  document.addEventListener('mouseup', endDrag);
+  document.addEventListener('touchend', endDrag);
 
   document.addEventListener('mouseleave', () => {
     if (isDragging) {
@@ -119,5 +139,7 @@ export let initSwapButton = () => {
     } else {
       document.documentElement.removeAttribute('data-swapped');
     }
+    // Re-apply ratio so panes reflow in the new layout
+    requestAnimationFrame(() => applyRatio(lastLeftRatio));
   });
 };

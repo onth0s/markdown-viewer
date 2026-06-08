@@ -85,10 +85,6 @@ let bootstrap = () => {
     previewScrollbar.setupOverlay(previewOverlayEl);
   }
   const previewHScrollbar = initPreviewHorizontalScrollbar(previewEl, previewHScrollbarEl, previewHThumbEl);
-  const previewHOverlayEl = document.getElementById('preview-hscroll-overlay');
-  if (previewHScrollbar && previewHOverlayEl) {
-    previewHScrollbar.setupOverlay(previewHOverlayEl);
-  }
   if (previewFullscreenOverlayEl && previewPaneContainer) {
     setupFullscreenOverlay(previewFullscreenOverlayEl, previewPaneContainer);
   }

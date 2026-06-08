@@ -406,6 +406,7 @@ img {
   cursor: col-resize;
   z-index: 1;
   transition: background-color 0.15s;
+  touch-action: none;
 }
 
 .split-divider.hover {
@@ -1407,52 +1408,6 @@ body.is-dragging-file #drop-overlay {
 }
 
 .clearall-popup-btn:hover {
-  background: var(--color-primary-subtle);
-  color: var(--color-primary);
-}
-
-.scroll-popup-overlay-h {
-  position: absolute;
-  bottom: 20px;
-  display: flex;
-  flex-direction: row;
-  gap: 2px;
-  background: var(--bg-surface);
-  border: 1px solid var(--border-default);
-  border-radius: 6px;
-  padding: 4px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  z-index: 10;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.1s;
-}
-
-[data-theme="dark"] .scroll-popup-overlay-h {
-  background: var(--bg-surface);
-  border-color: var(--border-default);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
-}
-
-.scroll-popup-overlay-h.at-left { left: 8px; }
-.scroll-popup-overlay-h.at-right { right: 22px; }
-.scroll-popup-overlay-h.visible { opacity: 1; pointer-events: auto; }
-
-.scroll-popup-btn-h {
-  width: 28px;
-  height: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 10px;
-  color: var(--text-secondary);
-  cursor: pointer;
-  border-radius: 4px;
-  transition: background 0.1s, color 0.1s;
-  user-select: none;
-}
-
-.scroll-popup-btn-h:hover {
   background: var(--color-primary-subtle);
   color: var(--color-primary);
 }

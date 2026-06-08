@@ -1,12 +1,20 @@
 
 /**
- * Native scrollbar (CSS) - no custom DOM/JS.
- * This module is kept for backward compat: the imported function is a no-op.
- * Native themed scrollbars are styled in css/scrollbars.css.
+ * Custom scrollbar overlay + caret indicator for the editor pane.
  */
-export let updateCustomScrollbar = () => {};
+export let updateCustomScrollbar = (editor, track, thumb) => {
+  if (!editor || !track || !thumb) return;
+  let max = editor.scrollHeight - editor.clientHeight;
+  if (max <= 0) { thumb.style.height = '0px'; return; }
+  let ratio = editor.scrollTop / max;
+  let avail = track.clientHeight;
+  let thumbH = Math.max(20, (editor.clientHeight / editor.scrollHeight) * avail);
+  let maxTop = avail - thumbH;
+  thumb.style.height = thumbH + 'px';
+  thumb.style.top = (0 + ratio * maxTop) + 'px';
+};
 
-export let updateCaretIndicator = (editor, customScrollbar, caretIndicator) => {
+export let updateCaretIndicator = (editor, track, caretIndicator) => {
   if (!caretIndicator || !editor) return;
 
   let hasFocus = document.activeElement === editor;
@@ -57,4 +65,52 @@ export let updateCaretIndicator = (editor, customScrollbar, caretIndicator) => {
   }
 };
 
-export let initCustomScrollbar = () => {};
+export let initCustomScrollbar = (editor, track, thumb) => {
+  if (!editor || !track || !thumb) return;
+
+  let isDragging = false;
+  let dragStartY = 0;
+  let dragStartScroll = 0;
+
+  let update = () => {
+    let max = editor.scrollHeight - editor.clientHeight;
+    if (max <= 0) { thumb.style.height = '0px'; return; }
+    let ratio = editor.scrollTop / max;
+    let avail = track.clientHeight;
+    let thumbH = Math.max(20, (editor.clientHeight / editor.scrollHeight) * avail);
+    let maxTop = avail - thumbH;
+    thumb.style.height = thumbH + 'px';
+    thumb.style.top = (0 + ratio * maxTop) + 'px';
+  };
+
+  thumb.addEventListener('mousedown', (e) => {
+    isDragging = true;
+    dragStartY = e.clientY;
+    dragStartScroll = editor.scrollTop;
+    e.preventDefault();
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+    let avail = track.clientHeight;
+    let thumbH = thumb.clientHeight;
+    let maxTop = avail - thumbH;
+    let delta = e.clientY - dragStartY;
+    let maxScroll = editor.scrollHeight - editor.clientHeight;
+    editor.scrollTop = dragStartScroll + (delta / maxTop) * maxScroll;
+  });
+
+  document.addEventListener('mouseup', () => { isDragging = false; });
+
+  track.addEventListener('click', (e) => {
+    if (e.target === thumb) return;
+    let rect = track.getBoundingClientRect();
+    let clickY = e.clientY - rect.top;
+    let ratio = clickY / track.clientHeight;
+    editor.scrollTop = ratio * (editor.scrollHeight - editor.clientHeight);
+  });
+
+  editor.addEventListener('scroll', update);
+
+  return { update };
+};

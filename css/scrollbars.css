@@ -1,100 +1,54 @@
-/* ── Scrollbar ── */
+/* ── Editor Custom Scrollbar ── */
 #editor {
-  scrollbar-width: thin;
-  scrollbar-color: var(--scrollbar-thumb) transparent;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
 #editor::-webkit-scrollbar {
-  width: 8px;
-  background: transparent;
-  display: block;
+  display: none;
+  width: 0;
+  height: 0;
 }
 
-#editor::-webkit-scrollbar-thumb {
+#custom-scrollbar {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 12px;
+  height: 100%;
+  background: transparent;
+  z-index: 5;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+#editor-wrapper:hover #custom-scrollbar {
+  opacity: 1;
+}
+
+#custom-scrollbar-thumb {
+  position: absolute;
+  top: 0;
+  right: 2px;
+  width: 8px;
   background: var(--scrollbar-thumb);
   border-radius: 0;
-}
-
-#editor::-webkit-scrollbar-thumb:hover {
-  background: var(--scrollbar-thumb-hover);
-}
-
-#editor-highlight {
-  pointer-events: none;
-  scrollbar-width: none;
-}
-
-#editor-highlight::-webkit-scrollbar {
-  display: none;
-}
-
-#preview {
-  scrollbar-width: none;
-}
-
-#preview::-webkit-scrollbar {
-  display: none;
-}
-
-/* Style scrollbars on content elements (pre, code, tables) to match theme */
-.markdown-body pre,
-.markdown-body table,
-.markdown-body .mermaid,
-.markdown-body .blob-wrapper {
-  scrollbar-color: var(--scrollbar-thumb) transparent;
-  scrollbar-width: thin;
-  overscroll-behavior-x: contain;
-  overscroll-behavior-y: auto;
-  overflow-x: auto !important;
-  overflow-y: hidden !important;
-}
-
-.markdown-body pre::-webkit-scrollbar,
-.markdown-body code::-webkit-scrollbar,
-.markdown-body table::-webkit-scrollbar,
-.markdown-body .mermaid::-webkit-scrollbar,
-.markdown-body .blob-wrapper::-webkit-scrollbar {
-  display: block;
-  height: 8px;
-  width: 8px;
-}
-
-.markdown-body pre::-webkit-scrollbar-track,
-.markdown-body code::-webkit-scrollbar-track,
-.markdown-body table::-webkit-scrollbar-track,
-.markdown-body .mermaid::-webkit-scrollbar-track,
-.markdown-body .blob-wrapper::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.markdown-body pre::-webkit-scrollbar-thumb,
-.markdown-body code::-webkit-scrollbar-thumb,
-.markdown-body table::-webkit-scrollbar-thumb,
-.markdown-body .mermaid::-webkit-scrollbar-thumb,
-.markdown-body .blob-wrapper::-webkit-scrollbar-thumb {
-  background: var(--scrollbar-thumb);
-  border-radius: 4px;
+  cursor: grab;
   opacity: 0.6;
+  transition: opacity 0.2s, background 0.2s;
 }
 
-.markdown-body pre::-webkit-scrollbar-thumb:hover,
-.markdown-body code::-webkit-scrollbar-thumb:hover,
-.markdown-body table::-webkit-scrollbar-thumb:hover,
-.markdown-body .mermaid::-webkit-scrollbar-thumb:hover,
-.markdown-body .blob-wrapper::-webkit-scrollbar-thumb:hover {
+[data-theme="light"] #custom-scrollbar-thumb {
+  background: hsl(var(--hue), 8%, 66%);
+}
+
+#custom-scrollbar-thumb:hover {
   background: var(--scrollbar-thumb-hover);
+  opacity: 1;
 }
 
-#preview-wrapper {
-  scrollbar-width: none;
-}
-
-#preview-wrapper::-webkit-scrollbar {
-  display: none;
-}
-
-#preview-custom-scrollbar {
-  position: absolute;
+/* ── Preview Custom Scrollbar ── */
+#preview-custom-scrollbar {  position: absolute;
   top: 0;
   right: 0;
   width: 14px;
@@ -329,25 +283,6 @@
   opacity: 1;
 }
 
-.hscrollbar-arrow {
-  width: 14px;
-  height: 14px;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 7px;
-  color: var(--scrollbar-thumb);
-  cursor: pointer;
-  user-select: none;
-  z-index: 6;
-  transition: color 0.15s;
-}
-
-.hscrollbar-arrow:hover {
-  color: var(--color-primary);
-}
-
 #preview-hscrollbar-thumb {
   flex: 1;
   position: relative;
@@ -375,62 +310,6 @@
 #preview-hscrollbar-thumb:hover::after {
   background: var(--scrollbar-thumb-hover);
   opacity: 1;
-}
-
-/* ── Horizontal Scroll Overlay (proximity-activated) ── */
-.scroll-popup-overlay-h {
-  position: absolute;
-  bottom: 20px;
-  display: flex;
-  flex-direction: row;
-  gap: 2px;
-  background: var(--bg-surface);
-  border: 1px solid var(--border-default);
-  border-radius: 6px;
-  padding: 4px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  z-index: 10;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.1s;
-}
-
-[data-theme="dark"] .scroll-popup-overlay-h {
-  background: var(--bg-surface);
-  border-color: var(--border-default);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
-}
-
-.scroll-popup-overlay-h.at-left {
-  left: 8px;
-}
-
-.scroll-popup-overlay-h.at-right {
-  right: 22px;
-}
-
-.scroll-popup-overlay-h.visible {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-.scroll-popup-btn-h {
-  width: 28px;
-  height: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 10px;
-  color: var(--text-secondary);
-  cursor: pointer;
-  border-radius: 4px;
-  transition: background 0.1s, color 0.1s;
-  user-select: none;
-}
-
-.scroll-popup-btn-h:hover {
-  background: var(--color-primary-subtle);
-  color: var(--color-primary);
 }
 
 
