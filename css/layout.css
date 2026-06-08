@@ -82,3 +82,35 @@
 .split-divider.active {
   background: var(--divider-active);
 }
+
+/* ── Portrait / Narrow Layout ── */
+@media (max-aspect-ratio: 1/1) {
+  #container,
+  .split-container {
+    flex-direction: column;
+  }
+
+  [data-swapped] .split-container {
+    flex-direction: column-reverse;
+  }
+
+  .column {
+    width: 100%;
+    flex: 1;
+    min-height: 0;
+  }
+
+  .split-divider {
+    width: 100%;
+    height: 5px;
+    cursor: row-resize;
+  }
+
+  #preview.column {
+    overflow: hidden;
+  }
+
+  #swap-button svg {
+    transform: rotate(90deg);
+  }
+}

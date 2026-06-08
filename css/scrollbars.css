@@ -7,11 +7,12 @@
 #editor::-webkit-scrollbar {
   width: 8px;
   background: transparent;
+  display: block;
 }
 
 #editor::-webkit-scrollbar-thumb {
   background: var(--scrollbar-thumb);
-  border-radius: 4px;
+  border-radius: 0;
 }
 
 #editor::-webkit-scrollbar-thumb:hover {
@@ -82,6 +83,14 @@
 .markdown-body .mermaid::-webkit-scrollbar-thumb:hover,
 .markdown-body .blob-wrapper::-webkit-scrollbar-thumb:hover {
   background: var(--scrollbar-thumb-hover);
+}
+
+#preview-wrapper {
+  scrollbar-width: none;
+}
+
+#preview-wrapper::-webkit-scrollbar {
+  display: none;
 }
 
 #preview-custom-scrollbar {
@@ -297,6 +306,129 @@
 }
 
 .clearall-popup-btn:hover {
+  background: var(--color-primary-subtle);
+  color: var(--color-primary);
+}
+
+/* ── Horizontal Scrollbar (Preview Pane) ── */
+#preview-hscrollbar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 14px;
+  height: 14px;
+  background: var(--bg-preview);
+  display: flex;
+  align-items: center;
+  z-index: 5;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.preview-pane:hover #preview-hscrollbar {
+  opacity: 1;
+}
+
+.hscrollbar-arrow {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 7px;
+  color: var(--scrollbar-thumb);
+  cursor: pointer;
+  user-select: none;
+  z-index: 6;
+  transition: color 0.15s;
+}
+
+.hscrollbar-arrow:hover {
+  color: var(--color-primary);
+}
+
+#preview-hscrollbar-thumb {
+  flex: 1;
+  position: relative;
+  height: 100%;
+}
+
+#preview-hscrollbar-thumb::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 0;
+  right: 0;
+  height: 8px;
+  background: var(--scrollbar-thumb);
+  border-radius: 4px;
+  cursor: grab;
+  opacity: 0.6;
+  transition: opacity 0.2s, background 0.2s;
+}
+
+[data-theme="light"] #preview-hscrollbar-thumb::after {
+  background: hsl(var(--hue), 8%, 66%);
+}
+
+#preview-hscrollbar-thumb:hover::after {
+  background: var(--scrollbar-thumb-hover);
+  opacity: 1;
+}
+
+/* ── Horizontal Scroll Overlay (proximity-activated) ── */
+.scroll-popup-overlay-h {
+  position: absolute;
+  bottom: 20px;
+  display: flex;
+  flex-direction: row;
+  gap: 2px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: 6px;
+  padding: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 10;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.1s;
+}
+
+[data-theme="dark"] .scroll-popup-overlay-h {
+  background: var(--bg-surface);
+  border-color: var(--border-default);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.scroll-popup-overlay-h.at-left {
+  left: 8px;
+}
+
+.scroll-popup-overlay-h.at-right {
+  right: 22px;
+}
+
+.scroll-popup-overlay-h.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.scroll-popup-btn-h {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background 0.1s, color 0.1s;
+  user-select: none;
+}
+
+.scroll-popup-btn-h:hover {
   background: var(--color-primary-subtle);
   color: var(--color-primary);
 }

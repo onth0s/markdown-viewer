@@ -9,19 +9,32 @@ export let setupDivider = () => {
 
   if (!divider || !leftPane || !rightPane || !container) return;
 
+  let isPortrait = () => window.innerWidth < window.innerHeight;
+
   // Restore persisted ratio or fall back to 50/50
   let lastLeftRatio = loadPaneRatio() ?? 0.5;
 
   let applyRatio = (ratio) => {
     let cr = container.getBoundingClientRect();
-    let dw = divider.offsetWidth;
-    let avail = cr.width - dw;
-    leftPane.style.width = (avail * ratio) + 'px';
-    rightPane.style.width = (avail * (1 - ratio)) + 'px';
+    if (isPortrait()) {
+      leftPane.style.width = '';
+      rightPane.style.width = '';
+      let dh = divider.offsetHeight;
+      let avail = cr.height - dh;
+      leftPane.style.height = (avail * ratio) + 'px';
+      rightPane.style.height = (avail * (1 - ratio)) + 'px';
+    } else {
+      leftPane.style.height = '';
+      rightPane.style.height = '';
+      let dw = divider.offsetWidth;
+      let avail = cr.width - dw;
+      leftPane.style.width = (avail * ratio) + 'px';
+      rightPane.style.width = (avail * (1 - ratio)) + 'px';
+    }
   };
 
   // Apply immediately on load so panes are never mis-sized after reload
-  // Use rAF so the container has finished painting its own width first
+  // Use rAF so the container has finished painting its own size first
   requestAnimationFrame(() => applyRatio(lastLeftRatio));
 
   divider.addEventListener('mouseenter', () => divider.classList.add('hover'));
@@ -29,7 +42,7 @@ export let setupDivider = () => {
   divider.addEventListener('mousedown', () => {
     isDragging = true;
     divider.classList.add('active');
-    document.body.style.cursor = 'col-resize';
+    document.body.style.cursor = isPortrait() ? 'row-resize' : 'col-resize';
   });
   divider.addEventListener('dblclick', () => {
     lastLeftRatio = 0.5;
@@ -41,14 +54,25 @@ export let setupDivider = () => {
     if (!isDragging) return;
     e.preventDefault();
     let cr = container.getBoundingClientRect();
-    let offsetX = e.clientX - cr.left;
     let dw = divider.offsetWidth;
-    let minW = 100;
-    let maxW = cr.width - minW - dw;
-    let leftW = Math.max(minW, Math.min(offsetX, maxW));
-    leftPane.style.width = leftW + 'px';
-    rightPane.style.width = (cr.width - leftW - dw) + 'px';
-    lastLeftRatio = leftW / (cr.width - dw);
+    let dh = divider.offsetHeight;
+    let minSize = 100;
+
+    if (isPortrait()) {
+      let offsetY = e.clientY - cr.top;
+      let maxH = cr.height - minSize - dh;
+      let topH = Math.max(minSize, Math.min(offsetY, maxH));
+      leftPane.style.height = topH + 'px';
+      rightPane.style.height = (cr.height - topH - dh) + 'px';
+      lastLeftRatio = topH / (cr.height - dh);
+    } else {
+      let offsetX = e.clientX - cr.left;
+      let maxW = cr.width - minSize - dw;
+      let leftW = Math.max(minSize, Math.min(offsetX, maxW));
+      leftPane.style.width = leftW + 'px';
+      rightPane.style.width = (cr.width - leftW - dw) + 'px';
+      lastLeftRatio = leftW / (cr.width - dw);
+    }
   });
 
   document.addEventListener('mouseup', () => {
