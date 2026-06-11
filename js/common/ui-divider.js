@@ -73,9 +73,17 @@ export let setupDivider = () => {
       let offsetX = clientX - cr.left;
       let maxW = cr.width - minSize - dw;
       let leftW = Math.max(minSize, Math.min(offsetX, maxW));
-      leftPane.style.width = leftW + 'px';
-      rightPane.style.width = (cr.width - leftW - dw) + 'px';
-      lastLeftRatio = leftW / (cr.width - dw);
+
+      if (isSwapped()) {
+        // row-reverse: preview on the left, editor on the right
+        rightPane.style.width = leftW + 'px';
+        leftPane.style.width = (cr.width - leftW - dw) + 'px';
+        lastLeftRatio = (cr.width - leftW - dw) / (cr.width - dw);
+      } else {
+        leftPane.style.width = leftW + 'px';
+        rightPane.style.width = (cr.width - leftW - dw) + 'px';
+        lastLeftRatio = leftW / (cr.width - dw);
+      }
     }
   };
 
