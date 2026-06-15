@@ -1,34 +1,3 @@
-import { renderMermaidDiagrams } from './mermaid-renderer.js';
-import { getBrightness, applyBrightness, DEFAULT_LIGHT_BRIGHTNESS } from '../common/theme-engine.js';
-import { setTheme, setPreviewCss } from '../common/theme-controller.js';
-
-/**
- * @typedef {{ set: (opts: object) => { from: (el: Element) => { save: () => Promise<void> } } }} Html2PdfInstance
- */
-
-const HTML2PDF_CDN = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
-
-let html2pdfPromise = null;
-const loadHtml2Pdf = () => {
-  if (typeof window.html2pdf === 'function') return Promise.resolve(window.html2pdf);
-  if (html2pdfPromise) return html2pdfPromise;
-  html2pdfPromise = new Promise((resolve, reject) => {
-    const s = document.createElement('script');
-    s.src = HTML2PDF_CDN;
-    s.crossOrigin = 'anonymous';
-    s.onload = () => {
-      if (typeof window.html2pdf === 'function') resolve(window.html2pdf);
-      else reject(new Error('html2pdf global not found after load'));
-    };
-    s.onerror = () => {
-      html2pdfPromise = null;
-      reject(new Error('Failed to load html2pdf from CDN'));
-    };
-    document.head.appendChild(s);
-  });
-  return html2pdfPromise;
-};
-
 export const copyToClipboard = (text, success, error) => {
   if (navigator.clipboard) {
     navigator.clipboard.writeText(text).then(success, error);
@@ -41,6 +10,237 @@ export const copyToClipboard = (text, success, error) => {
     try { document.execCommand('copy'); success(); } catch (e) { error(e); }
     document.body.removeChild(ta);
   }
+};
+
+const PRINT_CSS = `
+@page {
+  size: A4;
+  margin: 16mm 20mm;
+}
+
+@media print {
+  html {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    font-size: 11pt;
+    line-height: 1.6;
+    color: #1f2328;
+    background: #fff;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* ── GitHub markdown body styling (subset) ── */
+  .markdown-body {
+    background: #fff;
+    color: #1f2328;
+  }
+  .markdown-body h1 { font-size: 20pt; border-bottom: 1px solid #d0d7de; padding-bottom: 0.3em; }
+  .markdown-body h2 { font-size: 16pt; border-bottom: 1px solid #d0d7de; padding-bottom: 0.3em; }
+  .markdown-body h3 { font-size: 14pt; }
+  .markdown-body h4 { font-size: 12pt; }
+  .markdown-body h5, .markdown-body h6 { font-size: 11pt; }
+
+  .markdown-body h1, .markdown-body h2, .markdown-body h3,
+  .markdown-body h4, .markdown-body h5, .markdown-body h6 {
+    page-break-after: avoid;
+    break-after: avoid;
+    margin-top: 24px;
+    margin-bottom: 16px;
+    font-weight: 600;
+  }
+
+  .markdown-body p, .markdown-body ul, .markdown-body ol, .markdown-body dl, .markdown-body table, .markdown-body pre, .markdown-body blockquote {
+    margin-top: 0;
+    margin-bottom: 16px;
+  }
+
+  .markdown-body pre, .markdown-body blockquote, .markdown-body table,
+  .markdown-body tr, .markdown-body img, .mermaid, .mermaid svg {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  .markdown-body pre {
+    background: #f6f8fa !important;
+    border: 1px solid #d0d7de;
+    border-radius: 6px;
+    padding: 12px 16px;
+    font-family: Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: 10pt;
+    overflow: visible;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .markdown-body code {
+    font-family: Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: 10pt;
+    background: #f6f8fa;
+    padding: 2px 4px;
+    border-radius: 4px;
+  }
+
+  .markdown-body pre code {
+    background: transparent;
+    padding: 0;
+    border: none;
+  }
+
+  .markdown-body img {
+    max-width: 100% !important;
+    page-break-inside: avoid;
+  }
+
+  .markdown-body table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 10pt;
+    margin-top: 0;
+    margin-bottom: 16px;
+  }
+
+  .markdown-body table th, .markdown-body table td {
+    border: 1px solid #d0d7de;
+    padding: 6px 10px;
+  }
+
+  .markdown-body table th {
+    background: #f6f8fa;
+    font-weight: 600;
+  }
+
+  .markdown-body blockquote {
+    border-left: 4px solid #d0d7de;
+    padding: 0 12px;
+    color: #656d76;
+    margin: 0 0 16px 0;
+  }
+
+  /* ── Mermaid diagrams ── */
+  .mermaid {
+    text-align: center;
+    margin: 16px 0;
+    max-width: 100%;
+    overflow: visible;
+  }
+
+  .mermaid svg {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 0 auto;
+  }
+
+  /* ── Code syntax highlighting (Prism tokens printed as colored text) ── */
+  .token.comment, .token.prolog, .token.doctype, .token.cdata { color: #6e7781; }
+  .token.punctuation { color: #656d76; }
+  .token.property, .token.tag, .token.boolean, .token.number,
+  .token.constant, .token.symbol, .token.deleted { color: #cf222e; }
+  .token.selector, .token.attr-name, .token.string, .token.char,
+  .token.builtin, .token.inserted { color: #116329; }
+  .token.operator, .token.entity, .token.url { color: #0550ae; }
+  .token.atrule, .token.attr-value, .token.keyword { color: #0969da; }
+  .token.function, .token.class-name { color: #8250df; }
+  .token.regex, .token.important, .token.variable { color: #953800; }
+  .token.important, .token.bold { font-weight: 600; }
+  .token.italic { font-style: italic; }
+
+  /* ── Task lists ── */
+  .task-list-item { list-style: none; }
+  .task-list-item-checkbox { margin-right: 6px; }
+
+  /* ── Horizontal rules ── */
+  .markdown-body hr {
+    border: 0;
+    border-top: 1px solid #d0d7de;
+    margin: 16px 0;
+  }
+}
+`;
+
+/**
+ * Clones the rendered content and builds a standalone HTML page.
+ * @param {HTMLElement} sourceEl
+ * @returns {string} Standalone HTML document string
+ */
+const buildPrintHtml = (sourceEl) => {
+  const clone = sourceEl.cloneNode(true);
+
+  // Strip selection highlights, anchors, and other non-print interactive structures
+  clone.querySelectorAll('.preview-selection, .anchor, .octicon-link').forEach(el => {
+    el.classList.remove('preview-selection');
+    el.remove();
+  });
+
+  // Resolve relative image URLs to absolute to ensure they render inside the frame
+  clone.querySelectorAll('[src]').forEach(el => {
+    try {
+      el.src = new URL(el.getAttribute('src'), window.location.href).href;
+    } catch {}
+  });
+
+  return `<!DOCTYPE html>
+<html data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <title>Markdown Export</title>
+  <style>${PRINT_CSS}</style>
+</head>
+<body>
+  <div class="markdown-body">${clone.innerHTML}</div>
+</body>
+</html>`;
+};
+
+/**
+ * Triggers PDF export by rendering content inside a hidden iframe and invoking window.print().
+ * @param {HTMLElement} outputEl - The rendered markdown output container element (#output)
+ */
+export const exportPreviewToPdf = async (outputEl) => {
+  if (!outputEl) return;
+
+  const iframe = document.createElement('iframe');
+  // Position off-screen but keep rendering context active
+  iframe.style.cssText = 'position:fixed;left:-9999px;top:0;width:1px;height:1px;border:0;';
+  iframe.sandbox = 'allow-modals allow-same-origin';
+  document.body.appendChild(iframe);
+
+  const html = buildPrintHtml(outputEl);
+  iframe.srcdoc = html;
+
+  // Wait for print-document assets (fonts/images) to render
+  await new Promise((resolve) => {
+    iframe.onload = () => {
+      if (iframe.contentDocument) {
+        iframe.contentDocument.fonts.ready.then(() => {
+          requestAnimationFrame(() => setTimeout(resolve, 200));
+        });
+      } else {
+        setTimeout(resolve, 500);
+      }
+    };
+    // Safety fallback
+    setTimeout(resolve, 1500);
+  });
+
+  // Open the browser print dialog
+  iframe.contentWindow.focus();
+  iframe.contentWindow.print();
+
+  // Clean up the frame after print dialog completes/closes
+  const cleanup = () => {
+    if (iframe.parentNode) {
+      iframe.parentNode.removeChild(iframe);
+    }
+  };
+  iframe.contentWindow.addEventListener('afterprint', cleanup, { once: true });
+  // Fallback cleanup
+  setTimeout(cleanup, 30000);
 };
 
 export const initCopyButton = (editor) => {
@@ -76,130 +276,15 @@ export const initDownloadButton = (editor) => {
   });
 };
 
-
-
 /**
- * Prepares the html2canvas cloned document for PDF rendering.
- * Forces light theme, injects page-break CSS, sets explicit element widths,
- * and scales Mermaid SVGs based on their viewBox dimensions.
- *
- * @param {Document} clonedDoc - The document clone provided by html2canvas
+ * Initializes the PDF export button click behaviour.
+ * @param {HTMLElement} outputEl - The rendered markdown output container element (#output)
  */
-const preparePdfClone = (clonedDoc) => {
-  clonedDoc.documentElement.setAttribute('data-theme', 'light');
-  const hue = clonedDoc.documentElement.style.getPropertyValue('--hue');
-  clonedDoc.documentElement.removeAttribute('style');
-  if (hue) {
-    clonedDoc.documentElement.style.setProperty('--hue', hue);
-  }
-
-  // Inject pagebreak and font override CSS
-  const pbStyle = clonedDoc.createElement('style');
-  pbStyle.id = 'export-pagebreaks';
-  pbStyle.textContent = `
-    h1, h2, h3, h4, h5, h6 { page-break-after: avoid; break-after: avoid; }
-    pre, blockquote, table, tr, img, .mermaid, li:not(:has(ul)):not(:has(ol)) { page-break-inside: avoid; break-inside: avoid; }
-    .markdown-body pre.mermaid { max-width: 100% !important; }
-    .markdown-body .mermaid svg { max-width: 100% !important; height: auto !important; }
-    #preview-wrapper, .markdown-body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif !important;
-    }
-    .markdown-body code, .markdown-body pre, .markdown-body tt, .markdown-body pre code {
-      font-family: Consolas, "Liberation Mono", Menlo, "Courier New", monospace !important;
-    }
-  `;
-  clonedDoc.head.appendChild(pbStyle);
-
-  const cpw = clonedDoc.getElementById('preview-wrapper');
-  if (cpw) { cpw.style.background = '#fff'; cpw.style.color = '#24292f'; cpw.style.width = '190mm'; cpw.style.maxWidth = '190mm'; }
-  const co = clonedDoc.getElementById('output');
-  if (co) { co.style.background = '#fff'; co.style.color = '#24292f'; co.style.width = '190mm'; co.style.maxWidth = '190mm'; }
-
-  // Explicitly scale Mermaid SVGs based on their viewBox to resolve html2canvas scaling issues
-  const svgs = Array.from(clonedDoc.querySelectorAll('.mermaid svg'));
-  const MAX_SVG_WIDTH = 680;
-  for (const svg of svgs) {
-    const viewBox = svg.getAttribute('viewBox');
-    if (!viewBox) continue;
-    const parts = viewBox.trim().split(/[\s,]+/);
-    if (parts.length !== 4) continue;
-    const vbWidth = parseFloat(parts[2]);
-    const vbHeight = parseFloat(parts[3]);
-    if (!(vbWidth > 0 && vbHeight > 0)) continue;
-
-    // Clear inline styles that could conflict with explicit attributes
-    svg.style.width = '';
-    svg.style.maxWidth = '';
-    svg.style.height = '';
-
-    if (vbWidth > MAX_SVG_WIDTH) {
-      const scale = MAX_SVG_WIDTH / vbWidth;
-      const targetHeight = vbHeight * scale;
-      svg.setAttribute('width', MAX_SVG_WIDTH);
-      svg.setAttribute('height', targetHeight);
-      svg.style.setProperty('width', MAX_SVG_WIDTH + 'px', 'important');
-      svg.style.setProperty('height', targetHeight + 'px', 'important');
-    } else {
-      svg.setAttribute('width', vbWidth);
-      svg.setAttribute('height', vbHeight);
-      svg.style.setProperty('width', vbWidth + 'px', 'important');
-      svg.style.setProperty('height', vbHeight + 'px', 'important');
-    }
-    svg.style.setProperty('max-width', '100%', 'important');
-  }
-};
-
-export const exportPreviewToPdf = async (previewWrapper, outputEl) => {
-  if (!previewWrapper || !outputEl) return;
-  let html2pdf;
-  try {
-    html2pdf = await loadHtml2Pdf();
-  } catch (e) {
-    console.warn('[actions] html2pdf is not loaded — PDF export is unavailable.', e);
-    window.alert('PDF export is not available. Check your network connection and try again.');
-    return;
-  }
-
-  const originalBrightness = getBrightness();
-  const wasDark = originalBrightness >= 50;
-
-  try {
-    // Temporarily switch live preview to light theme so that html2canvas computes light mode styles correctly.
-    applyBrightness(DEFAULT_LIGHT_BRIGHTNESS);
-    setTheme(false);
-    await setPreviewCss(false);
-    await renderMermaidDiagrams(outputEl, 'default');
-
-    // Wait for fonts to be ready and styles to recalculate/repaint
-    await document.fonts.ready;
-    await new Promise((resolve) => setTimeout(resolve, 150));
-
-    const options = {
-      margin: 10,
-      filename: 'markdown-preview.pdf',
-      image: { type: 'jpeg', quality: 0.98 },
-      pagebreak: { mode: ['avoid-all', 'css'] },
-      html2canvas: { scale: 2, useCORS: true, onclone: preparePdfClone },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-    };
-    await html2pdf().set(options).from(previewWrapper).save();
-  } catch (err) {
-    console.error('PDF export failed', err);
-    window.alert('PDF export failed: ' + (err.message || err));
-  } finally {
-    // Restore original theme and styles
-    applyBrightness(originalBrightness);
-    setTheme(wasDark);
-    await setPreviewCss(wasDark);
-    await renderMermaidDiagrams(outputEl);
-  }
-};
-
-export const initPdfButton = (previewWrapper, outputEl) => {
+export const initPdfButton = (outputEl) => {
   const exportBtn = document.querySelector('#export-button');
   if (!exportBtn) return;
   exportBtn.addEventListener('click', (e) => {
     e.preventDefault();
-    exportPreviewToPdf(previewWrapper, outputEl);
+    exportPreviewToPdf(outputEl);
   });
 };

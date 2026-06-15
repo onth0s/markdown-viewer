@@ -41,9 +41,15 @@ export const setupDivider = () => {
     }
   };
 
-  // Apply exact pixel sizes — container dimensions are already known
-  // since the module runs after full DOM parse
-  applyRatio(lastLeftRatio);
+  // Apply exact pixel sizes — use rAF to ensure the container is fully laid out,
+  // then remove the boot override style so inline styles can take over.
+  requestAnimationFrame(() => {
+    applyRatio(lastLeftRatio);
+    const bootStyle = document.getElementById('boot-pane-ratio-style');
+    if (bootStyle) {
+      bootStyle.remove();
+    }
+  });
 
   const startDrag = () => {
     isDragging = true;

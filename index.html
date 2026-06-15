@@ -162,6 +162,7 @@
             var ratio = parseFloat(ratioRaw);
             if (!isNaN(ratio) && ratio >= 0.1 && ratio <= 0.9) {
               var ps = document.createElement('style');
+              ps.id = 'boot-pane-ratio-style';
               ps.textContent = '#edit{width:' + (ratio * 100) + '%!important}#preview{width:' + ((1 - ratio) * 100) + '%!important}';
               document.head.appendChild(ps);
             }

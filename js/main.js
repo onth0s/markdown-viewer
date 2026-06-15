@@ -162,7 +162,7 @@ const bootstrap = () => {
   // 8. Action buttons
   initCopyButton(editorEl);
   initDownloadButton(editorEl);
-  initPdfButton(previewEl, outputEl);
+  initPdfButton(outputEl);
 
   // 8b. Drag-and-drop .md files anywhere on the page
   initDropLoader({
