@@ -27,15 +27,28 @@ export const initFullscreenButton = (overlayEl) => {
 
 /**
  * Wires the clear-all button inside the editor clearall overlay.
- * Clears all localStorage data and reloads the page.
+ * Clears localStorage, flushes Cache API stores, unregisters service
+ * workers, then reloads with a cache-busting query parameter.
  *
  * @param {HTMLElement} overlayEl - The clearall popup overlay element
  */
 export const initClearallButton = (overlayEl) => {
   const btn = overlayEl && overlayEl.querySelector('.clearall-popup-btn');
   if (!btn) return;
-  btn.addEventListener('click', () => {
+  btn.addEventListener('click', async () => {
     localStorage.clear();
-    location.reload();
+
+    if ('caches' in self) {
+      const keys = await caches.keys();
+      await Promise.all(keys.map(k => caches.delete(k)));
+    }
+
+    if ('serviceWorker' in navigator) {
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(registrations.map(r => r.unregister()));
+    }
+
+    const base = location.href.split('?')[0];
+    location.href = base + '?cb=' + Date.now();
   });
 };
