@@ -24,9 +24,8 @@ export default [
     }
   },
   {
-    files: ["misc/log_tokens.js"],
+    files: ["misc/log_tokens.js", "scripts/**/*.js"],
     languageOptions: {
-      sourceType: "commonjs",
       globals: {
         ...globals.node
       }

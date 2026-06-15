@@ -5,31 +5,42 @@ import { wrapEmojis } from '../common/emoji-helper.js';
 
 /* global marked, DOMPurify */
 
-const renderer = new marked.Renderer();
-const renderCode = renderer.code.bind(renderer);
-renderer.code = (token) => {
-  const lang = (token.lang || '').match(/^\S*/)?.[0].toLowerCase();
-  if (lang !== 'mermaid') return renderCode(token);
-  return '<pre class="mermaid">' + escapeHtml(token.text) + '</pre>\n';
-};
+let baseRenderer = null;
+let sourcePosRenderer = null;
 
-const renderImage = renderer.image.bind(renderer);
-renderer.image = (token) => {
-  const href = token.href || '';
-  if (href.endsWith('markdown-preview-logo.svg') || href.endsWith('logo.png')) {
-    return `<img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="${escapeHtml(token.text || '')}" class="themed-logo" data-original-src="${href}">`;
-  }
-  return renderImage(token);
-};
+export const getSourcePosRenderer = () => {
+  if (typeof marked === 'undefined') return null;
+  if (sourcePosRenderer) return sourcePosRenderer;
 
-const originalListitem = renderer.listitem;
-renderer.listitem = function (token) {
-  let html = originalListitem.call(this, token);
-  if (token.task) {
-    html = html.replace('<li', '<li class="task-list-item"');
-    html = html.replace('<input ', '<input class="task-list-item-checkbox" ');
-  }
-  return html;
+  baseRenderer = new marked.Renderer();
+  const renderCode = baseRenderer.code.bind(baseRenderer);
+  baseRenderer.code = (token) => {
+    const lang = (token.lang || '').match(/^\S*/)?.[0].toLowerCase();
+    if (lang !== 'mermaid') return renderCode(token);
+    return '<pre class="mermaid">' + escapeHtml(token.text) + '</pre>\n';
+  };
+
+  const renderImage = baseRenderer.image.bind(baseRenderer);
+  baseRenderer.image = (token) => {
+    const href = token.href || '';
+    if (href.endsWith('markdown-preview-logo.svg') || href.endsWith('logo.png')) {
+      return `<img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="${escapeHtml(token.text || '')}" class="themed-logo" data-original-src="${href}">`;
+    }
+    return renderImage(token);
+  };
+
+  const originalListitem = baseRenderer.listitem;
+  baseRenderer.listitem = function (token) {
+    let html = originalListitem.call(this, token);
+    if (token.task) {
+      html = html.replace('<li', '<li class="task-list-item"');
+      html = html.replace('<input ', '<input class="task-list-item-checkbox" ');
+    }
+    return html;
+  };
+
+  sourcePosRenderer = createSourcePosRenderer(baseRenderer);
+  return sourcePosRenderer;
 };
 
 /**
@@ -75,16 +86,24 @@ export const createSourcePosRenderer = (baseRenderer) => {
   return decoratedRenderer;
 };
 
-const sourcePosRenderer = createSourcePosRenderer(renderer);
-
 export const convert = (output, markdown) => {
   if (!output) return;
+  const activeRenderer = getSourcePosRenderer();
+  if (!activeRenderer) {
+    output.innerHTML = `
+      <div style="padding: 24px; color: var(--text-primary); text-align: center; border: 1px solid var(--border-default); border-radius: 6px; background: var(--bg-surface); margin: 20px;">
+        <h3 style="margin: 0 0 10px 0; color: #ff3b30;">Markdown Parser Offline</h3>
+        <p style="margin: 0; font-size: 14px;">The markdown compilation engine could not be loaded. Please check your internet connection and try reloading.</p>
+      </div>
+    `;
+    return;
+  }
   try {
     const cleanMd = stripCR(markdown);
     const tokens = marked.lexer(cleanMd);
     enrichTokensWithPositions(tokens);
 
-    const html = marked.parser(tokens, { renderer: sourcePosRenderer, headerIds: false, mangle: false });
+    const html = marked.parser(tokens, { renderer: activeRenderer, headerIds: false, mangle: false });
     let sanitized;
     if (typeof DOMPurify !== 'undefined') {
       sanitized = DOMPurify.sanitize(html, { ADD_ATTR: ['class', 'data-source-pos'] });

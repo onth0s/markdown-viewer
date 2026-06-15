@@ -58,6 +58,9 @@ export const renderMermaidDiagramsNow = async (output, theme) => {
       await loadMermaidScript();
     } catch (e) {
       console.warn('[mermaid-renderer] failed to load mermaid:', e);
+      for (const el of elements) {
+        showMermaidError(el, new Error('Mermaid rendering engine is offline (failed to fetch CDN script).'));
+      }
       return;
     }
   }
