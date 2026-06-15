@@ -49,6 +49,6 @@ export const initClearallButton = (overlayEl) => {
     }
 
     const base = location.href.split('?')[0];
-    location.href = base + '?cb=' + Date.now();
+    location.href = base;
   });
 };
