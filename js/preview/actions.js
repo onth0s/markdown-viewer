@@ -26,7 +26,7 @@ const PRINT_CSS = `
 
   html, body {
     height: auto !important;
-    min-height: 100% !important;
+    min-height: 0 !important;
     background-color: var(--bg-preview) !important;
     background: var(--bg-preview) !important;
     color: var(--text-primary) !important;
@@ -37,8 +37,8 @@ const PRINT_CSS = `
     font-family: 'Roboto', -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
     font-size: 11pt;
     line-height: 1.6;
-    margin: 0;
-    padding: 16mm 20mm;
+    margin: 0 !important;
+    padding: 16mm 20mm !important;
   }
 
   #preview-wrapper {
@@ -57,6 +57,8 @@ const PRINT_CSS = `
   .markdown-body {
     background: var(--bg-preview) !important;
     color: var(--text-primary) !important;
+    padding: 0 !important;
+    margin: 0 !important;
   }
   .markdown-body h1 { font-size: 20pt; border-bottom: 1px solid var(--border-default); padding-bottom: 0.3em; }
   .markdown-body h2 { font-size: 16pt; border-bottom: 1px solid var(--border-default); padding-bottom: 0.3em; }
