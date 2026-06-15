@@ -18,158 +18,156 @@ const PRINT_CSS = `
   margin: 0;
 }
 
-@media print {
-  * {
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-  }
+* {
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
+}
 
-  html, body {
-    height: auto !important;
-    min-height: 0 !important;
-    background-color: var(--bg-preview) !important;
-    background: var(--bg-preview) !important;
-    color: var(--text-primary) !important;
-    display: block !important;
-  }
+html, body {
+  height: auto !important;
+  min-height: 0 !important;
+  background-color: var(--bg-preview) !important;
+  background: var(--bg-preview) !important;
+  color: var(--text-primary) !important;
+  display: block !important;
+}
 
-  body {
-    font-family: 'Roboto', -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-    font-size: 11pt;
-    line-height: 1.6;
-    margin: 0 !important;
-    padding: 16mm 20mm !important;
-  }
+body {
+  font-family: 'Roboto', -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  font-size: 11pt;
+  line-height: 1.6;
+  margin: 0 !important;
+  padding: 16mm 20mm !important;
+}
 
-  #preview-wrapper {
-    display: block !important;
-    height: auto !important;
-    min-height: 0 !important;
-    overflow: visible !important;
-    position: static !important;
-    background: transparent !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    width: 100% !important;
-  }
+#preview-wrapper {
+  display: block !important;
+  height: auto !important;
+  min-height: 0 !important;
+  overflow: visible !important;
+  position: static !important;
+  background: transparent !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  width: 100% !important;
+}
 
-  /* ── GitHub markdown body styling (subset) ── */
-  .markdown-body {
-    background: var(--bg-preview) !important;
-    color: var(--text-primary) !important;
-    padding: 0 !important;
-    margin: 0 !important;
-  }
-  .markdown-body h1 { font-size: 20pt; border-bottom: 1px solid var(--border-default); padding-bottom: 0.3em; }
-  .markdown-body h2 { font-size: 16pt; border-bottom: 1px solid var(--border-default); padding-bottom: 0.3em; }
-  .markdown-body h3 { font-size: 14pt; }
-  .markdown-body h4 { font-size: 12pt; }
-  .markdown-body h5, .markdown-body h6 { font-size: 11pt; }
+/* ── GitHub markdown body styling (subset) ── */
+.markdown-body {
+  background: var(--bg-preview) !important;
+  color: var(--text-primary) !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+.markdown-body h1 { font-size: 20pt; border-bottom: 1px solid var(--border-default); padding-bottom: 0.3em; }
+.markdown-body h2 { font-size: 16pt; border-bottom: 1px solid var(--border-default); padding-bottom: 0.3em; }
+.markdown-body h3 { font-size: 14pt; }
+.markdown-body h4 { font-size: 12pt; }
+.markdown-body h5, .markdown-body h6 { font-size: 11pt; }
 
-  .markdown-body h1, .markdown-body h2, .markdown-body h3,
-  .markdown-body h4, .markdown-body h5, .markdown-body h6 {
-    page-break-after: avoid;
-    break-after: avoid;
-    margin-top: 24px;
-    margin-bottom: 16px;
-    font-weight: 600;
-  }
+.markdown-body h1, .markdown-body h2, .markdown-body h3,
+.markdown-body h4, .markdown-body h5, .markdown-body h6 {
+  page-break-after: avoid;
+  break-after: avoid;
+  margin-top: 24px;
+  margin-bottom: 16px;
+  font-weight: 600;
+}
 
-  .markdown-body p, .markdown-body ul, .markdown-body ol, .markdown-body dl, .markdown-body table, .markdown-body pre, .markdown-body blockquote {
-    margin-top: 0;
-    margin-bottom: 16px;
-  }
+.markdown-body p, .markdown-body ul, .markdown-body ol, .markdown-body dl, .markdown-body table, .markdown-body pre, .markdown-body blockquote {
+  margin-top: 0;
+  margin-bottom: 16px;
+}
 
-  .markdown-body pre, .markdown-body blockquote, .markdown-body table,
-  .markdown-body tr, .markdown-body img, .mermaid, .mermaid svg {
-    page-break-inside: avoid;
-    break-inside: avoid;
-  }
+.markdown-body pre, .markdown-body blockquote, .markdown-body table,
+.markdown-body tr, .markdown-body img, .mermaid, .mermaid svg {
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
 
-  .markdown-body pre {
-    background: var(--bg-code) !important;
-    border: 1px solid var(--border-default);
-    border-radius: 6px;
-    padding: 12px 16px;
-    font-family: Consolas, "Liberation Mono", Menlo, monospace;
-    font-size: 10pt;
-    overflow: visible;
-    white-space: pre-wrap;
-    word-break: break-word;
-  }
+.markdown-body pre {
+  background: var(--bg-code) !important;
+  border: 1px solid var(--border-default);
+  border-radius: 6px;
+  padding: 12px 16px;
+  font-family: Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 10pt;
+  overflow: visible;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
 
-  .markdown-body code {
-    font-family: Consolas, "Liberation Mono", Menlo, monospace;
-    font-size: 10pt;
-    background: var(--bg-code);
-    padding: 2px 4px;
-    border-radius: 4px;
-  }
+.markdown-body code {
+  font-family: Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 10pt;
+  background: var(--bg-code);
+  padding: 2px 4px;
+  border-radius: 4px;
+}
 
-  .markdown-body pre code {
-    background: transparent;
-    padding: 0;
-    border: none;
-  }
+.markdown-body pre code {
+  background: transparent;
+  padding: 0;
+  border: none;
+}
 
-  .markdown-body img {
-    max-width: 100% !important;
-    page-break-inside: avoid;
-  }
+.markdown-body img {
+  max-width: 100% !important;
+  page-break-inside: avoid;
+}
 
-  .markdown-body table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 10pt;
-    margin-top: 0;
-    margin-bottom: 16px;
-  }
+.markdown-body table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 10pt;
+  margin-top: 0;
+  margin-bottom: 16px;
+}
 
-  .markdown-body table th, .markdown-body table td {
-    border: 1px solid var(--border-default);
-    padding: 6px 10px;
-  }
+.markdown-body table th, .markdown-body table td {
+  border: 1px solid var(--border-default);
+  padding: 6px 10px;
+}
 
-  .markdown-body table th {
-    background: var(--bg-code);
-    font-weight: 600;
-  }
+.markdown-body table th {
+  background: var(--bg-code);
+  font-weight: 600;
+}
 
-  .markdown-body blockquote {
-    border-left: 4px solid var(--border-default);
-    padding: 0 12px;
-    color: var(--text-secondary);
-    margin: 0 0 16px 0;
-  }
+.markdown-body blockquote {
+  border-left: 4px solid var(--border-default);
+  padding: 0 12px;
+  color: var(--text-secondary);
+  margin: 0 0 16px 0;
+}
 
-  /* ── Mermaid diagrams ── */
-  .mermaid {
-    text-align: center;
-    margin: 16px 0;
-    max-width: 100%;
-    overflow: visible;
-  }
+/* ── Mermaid diagrams ── */
+.mermaid {
+  text-align: center;
+  margin: 16px 0;
+  max-width: 100%;
+  overflow: visible;
+}
 
-  .mermaid svg {
-    display: block;
-    max-width: 100%;
-    height: auto;
-    margin: 0 auto;
-  }
+.mermaid svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+}
 
-  .token.important, .token.bold { font-weight: 600; }
-  .token.italic { font-style: italic; }
+.token.important, .token.bold { font-weight: 600; }
+.token.italic { font-style: italic; }
 
-  /* ── Task lists ── */
-  .task-list-item { list-style: none; }
-  .task-list-item-checkbox { margin-right: 6px; }
+/* ── Task lists ── */
+.task-list-item { list-style: none; }
+.task-list-item-checkbox { margin-right: 6px; }
 
-  /* ── Horizontal rules ── */
-  .markdown-body hr {
-    border: 0;
-    border-top: 1px solid var(--border-default);
-    margin: 16px 0;
-  }
+/* ── Horizontal rules ── */
+.markdown-body hr {
+  border: 0;
+  border-top: 1px solid var(--border-default);
+  margin: 16px 0;
 }
 `;
 
