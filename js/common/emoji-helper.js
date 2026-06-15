@@ -3,7 +3,7 @@
  * Utilities for finding and wrapping emoji characters in the DOM.
  */
 
-const emojiRegex = /(\p{Emoji_Presentation}|\p{Emoji}\uFE0F)/gu;
+const emojiRegex = /((?:\p{Emoji_Presentation}|\p{Emoji}\uFE0F)(?:\u200D(?:\p{Emoji_Presentation}|\p{Emoji}\uFE0F))*)/gu;
 
 /**
  * Traverses text nodes within the root element and wraps any emojis in <span class="emoji-wrapper">.

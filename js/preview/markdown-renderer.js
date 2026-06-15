@@ -22,6 +22,16 @@ renderer.image = (token) => {
   return renderImage(token);
 };
 
+let originalListitem = renderer.listitem;
+renderer.listitem = function (token) {
+  let html = originalListitem.call(this, token);
+  if (token.task) {
+    html = html.replace('<li', '<li class="task-list-item"');
+    html = html.replace('<input ', '<input class="task-list-item-checkbox" ');
+  }
+  return html;
+};
+
 /**
  * Injects a data-source-pos attribute into the first opening HTML tag of a
  * rendered HTML string, linking it back to the source markdown offset range.

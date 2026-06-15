@@ -1,14 +1,12 @@
 @font-face {
   font-family: 'Monaco';
-  src: url('../fonts/monaco-subset.woff') format('woff'),
-       url('../fonts/monaco.ttf') format('truetype');
+  src: url('../fonts/monaco.ttf') format('truetype');
   font-display: swap;
 }
 
 @font-face {
   font-family: 'Roboto';
-  src: url('../fonts/roboto-subset.woff') format('woff'),
-       url('../fonts/Roboto.ttf') format('truetype');
+  src: url('../fonts/Roboto.ttf') format('truetype');
   font-display: swap;
 }
 
@@ -17,14 +15,14 @@
   --hue: 228; /* fallback; overridden by boot script + color-engine.js */
 
   /* S & L Component Tokens (Light defaults) */
-  --color-primary-s:        47%;
-  --color-primary-l:        49%;
-  --color-primary-hover-s:  46%;
-  --color-primary-hover-l:  56%;
-  --color-primary-active-s: 49%;
-  --color-primary-active-l: 42%;
-  --color-primary-subtle-s: 73%;
-  --color-primary-subtle-l: 96%;
+  --color-primary-s:        38%;
+  --color-primary-l:        45%;
+  --color-primary-hover-s:  38%;
+  --color-primary-hover-l:  52%;
+  --color-primary-active-s: 38%;
+  --color-primary-active-l: 38%;
+  --color-primary-subtle-s: 30%;
+  --color-primary-subtle-l: 95%;
 
   --bg-app-s:     11%;
   --bg-app-l:     97%;
@@ -52,27 +50,27 @@
   --text-tertiary-l:   56%;
   --text-on-primary-s: 0%;
   --text-on-primary-l: 100%;
-  --text-link-s:       47%;
-  --text-link-l:       49%;
+  --text-link-s:       38%;
+  --text-link-l:       45%;
 
-  --syntax-heading-s:   47%;
-  --syntax-heading-l:   49%;
+  --syntax-heading-s:   38%;
+  --syntax-heading-l:   45%;
   --syntax-bold-s:      13%;
   --syntax-bold-l:      16%;
   --syntax-italic-s:    13%;
   --syntax-italic-l:    16%;
-  --syntax-code-s:      47%;
-  --syntax-code-l:      49%;
+  --syntax-code-s:      38%;
+  --syntax-code-l:      45%;
   --syntax-fence-s:     8%;
   --syntax-fence-l:     43%;
-  --syntax-link-s:      47%;
-  --syntax-link-l:      49%;
-  --syntax-image-s:     47%;
-  --syntax-image-l:     49%;
+  --syntax-link-s:      38%;
+  --syntax-link-l:      45%;
+  --syntax-image-s:     38%;
+  --syntax-image-l:     45%;
   --syntax-quote-s:     8%;
   --syntax-quote-l:     43%;
-  --syntax-list-s:      47%;
-  --syntax-list-l:      49%;
+  --syntax-list-s:      38%;
+  --syntax-list-l:      45%;
   --syntax-hr-s:        22%;
   --syntax-hr-l:        88%;
   --syntax-table-s:     13%;
