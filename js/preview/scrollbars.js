@@ -68,8 +68,8 @@ export const initPreviewCustomScrollbar = (previewEl, previewTrack, previewThumb
   // preserved. Horizontal scrolls are left alone so code blocks still pan.
   previewEl.addEventListener('wheel', (e) => {
     if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return; // horizontal-dominant – leave it
-    const pre = (e.target instanceof Element) ? e.target.closest('pre') : null;
-    if (!pre) return; // not over a code block – browser handles normally
+    const targetContainer = (e.target instanceof Element) ? e.target.closest('pre, table') : null;
+    if (!targetContainer) return; // not over a code block or table – browser handles normally
     let delta = e.deltaY;
     if (e.deltaMode === WheelEvent.DOM_DELTA_LINE) delta *= 16;
     if (e.deltaMode === WheelEvent.DOM_DELTA_PAGE) delta *= previewEl.clientHeight;
