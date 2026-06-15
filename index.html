@@ -14,7 +14,9 @@
           var brightness = brightnessRaw !== null ? parseInt(brightnessRaw, 10) : (raw === 'light' ? 25 : 75);
           var useDark = brightness >= 50;
           document.documentElement.setAttribute('data-theme', useDark ? 'dark' : 'light');
-
+          // AUTO-SYNC WARNING:
+          // This COLOR_MAP must be kept in sync with theme-engine.js COLOR_MAP and css/variables.css.
+          // Format: 'role': [light_saturation, light_lightness, dark_saturation, dark_lightness]
           var COLOR_MAP = {
             'color-primary': [38, 45, 59, 64],
             'color-primary-hover': [38, 52, 64, 69],

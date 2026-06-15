@@ -1,3 +1,5 @@
+import { stripCR } from '../common/utils.js';
+
 /**
  * Recursively enriches a list of marked tokens with start and end position offsets
  * relative to the source markdown string.
@@ -87,12 +89,6 @@ export const enrichTokensWithPositions = (tokens, baseOffset = 0) => {
  */
 export const translateOffset = (md, offset) => {
   if (!md) return offset;
-  let cleanOffset = 0;
-  for (let i = 0; i < offset && i < md.length; i++) {
-    if (md[i] !== '\r') {
-      cleanOffset++;
-    }
-  }
-  return cleanOffset;
+  return stripCR(md.slice(0, offset)).length;
 };
 

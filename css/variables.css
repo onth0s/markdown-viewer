@@ -11,6 +11,7 @@
 }
 
 /* ── Hue Engine — Light Theme (Defaults) ────────────────────────────────── */
+/* AUTO-SYNC WARNING: The S & L component token percentages below must match the light defaults in theme-engine.js and index.html COLOR_MAPs. */
 :root {
   --hue: 228; /* fallback; overridden by boot script + color-engine.js */
 
