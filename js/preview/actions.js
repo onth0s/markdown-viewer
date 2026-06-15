@@ -25,22 +25,22 @@ const PRINT_CSS = `
   }
 
   body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    font-family: 'Roboto', -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
     font-size: 11pt;
     line-height: 1.6;
-    color: #1f2328;
-    background: #fff;
+    color: var(--text-primary);
+    background: var(--bg-preview);
     margin: 0;
     padding: 0;
   }
 
   /* ── GitHub markdown body styling (subset) ── */
   .markdown-body {
-    background: #fff;
-    color: #1f2328;
+    background: var(--bg-preview);
+    color: var(--text-primary);
   }
-  .markdown-body h1 { font-size: 20pt; border-bottom: 1px solid #d0d7de; padding-bottom: 0.3em; }
-  .markdown-body h2 { font-size: 16pt; border-bottom: 1px solid #d0d7de; padding-bottom: 0.3em; }
+  .markdown-body h1 { font-size: 20pt; border-bottom: 1px solid var(--border-default); padding-bottom: 0.3em; }
+  .markdown-body h2 { font-size: 16pt; border-bottom: 1px solid var(--border-default); padding-bottom: 0.3em; }
   .markdown-body h3 { font-size: 14pt; }
   .markdown-body h4 { font-size: 12pt; }
   .markdown-body h5, .markdown-body h6 { font-size: 11pt; }
@@ -66,8 +66,8 @@ const PRINT_CSS = `
   }
 
   .markdown-body pre {
-    background: #f6f8fa !important;
-    border: 1px solid #d0d7de;
+    background: var(--bg-code) !important;
+    border: 1px solid var(--border-default);
     border-radius: 6px;
     padding: 12px 16px;
     font-family: Consolas, "Liberation Mono", Menlo, monospace;
@@ -80,7 +80,7 @@ const PRINT_CSS = `
   .markdown-body code {
     font-family: Consolas, "Liberation Mono", Menlo, monospace;
     font-size: 10pt;
-    background: #f6f8fa;
+    background: var(--bg-code);
     padding: 2px 4px;
     border-radius: 4px;
   }
@@ -105,19 +105,19 @@ const PRINT_CSS = `
   }
 
   .markdown-body table th, .markdown-body table td {
-    border: 1px solid #d0d7de;
+    border: 1px solid var(--border-default);
     padding: 6px 10px;
   }
 
   .markdown-body table th {
-    background: #f6f8fa;
+    background: var(--bg-code);
     font-weight: 600;
   }
 
   .markdown-body blockquote {
-    border-left: 4px solid #d0d7de;
+    border-left: 4px solid var(--border-default);
     padding: 0 12px;
-    color: #656d76;
+    color: var(--text-secondary);
     margin: 0 0 16px 0;
   }
 
@@ -136,17 +136,6 @@ const PRINT_CSS = `
     margin: 0 auto;
   }
 
-  /* ── Code syntax highlighting (Prism tokens printed as colored text) ── */
-  .token.comment, .token.prolog, .token.doctype, .token.cdata { color: #6e7781; }
-  .token.punctuation { color: #656d76; }
-  .token.property, .token.tag, .token.boolean, .token.number,
-  .token.constant, .token.symbol, .token.deleted { color: #cf222e; }
-  .token.selector, .token.attr-name, .token.string, .token.char,
-  .token.builtin, .token.inserted { color: #116329; }
-  .token.operator, .token.entity, .token.url { color: #0550ae; }
-  .token.atrule, .token.attr-value, .token.keyword { color: #0969da; }
-  .token.function, .token.class-name { color: #8250df; }
-  .token.regex, .token.important, .token.variable { color: #953800; }
   .token.important, .token.bold { font-weight: 600; }
   .token.italic { font-style: italic; }
 
@@ -157,7 +146,7 @@ const PRINT_CSS = `
   /* ── Horizontal rules ── */
   .markdown-body hr {
     border: 0;
-    border-top: 1px solid #d0d7de;
+    border-top: 1px solid var(--border-default);
     margin: 16px 0;
   }
 }
@@ -168,7 +157,7 @@ const PRINT_CSS = `
  * @param {HTMLElement} sourceEl
  * @returns {string} Standalone HTML document string
  */
-const buildPrintHtml = (sourceEl) => {
+const buildPrintHtml = (sourceEl, docStyle, currentTheme, ghHref, prismHref) => {
   const clone = sourceEl.cloneNode(true);
 
   // Strip selection highlights, anchors, and other non-print interactive structures
@@ -185,14 +174,17 @@ const buildPrintHtml = (sourceEl) => {
   });
 
   return `<!DOCTYPE html>
-<html data-theme="light">
+<html data-theme="${currentTheme}" style="${docStyle}">
 <head>
   <meta charset="utf-8">
   <title>Markdown Export</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="${ghHref}">
+  <link rel="stylesheet" href="${prismHref}">
   <style>${PRINT_CSS}</style>
 </head>
-<body>
-  <div class="markdown-body">${clone.innerHTML}</div>
+<body class="markdown-body">
+  ${clone.innerHTML}
 </body>
 </html>`;
 };
@@ -204,13 +196,22 @@ const buildPrintHtml = (sourceEl) => {
 export const exportPreviewToPdf = async (outputEl) => {
   if (!outputEl) return;
 
+  const docStyle = document.documentElement.getAttribute('style') || '';
+  const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+
+  const ghLink = document.getElementById('gh-markdown-link');
+  const ghHref = ghLink ? ghLink.getAttribute('href') : '';
+
+  const prismLink = document.getElementById('prism-theme-link');
+  const prismHref = prismLink ? prismLink.getAttribute('href') : '';
+
   const iframe = document.createElement('iframe');
   // Position off-screen but keep rendering context active
   iframe.style.cssText = 'position:fixed;left:-9999px;top:0;width:1px;height:1px;border:0;';
   iframe.sandbox = 'allow-modals allow-same-origin';
   document.body.appendChild(iframe);
 
-  const html = buildPrintHtml(outputEl);
+  const html = buildPrintHtml(outputEl, docStyle, currentTheme, ghHref, prismHref);
   iframe.srcdoc = html;
 
   // Wait for print-document assets (fonts/images) to render
