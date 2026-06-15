@@ -29,7 +29,7 @@
   background: var(--caret-color);
   border-radius: 0;
   cursor: grab;
-  opacity: 0.2;
+  opacity: 0.1;
   transition: opacity 0.15s ease-in-out;
 }
 
@@ -39,7 +39,7 @@
 
 [data-theme="dark"] #custom-scrollbar-thumb {
   background: var(--color-primary);
-  opacity: 0.2;
+  opacity: 0.1;
 }
 
 /* ── Preview Custom Scrollbar ── */
