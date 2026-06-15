@@ -3,29 +3,31 @@
  *
  * @param {HTMLElement} container - The preview wrapper element
  */
-export let clearHighlights = (container) => {
+export const clearHighlights = (container) => {
   if (!container) return;
 
   // 1. Remove elements with class 'preview-selection' that were added as wrapper spans
-  let highlights = container.querySelectorAll('span.preview-selection:not([data-source-pos])');
+  const highlights = container.querySelectorAll('span.preview-selection:not([data-source-pos])');
 
-  for (let span of highlights) {
-    let parent = span.parentNode;
-    if (parent) {
-      // Replace the span with its child nodes (the text node)
-      while (span.firstChild) {
-        parent.insertBefore(span.firstChild, span);
+  if (highlights.length > 0) {
+    for (const span of highlights) {
+      const parent = span.parentNode;
+      if (parent) {
+        // Replace the span with its child nodes (the text node)
+        while (span.firstChild) {
+          parent.insertBefore(span.firstChild, span);
+        }
+        parent.removeChild(span);
       }
-      parent.removeChild(span);
     }
+    // Normalize the entire container DOM to merge all adjacent text nodes cleanly.
+    // Only called when spans were actually removed to avoid a full DOM traversal on no-op.
+    container.normalize();
   }
 
-  // Normalize the entire container DOM to merge all adjacent text nodes cleanly
-  container.normalize();
-
   // 2. Remove the 'preview-selection' class from block/inline containers that were fully highlighted
-  let selectedContainers = container.querySelectorAll('.preview-selection');
-  for (let el of selectedContainers) {
+  const selectedContainers = container.querySelectorAll('.preview-selection');
+  for (const el of selectedContainers) {
     el.classList.remove('preview-selection');
   }
 };
@@ -38,22 +40,22 @@ export let clearHighlights = (container) => {
  * @param {number} selStart - Selection start offset
  * @param {number} selEnd - Selection end offset
  */
-export let applyHighlight = (container, markdown, selStart, selEnd) => {
+export const applyHighlight = (container, markdown, selStart, selEnd) => {
   if (!container || selStart === selEnd || selStart == null || selEnd == null) return;
 
   // Find all elements containing source pos mappings
-  let elements = Array.from(container.querySelectorAll('[data-source-pos]'));
+  const elements = Array.from(container.querySelectorAll('[data-source-pos]'));
 
-  for (let el of elements) {
-    let sourcePos = el.getAttribute('data-source-pos');
+  for (const el of elements) {
+    const sourcePos = el.getAttribute('data-source-pos');
     if (!sourcePos) continue;
 
-    let [start, end] = sourcePos.split('-').map(Number);
+    const [start, end] = sourcePos.split('-').map(Number);
     if (isNaN(start) || isNaN(end)) continue;
 
     // Check if this element overlaps with the selection range
     if (start < selEnd && end > selStart) {
-      let fullyCovered = start >= selStart && end <= selEnd;
+      const fullyCovered = start >= selStart && end <= selEnd;
 
       if (fullyCovered) {
         // Apply the class for container-level background fill.
@@ -65,9 +67,9 @@ export let applyHighlight = (container, markdown, selStart, selEnd) => {
         // our .preview-selection * rule at (0,1,0). Without text-node wrapping
         // the selection colour is silently overridden for syntax-highlighted
         // code blocks, making characters appear "missing" on Ctrl-A.
-        let hasSourceChildren = el.querySelector('[data-source-pos]');
+        const hasSourceChildren = el.querySelector('[data-source-pos]');
         if (!hasSourceChildren) {
-          let domText = el.textContent || '';
+          const domText = el.textContent || '';
           if (domText) {
             highlightTextRange(el, 0, domText.length);
           }
@@ -75,21 +77,21 @@ export let applyHighlight = (container, markdown, selStart, selEnd) => {
       } else {
         // Partially covered. Check if it has any children with data-source-pos.
         // If it does, we let the children handle their own partial selections.
-        let hasSourceChildren = el.querySelector('[data-source-pos]');
+        const hasSourceChildren = el.querySelector('[data-source-pos]');
         if (hasSourceChildren) continue;
 
         // Leaf element containing text node(s). Wrap the intersecting text range.
-        let domText = el.textContent || '';
+        const domText = el.textContent || '';
         if (!domText) continue;
 
         // Align the DOM text index to raw markdown index
-        let rawText = markdown.substring(start, end);
+        const rawText = markdown.substring(start, end);
         let prefixLen = rawText.indexOf(domText);
         if (prefixLen < 0) prefixLen = 0; // fallback
 
         // Calculate overlapping range in DOM text space
-        let localStart = Math.max(0, selStart - start - prefixLen);
-        let localEnd = Math.min(domText.length, selEnd - start - prefixLen);
+        const localStart = Math.max(0, selStart - start - prefixLen);
+        const localEnd = Math.min(domText.length, selEnd - start - prefixLen);
 
         if (localStart < localEnd) {
           highlightTextRange(el, localStart, localEnd);
@@ -107,41 +109,41 @@ export let applyHighlight = (container, markdown, selStart, selEnd) => {
  * @param {number} endOffset - Character end index within the element's textContent
  */
 function highlightTextRange(element, startOffset, endOffset) {
-  let textNodes = getTextNodes(element);
+  const textNodes = getTextNodes(element);
   let currentOffset = 0;
 
-  for (let node of textNodes) {
-    let nodeLen = node.textContent.length;
-    let nodeStart = currentOffset;
-    let nodeEnd = currentOffset + nodeLen;
+  for (const node of textNodes) {
+    const nodeLen = node.textContent.length;
+    const nodeStart = currentOffset;
+    const nodeEnd = currentOffset + nodeLen;
 
     if (nodeStart < endOffset && nodeEnd > startOffset) {
-      let localStart = Math.max(0, startOffset - nodeStart);
-      let localEnd = Math.min(nodeLen, endOffset - nodeStart);
+      const localStart = Math.max(0, startOffset - nodeStart);
+      const localEnd = Math.min(nodeLen, endOffset - nodeStart);
 
       // Split the text node and wrap the target range
-      let range = document.createRange();
+      const range = document.createRange();
       range.setStart(node, localStart);
       range.setEnd(node, localEnd);
 
-      let span = document.createElement('span');
+      const span = document.createElement('span');
       span.className = 'preview-selection';
       
       try {
         range.surroundContents(span);
       } catch (e) {
         // Fallback: if surroundContents fails due to non-text intersections
-        let wrapped = node.textContent.substring(localStart, localEnd);
-        let before = node.textContent.substring(0, localStart);
-        let after = node.textContent.substring(localEnd);
+        const wrapped = node.textContent.substring(localStart, localEnd);
+        const before = node.textContent.substring(0, localStart);
+        const after = node.textContent.substring(localEnd);
         
-        let parent = node.parentNode;
+        const parent = node.parentNode;
         if (parent) {
-          let beforeNode = document.createTextNode(before);
-          let spanNode = document.createElement('span');
+          const beforeNode = document.createTextNode(before);
+          const spanNode = document.createElement('span');
           spanNode.className = 'preview-selection';
           spanNode.textContent = wrapped;
-          let afterNode = document.createTextNode(after);
+          const afterNode = document.createTextNode(after);
           
           parent.insertBefore(beforeNode, node);
           parent.insertBefore(spanNode, node);
@@ -159,11 +161,11 @@ function highlightTextRange(element, startOffset, endOffset) {
  * Recursively collects all text nodes within an element.
  */
 function getTextNodes(node) {
-  let textNodes = [];
+  const textNodes = [];
   if (node.nodeType === Node.TEXT_NODE) {
     textNodes.push(node);
   } else {
-    for (let child of node.childNodes) {
+    for (const child of node.childNodes) {
       textNodes.push(...getTextNodes(child));
     }
   }

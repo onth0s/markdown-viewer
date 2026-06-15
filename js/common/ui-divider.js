@@ -1,37 +1,41 @@
 import { loadSwappedState, saveSwappedState, savePaneRatio, loadPaneRatio } from './storage.js';
 
-let lastLeftRatio = 0.5;
-let applyRatioFn = null;
-
-export let setupDivider = () => {
-  let divider = document.getElementById('split-divider');
-  let leftPane = document.getElementById('edit');
-  let rightPane = document.getElementById('preview');
-  let container = document.getElementById('container');
+/**
+ * Sets up the split-pane divider drag behaviour.
+ * Returns a divider handle object so the swap button can access current state
+ * without relying on module-level mutable variables.
+ *
+ * @returns {{ applyRatio: (ratio: number) => void, getLastRatio: () => number }}
+ */
+export const setupDivider = () => {
+  const divider = document.getElementById('split-divider');
+  const leftPane = document.getElementById('edit');
+  const rightPane = document.getElementById('preview');
+  const container = document.getElementById('container');
   let isDragging = false;
 
-  if (!divider || !leftPane || !rightPane || !container) return;
+  if (!divider || !leftPane || !rightPane || !container) return { applyRatio: () => {}, getLastRatio: () => 0.5 };
 
-  let isPortrait = () => window.innerWidth < window.innerHeight;
-  let isSwapped = () => document.documentElement.hasAttribute('data-swapped');
+  const isPortrait = () => window.innerWidth < window.innerHeight;
+  const isSwapped = () => document.documentElement.hasAttribute('data-swapped');
 
   // Restore persisted ratio or fall back to 50/50
-  lastLeftRatio = loadPaneRatio() ?? 0.5;
+  let lastLeftRatio = loadPaneRatio() ?? 0.5;
 
-  applyRatioFn = (ratio) => {
-    let cr = container.getBoundingClientRect();
+  const applyRatio = (ratio) => {
+    const cr = container.getBoundingClientRect();
     if (isPortrait()) {
       leftPane.style.width = '';
       rightPane.style.width = '';
-      let dh = divider.offsetHeight;
-      let avail = cr.height - dh;
+      const dh = divider.offsetHeight;
+      const avail = cr.height - dh;
       leftPane.style.height = (avail * ratio) + 'px';
       rightPane.style.height = (avail * (1 - ratio)) + 'px';
     } else {
       leftPane.style.height = '';
       rightPane.style.height = '';
-      let dw = divider.offsetWidth;
-      let avail = cr.width - dw;
+      const dw = divider.offsetWidth;
+      const avail = cr.width - dw;
       leftPane.style.width = (avail * ratio) + 'px';
       rightPane.style.width = (avail * (1 - ratio)) + 'px';
     }
@@ -39,25 +43,25 @@ export let setupDivider = () => {
 
   // Apply immediately on load so panes are never mis-sized after reload
   // Use rAF so the container has finished painting its own size first
-  requestAnimationFrame(() => applyRatioFn(lastLeftRatio));
+  requestAnimationFrame(() => applyRatio(lastLeftRatio));
 
-  let startDrag = () => {
+  const startDrag = () => {
     isDragging = true;
     divider.classList.add('active');
     document.body.style.cursor = isPortrait() ? 'row-resize' : 'col-resize';
   };
 
-  let moveDrag = (clientX, clientY) => {
+  const moveDrag = (clientX, clientY) => {
     if (!isDragging) return;
-    let cr = container.getBoundingClientRect();
-    let dw = divider.offsetWidth;
-    let dh = divider.offsetHeight;
-    let minSize = 100;
+    const cr = container.getBoundingClientRect();
+    const dw = divider.offsetWidth;
+    const dh = divider.offsetHeight;
+    const minSize = 100;
 
     if (isPortrait()) {
-      let offsetY = clientY - cr.top;
-      let maxH = cr.height - minSize - dh;
-      let topH = Math.max(minSize, Math.min(offsetY, maxH));
+      const offsetY = clientY - cr.top;
+      const maxH = cr.height - minSize - dh;
+      const topH = Math.max(minSize, Math.min(offsetY, maxH));
 
       if (isSwapped()) {
         // column-reverse: preview at top, editor at bottom
@@ -70,9 +74,9 @@ export let setupDivider = () => {
         lastLeftRatio = topH / (cr.height - dh);
       }
     } else {
-      let offsetX = clientX - cr.left;
-      let maxW = cr.width - minSize - dw;
-      let leftW = Math.max(minSize, Math.min(offsetX, maxW));
+      const offsetX = clientX - cr.left;
+      const maxW = cr.width - minSize - dw;
+      const leftW = Math.max(minSize, Math.min(offsetX, maxW));
 
       if (isSwapped()) {
         // row-reverse: preview on the left, editor on the right
@@ -87,7 +91,7 @@ export let setupDivider = () => {
     }
   };
 
-  let endDrag = () => {
+  const endDrag = () => {
     if (isDragging) {
       isDragging = false;
       divider.classList.remove('active', 'hover');
@@ -102,13 +106,13 @@ export let setupDivider = () => {
   divider.addEventListener('touchstart', (e) => { e.preventDefault(); startDrag(); }, { passive: false });
   divider.addEventListener('dblclick', () => {
     lastLeftRatio = 0.5;
-    if (applyRatioFn) applyRatioFn(lastLeftRatio);
+    applyRatio(lastLeftRatio);
     savePaneRatio(lastLeftRatio);
   });
 
   document.addEventListener('mousemove', (e) => moveDrag(e.clientX, e.clientY));
   document.addEventListener('touchmove', (e) => {
-    let t = e.touches[0];
+    const t = e.touches[0];
     if (t) { e.preventDefault(); moveDrag(t.clientX, t.clientY); }
   }, { passive: false });
 
@@ -124,17 +128,25 @@ export let setupDivider = () => {
     }
   });
 
-  window.addEventListener('resize', () => {
-    if (applyRatioFn) applyRatioFn(lastLeftRatio);
-  });
+  window.addEventListener('resize', () => applyRatio(lastLeftRatio));
+
+  return {
+    applyRatio,
+    getLastRatio: () => lastLeftRatio
+  };
 };
 
-export let initSwapButton = () => {
-  let swapButton = document.getElementById('swap-button');
+/**
+ * Wires the swap-panes button.
+ * @param {{ applyRatio: (ratio: number) => void, getLastRatio: () => number }} dividerHandle
+ *   The object returned by setupDivider(). Passed explicitly to avoid module-level state.
+ */
+export const initSwapButton = (dividerHandle) => {
+  const swapButton = document.getElementById('swap-button');
   if (!swapButton) return;
 
   // Initialize from storage
-  let swapped = loadSwappedState();
+  const swapped = loadSwappedState();
   if (swapped) {
     document.documentElement.setAttribute('data-swapped', '');
   } else {
@@ -151,8 +163,8 @@ export let initSwapButton = () => {
       document.documentElement.removeAttribute('data-swapped');
     }
     // Re-apply ratio so panes reflow in the new layout
-    if (applyRatioFn) {
-      requestAnimationFrame(() => applyRatioFn(lastLeftRatio));
+    if (dividerHandle) {
+      requestAnimationFrame(() => dividerHandle.applyRatio(dividerHandle.getLastRatio()));
     }
   });
 };

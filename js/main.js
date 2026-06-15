@@ -7,7 +7,8 @@ import {
   loadScrollPositions
 } from './common/storage.js';
 import { setupDivider, initSwapButton } from './common/ui-divider.js';
-import { setupFullscreenOverlay, setupClearallOverlay, initFullscreenButton, initClearallButton } from './common/scroll-utils.js';
+import { setupFullscreenOverlay, setupClearallOverlay } from './common/scroll-utils.js';
+import { initFullscreenButton, initClearallButton } from './common/overlay-actions.js';
 import { initDynamicSvg, updateThemedLogos } from './common/logo-engine.js';
 import { initScrollSync } from './common/scroll-sync.js';
 import { initThemeToggle } from './common/theme-controller.js';
@@ -42,21 +43,21 @@ const editPaneContainer         = document.getElementById('edit');
 const previewPaneContainer      = document.getElementById('preview');
 
 // ── Scroll-position state helpers ────────────────────────────────────────────
-let computeScrollRatio = (el) => {
+const computeScrollRatio = (el) => {
   if (!el) return 0;
-  let max = el.scrollHeight - el.clientHeight;
+  const max = el.scrollHeight - el.clientHeight;
   if (max <= 0) return 0;
   return Math.max(0, Math.min(1, el.scrollTop / max));
 };
 
-let applyScrollRatio = (el, ratio) => {
+const applyScrollRatio = (el, ratio) => {
   if (!el || ratio == null) return;
-  let max = el.scrollHeight - el.clientHeight;
+  const max = el.scrollHeight - el.clientHeight;
   if (max <= 0) return;
   el.scrollTop = ratio * max;
 };
 
-let persistScrollPositions = () => {
+const persistScrollPositions = () => {
   if (!editorEl || !previewEl) return;
   saveScrollPositions(
     computeScrollRatio(editorEl),
@@ -66,10 +67,10 @@ let persistScrollPositions = () => {
 };
 
 // ── Bootstrap ────────────────────────────────────────────────────────────────
-let bootstrap = () => {
+const bootstrap = () => {
   // 1. Core UI chrome
-  setupDivider();
-  initSwapButton();
+  const dividerHandle = setupDivider();
+  initSwapButton(dividerHandle);
   initMermaid();
   initDynamicSvg();
 
@@ -119,9 +120,9 @@ let bootstrap = () => {
   });
 
   // 7. Load content and restore scroll/caret positions
-  let savedScrolls = loadScrollPositions();
+  const savedScrolls = loadScrollPositions();
 
-  let onContentReady = (content) => {
+  const onContentReady = (content) => {
     if (editorController) {
       editorController.presetValue(content);
     }
@@ -148,7 +149,7 @@ let bootstrap = () => {
     }
   };
 
-  let lastContent = loadLastContent();
+  const lastContent = loadLastContent();
   if (lastContent) {
     onContentReady(lastContent);
   } else {

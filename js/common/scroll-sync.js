@@ -16,7 +16,7 @@ import { saveScrollBarSettings } from './storage.js';
  * @param {HTMLElement} previewPaneContainer - The preview column container
  * @returns {{ initScrollBarSyncToggle: (settings: boolean) => void }}
  */
-export let initScrollSync = (editorEl, previewEl, editPaneContainer, previewPaneContainer) => {
+export const initScrollSync = (editorEl, previewEl, editPaneContainer, previewPaneContainer) => {
   let activePane = 'editor';
   let scrollBarSync = false;
 
@@ -37,8 +37,8 @@ export let initScrollSync = (editorEl, previewEl, editPaneContainer, previewPane
     previewEl.addEventListener('wheel', () => { activePane = 'preview'; }, { passive: true });
   }
 
-  let syncPaneToPane = (source, target) => {
-    let max = source.scrollHeight - source.clientHeight;
+  const syncPaneToPane = (source, target) => {
+    const max = source.scrollHeight - source.clientHeight;
     if (max <= 0) return;
     if (source.scrollTop <= 1) {
       source.scrollTop = 0;
@@ -50,8 +50,8 @@ export let initScrollSync = (editorEl, previewEl, editPaneContainer, previewPane
       target.scrollTop = target.scrollHeight;
       return;
     }
-    let ratio = source.scrollTop / max;
-    let targetMax = target.scrollHeight - target.clientHeight;
+    const ratio = source.scrollTop / max;
+    const targetMax = target.scrollHeight - target.clientHeight;
     if (targetMax <= 0) return;
     target.scrollTop = ratio * targetMax;
   };
@@ -69,7 +69,7 @@ export let initScrollSync = (editorEl, previewEl, editPaneContainer, previewPane
     });
   }
 
-  let setSyncScroll = (enabled) => {
+  const setSyncScroll = (enabled) => {
     document.documentElement.setAttribute('data-sync', enabled ? 'on' : 'off');
     scrollBarSync = enabled;
     if (enabled && editorEl && previewEl) {
@@ -81,13 +81,13 @@ export let initScrollSync = (editorEl, previewEl, editPaneContainer, previewPane
    * Reads initial settings, applies them, and wires the sync toggle button.
    * @param {boolean} settings - Initial sync-on state
    */
-  let initScrollBarSyncToggle = (settings) => {
+  const initScrollBarSyncToggle = (settings) => {
     setSyncScroll(settings);
-    let toggle = document.querySelector('.sync-toggle');
+    const toggle = document.querySelector('.sync-toggle');
     if (!toggle) return;
     toggle.addEventListener('click', () => {
-      let isOn = document.documentElement.getAttribute('data-sync') === 'on';
-      let checked = !isOn;
+      const isOn = document.documentElement.getAttribute('data-sync') === 'on';
+      const checked = !isOn;
       scrollBarSync = checked;
       setSyncScroll(checked);
       saveScrollBarSettings(checked);

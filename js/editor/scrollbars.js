@@ -2,35 +2,46 @@
 /**
  * Custom scrollbar overlay + caret indicator for the editor pane.
  */
-export let updateCustomScrollbar = (editor, track, thumb) => {
-  if (!editor || !track || !thumb) return;
-  let max = editor.scrollHeight - editor.clientHeight;
+
+/**
+ * Applies thumb position/size to a scrollbar track based on the current scroll state.
+ * @param {HTMLElement} editor - The scrollable element
+ * @param {HTMLElement} track  - The scrollbar track
+ * @param {HTMLElement} thumb  - The scrollbar thumb
+ */
+const applyScrollThumb = (editor, track, thumb) => {
+  const max = editor.scrollHeight - editor.clientHeight;
   if (max <= 0) { thumb.style.height = '0px'; return; }
-  let ratio = editor.scrollTop / max;
-  let avail = track.clientHeight;
-  let thumbH = Math.max(20, (editor.clientHeight / editor.scrollHeight) * avail);
-  let maxTop = avail - thumbH;
+  const ratio = editor.scrollTop / max;
+  const avail = track.clientHeight;
+  const thumbH = Math.max(20, (editor.clientHeight / editor.scrollHeight) * avail);
+  const maxTop = avail - thumbH;
   thumb.style.height = thumbH + 'px';
-  thumb.style.top = (0 + ratio * maxTop) + 'px';
+  thumb.style.top = (ratio * maxTop) + 'px';
 };
 
-export let updateCaretIndicator = (editor, track, caretIndicator) => {
+export const updateCustomScrollbar = (editor, track, thumb) => {
+  if (!editor || !track || !thumb) return;
+  applyScrollThumb(editor, track, thumb);
+};
+
+export const updateCaretIndicator = (editor, track, caretIndicator) => {
   if (!caretIndicator || !editor) return;
 
-  let hasFocus = document.activeElement === editor;
+  const hasFocus = document.activeElement === editor;
   if (!hasFocus) {
     caretIndicator.classList.remove('visible');
     return;
   }
 
   caretIndicator.classList.add('visible');
-  let start = editor.selectionStart;
-  let end = editor.selectionEnd;
-  let text = editor.value;
-  let len = text.length;
-  let trackHeight = editor.clientHeight;
+  const start = editor.selectionStart;
+  const end = editor.selectionEnd;
+  const text = editor.value;
+  const len = text.length;
+  const trackHeight = editor.clientHeight;
 
-  let lineOf = (offset) => {
+  const lineOf = (offset) => {
     let n = 0;
     for (let i = 0; i < offset && i < len; i++) {
       if (text.charCodeAt(i) === 10) n++;
@@ -43,20 +54,20 @@ export let updateCaretIndicator = (editor, track, caretIndicator) => {
     if (text.charCodeAt(i) === 10) totalLines++;
   }
 
-  let clamp = (val, max) => val < 0 ? 0 : val > max ? max : val;
+  const clamp = (val, max) => val < 0 ? 0 : val > max ? max : val;
 
   if (start !== end) {
-    let startLine = lineOf(start);
-    let endLine = lineOf(end);
+    const startLine = lineOf(start);
+    const endLine = lineOf(end);
     let topLine = totalLines <= 1 ? 0 : (startLine / (totalLines - 1)) * trackHeight;
-    let bottomLine = totalLines <= 1 ? 0 : (endLine / (totalLines - 1)) * trackHeight;
-    let selHeight = Math.max(2, bottomLine - topLine);
+    const bottomLine = totalLines <= 1 ? 0 : (endLine / (totalLines - 1)) * trackHeight;
+    const selHeight = Math.max(2, bottomLine - topLine);
     topLine = clamp(topLine, trackHeight - selHeight);
     caretIndicator.style.top = topLine + 'px';
     caretIndicator.style.height = selHeight + 'px';
     caretIndicator.classList.add('selection-active');
   } else {
-    let caretLine = lineOf(start);
+    const caretLine = lineOf(start);
     let top = totalLines <= 1 ? 0 : (caretLine / (totalLines - 1)) * trackHeight;
     top = clamp(top, trackHeight - 2);
     caretIndicator.style.top = top + 'px';
@@ -65,23 +76,12 @@ export let updateCaretIndicator = (editor, track, caretIndicator) => {
   }
 };
 
-export let initCustomScrollbar = (editor, track, thumb) => {
+export const initCustomScrollbar = (editor, track, thumb) => {
   if (!editor || !track || !thumb) return;
 
   let isDragging = false;
   let dragStartY = 0;
   let dragStartScroll = 0;
-
-  let update = () => {
-    let max = editor.scrollHeight - editor.clientHeight;
-    if (max <= 0) { thumb.style.height = '0px'; return; }
-    let ratio = editor.scrollTop / max;
-    let avail = track.clientHeight;
-    let thumbH = Math.max(20, (editor.clientHeight / editor.scrollHeight) * avail);
-    let maxTop = avail - thumbH;
-    thumb.style.height = thumbH + 'px';
-    thumb.style.top = (0 + ratio * maxTop) + 'px';
-  };
 
   thumb.addEventListener('mousedown', (e) => {
     isDragging = true;
@@ -92,11 +92,11 @@ export let initCustomScrollbar = (editor, track, thumb) => {
 
   document.addEventListener('mousemove', (e) => {
     if (!isDragging) return;
-    let avail = track.clientHeight;
-    let thumbH = thumb.clientHeight;
-    let maxTop = avail - thumbH;
-    let delta = e.clientY - dragStartY;
-    let maxScroll = editor.scrollHeight - editor.clientHeight;
+    const avail = track.clientHeight;
+    const thumbH = thumb.clientHeight;
+    const maxTop = avail - thumbH;
+    const delta = e.clientY - dragStartY;
+    const maxScroll = editor.scrollHeight - editor.clientHeight;
     editor.scrollTop = dragStartScroll + (delta / maxTop) * maxScroll;
   });
 
@@ -104,13 +104,13 @@ export let initCustomScrollbar = (editor, track, thumb) => {
 
   track.addEventListener('click', (e) => {
     if (e.target === thumb) return;
-    let rect = track.getBoundingClientRect();
-    let clickY = e.clientY - rect.top;
-    let ratio = clickY / track.clientHeight;
+    const rect = track.getBoundingClientRect();
+    const clickY = e.clientY - rect.top;
+    const ratio = clickY / track.clientHeight;
     editor.scrollTop = ratio * (editor.scrollHeight - editor.clientHeight);
   });
 
-  editor.addEventListener('scroll', update);
+  editor.addEventListener('scroll', () => applyScrollThumb(editor, track, thumb));
 
-  return { update };
+  return { update: () => applyScrollThumb(editor, track, thumb) };
 };

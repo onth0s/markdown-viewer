@@ -16,22 +16,22 @@ import { setTheme, setPreviewCss } from './theme-controller.js';
  * @param {HTMLElement} outputEl              - Output element (for Mermaid re-render)
  * @param {function}    renderMermaidDiagrams - Async fn to re-render Mermaid diagrams
  */
-export let initSettingsPanel = (previewEl, outputEl, renderMermaidDiagrams) => {
+export const initSettingsPanel = (previewEl, outputEl, renderMermaidDiagrams) => {
 
   // ── Wrench popup toggle ───────────────────────────────────────────────────
   const wrenchBtn = document.getElementById('wrench-button');
   const wrenchPopup = document.getElementById('wrench-popup');
   if (wrenchBtn && wrenchPopup) {
-    let positionPopup = () => {
-      let header = document.querySelector('header');
-      let btnRect = wrenchBtn.getBoundingClientRect();
-      let navBottom = header ? header.getBoundingClientRect().bottom : btnRect.bottom;
+    const positionPopup = () => {
+      const header = document.querySelector('header');
+      const btnRect = wrenchBtn.getBoundingClientRect();
+      const navBottom = header ? header.getBoundingClientRect().bottom : btnRect.bottom;
       wrenchPopup.style.top = (navBottom + 4) + 'px';
       wrenchPopup.style.left = btnRect.left + 'px';
     };
     wrenchBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      let opening = !wrenchBtn.classList.contains('open');
+      const opening = !wrenchBtn.classList.contains('open');
       wrenchBtn.classList.toggle('open');
       if (opening) positionPopup();
     });
@@ -51,7 +51,7 @@ export let initSettingsPanel = (previewEl, outputEl, renderMermaidDiagrams) => {
       saveHue(hueSlider.value);
     });
     // Click the label → reset to default hue
-    let hueLabel = document.querySelector('.wrench-label[for="hue-slider"]');
+    const hueLabel = document.querySelector('.wrench-label[for="hue-slider"]');
     if (hueLabel) {
       hueLabel.addEventListener('click', (e) => {
         e.preventDefault();
@@ -69,52 +69,52 @@ export let initSettingsPanel = (previewEl, outputEl, renderMermaidDiagrams) => {
     brightnessSlider.value = getBrightness();
 
     brightnessSlider.addEventListener('input', async () => {
-      let val = parseInt(brightnessSlider.value, 10);
+      const val = parseInt(brightnessSlider.value, 10);
       applyBrightness(val);
       updateThemedLogos();
 
-      let isDark = val >= 50;
-      let currentTheme = document.documentElement.getAttribute('data-theme');
-      let newTheme = isDark ? 'dark' : 'light';
+      const isDark = val >= 50;
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      const newTheme = isDark ? 'dark' : 'light';
       if (currentTheme !== newTheme) {
         setTheme(isDark);
-        let ratio = (previewEl.scrollHeight - previewEl.clientHeight) > 0
+        const ratio = (previewEl && (previewEl.scrollHeight - previewEl.clientHeight) > 0)
           ? previewEl.scrollTop / (previewEl.scrollHeight - previewEl.clientHeight)
           : 0;
         await setPreviewCss(isDark);
         await renderMermaidDiagrams(outputEl);
-        if ((previewEl.scrollHeight - previewEl.clientHeight) > 0) {
+        if (previewEl && (previewEl.scrollHeight - previewEl.clientHeight) > 0) {
           previewEl.scrollTop = ratio * (previewEl.scrollHeight - previewEl.clientHeight);
         }
       }
     });
 
     brightnessSlider.addEventListener('change', () => {
-      let val = parseInt(brightnessSlider.value, 10);
+      const val = parseInt(brightnessSlider.value, 10);
       saveBrightness(val);
     });
 
     // Click the label → reset brightness to the default for the current side
-    let brightnessLabel = document.querySelector('.wrench-label[for="brightness-slider"]');
+    const brightnessLabel = document.querySelector('.wrench-label[for="brightness-slider"]');
     if (brightnessLabel) {
       brightnessLabel.addEventListener('click', async (e) => {
         e.preventDefault();
-        let val = parseInt(brightnessSlider.value, 10);
-        let targetVal = val < 50 ? DEFAULT_LIGHT_BRIGHTNESS : DEFAULT_DARK_BRIGHTNESS;
+        const val = parseInt(brightnessSlider.value, 10);
+        const targetVal = val < 50 ? DEFAULT_LIGHT_BRIGHTNESS : DEFAULT_DARK_BRIGHTNESS;
 
         brightnessSlider.value = targetVal;
         applyBrightness(targetVal);
         updateThemedLogos();
         saveBrightness(targetVal);
 
-        let isDark = targetVal >= 50;
+        const isDark = targetVal >= 50;
         setTheme(isDark);
-        let ratio = (previewEl.scrollHeight - previewEl.clientHeight) > 0
+        const ratio = (previewEl && (previewEl.scrollHeight - previewEl.clientHeight) > 0)
           ? previewEl.scrollTop / (previewEl.scrollHeight - previewEl.clientHeight)
           : 0;
         await setPreviewCss(isDark);
         await renderMermaidDiagrams(outputEl);
-        if ((previewEl.scrollHeight - previewEl.clientHeight) > 0) {
+        if (previewEl && (previewEl.scrollHeight - previewEl.clientHeight) > 0) {
           previewEl.scrollTop = ratio * (previewEl.scrollHeight - previewEl.clientHeight);
         }
       });

@@ -1,4 +1,8 @@
 {
+  "name": "markdown-viewer",
+  "version": "1.0.0",
+  "description": "A vanilla JS markdown editor with live preview, theming, and Mermaid support.",
+  "private": true,
   "type": "module",
   "dependencies": {
     "@types/prismjs": "^1.26.6",

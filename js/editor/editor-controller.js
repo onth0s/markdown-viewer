@@ -3,7 +3,7 @@ import { initCustomScrollbar, updateCaretIndicator, updateCustomScrollbar } from
 import { setupScrollOverlay } from '../common/scroll-utils.js';
 import { wrapEmojis } from '../common/emoji-helper.js';
 
-export let initEditorController = ({
+export const initEditorController = ({
   editor,
   editorHighlight,
   customScrollbar,
@@ -19,12 +19,12 @@ export let initEditorController = ({
   initCustomScrollbar(editor, customScrollbar, customScrollbarThumb, caretIndicator);
   setupScrollOverlay(scrollOverlay, editor);
 
-  let lastSelStart = -1;
-  let lastSelEnd = -1;
+  let lastSelStart = null;
+  let lastSelEnd = null;
 
-  let handleSelectionUpdate = () => {
-    let start = editor.selectionStart;
-    let end = editor.selectionEnd;
+  const handleSelectionUpdate = () => {
+    const start = editor.selectionStart;
+    const end = editor.selectionEnd;
     updateCaretIndicator(editor, customScrollbar, caretIndicator);
     if (lastSelStart === start && lastSelEnd === end) return;
     lastSelStart = start;
@@ -34,9 +34,19 @@ export let initEditorController = ({
     }
   };
 
+  // Rate-limit the highlight repaint to once per animation frame.
+  // The onInput callback (markdown re-render) runs synchronously for live-preview responsiveness.
+  let highlightRafPending = false;
+
   editor.addEventListener('input', () => {
-    syncHighlight(editor, editorHighlight);
-    wrapEmojis(editorHighlight);
+    if (!highlightRafPending) {
+      highlightRafPending = true;
+      requestAnimationFrame(() => {
+        highlightRafPending = false;
+        syncHighlight(editor, editorHighlight);
+        wrapEmojis(editorHighlight);
+      });
+    }
     updateCaretIndicator(editor, customScrollbar, caretIndicator);
     updateCustomScrollbar(editor, customScrollbar, customScrollbarThumb);
     if (onInput) {
@@ -50,10 +60,10 @@ export let initEditorController = ({
     }
   });
 
-  let editorWrapper = editor.parentElement;
+  const editorWrapper = editor.parentElement;
   if (editorWrapper) {
     editorWrapper.addEventListener('wheel', (e) => {
-      let orig = editor.scrollTop;
+      const orig = editor.scrollTop;
       editor.scrollTop += e.deltaY;
       if (editor.scrollTop !== orig) e.preventDefault();
     }, { passive: false });

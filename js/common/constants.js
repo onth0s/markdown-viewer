@@ -13,6 +13,9 @@ export const STORAGE_SCROLL_KEY = 'mdv_scroll_sync';
 export const STORAGE_SCROLL_POS_KEY = 'mdv_scroll_positions';
 export const STORAGE_SWAP_KEY = 'mdv_swapped';
 export const STORAGE_PANE_RATIO_KEY = 'mdv_pane_ratio';
+// NOTE: BRIGHTNESS_KEY and HUE_KEY are also mirrored in index.html's boot script.
+export const BRIGHTNESS_KEY = 'mdv_brightness';
+export const HUE_KEY = 'mdv_hue';
 
 export const PREVIEW_CSS_LIGHT = 'css/github-markdown-light.css';
 export const PREVIEW_CSS_DARK = 'css/github-markdown-dark_dimmed.css';

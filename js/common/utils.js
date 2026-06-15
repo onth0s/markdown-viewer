@@ -9,6 +9,14 @@
  * @param {string} value - Raw string
  * @returns {string} HTML-safe string
  */
-export let escapeHtml = (value) => {
+export const escapeHtml = (value) => {
   return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 };
+
+/**
+ * Strips Windows carriage returns (\r) from a string.
+ * Use this to normalize markdown before processing or offset calculation.
+ * @param {string} str - Raw string potentially containing \r\n line endings
+ * @returns {string} String with all \r characters removed
+ */
+export const stripCR = (str) => str.replace(/\r/g, '');

@@ -3,13 +3,12 @@
  * Lightness & Brightness engine.
  * Interpolates theme variables across:
  * A (0 - white) -> LIGHT (25) -> B (50 - illegible midpoint) -> DARK (75) -> C (100 - black)
+ *
+ * Persistence (getBrightness/saveBrightness/DEFAULT_*) is centralized in storage.js.
  */
 
-const BRIGHTNESS_KEY = 'mdv_brightness';
-const THEME_KEY = 'com.markdownlivepreview_theme';
+export { DEFAULT_LIGHT_BRIGHTNESS, DEFAULT_DARK_BRIGHTNESS, getBrightness, saveBrightness } from './storage.js';
 
-export const DEFAULT_LIGHT_BRIGHTNESS = 25;
-export const DEFAULT_DARK_BRIGHTNESS = 75;
 
 // Defined anchors: [S, L] percentages for Light (25) and Dark (75) themes.
 // At A (0), L = 100, S = 0.
@@ -70,21 +69,12 @@ export const COLOR_MAP = (() => {
   };
 })();
 
-/** Get stored brightness value (0-100) */
-export let getBrightness = () => {
-  let val = localStorage.getItem(BRIGHTNESS_KEY);
-  if (val !== null) return parseInt(val, 10);
-  // Fallback to legacy theme key
-  let old = localStorage.getItem(THEME_KEY);
-  return old === 'light' ? DEFAULT_LIGHT_BRIGHTNESS : DEFAULT_DARK_BRIGHTNESS;
-};
-
 /** Interpolate a single color role value */
-let interpolateColor = (brightness, lightHsl, darkHsl) => {
-  let [sLight, lLight] = lightHsl;
-  let [sDark, lDark] = darkHsl;
-  let sMid = (sLight + sDark) / 2;
-  let lMid = 50;
+const interpolateColor = (brightness, lightHsl, darkHsl) => {
+  const [sLight, lLight] = lightHsl;
+  const [sDark, lDark] = darkHsl;
+  const sMid = (sLight + sDark) / 2;
+  const lMid = 50;
 
   let s, l;
 
@@ -92,28 +82,28 @@ let interpolateColor = (brightness, lightHsl, darkHsl) => {
     // Segment A (0) to LIGHT (25)
     // S: 0 -> sLight
     // L: 100 -> lLight
-    let t = brightness / 25;
+    const t = brightness / 25;
     s = t * sLight;
     l = 100 - t * (100 - lLight);
   } else if (brightness <= 50) {
     // Segment LIGHT (25) to B (50)
     // S: sLight -> sMid
     // L: lLight -> 50
-    let t = (brightness - 25) / 25;
+    const t = (brightness - 25) / 25;
     s = sLight + t * (sMid - sLight);
     l = lLight + t * (lMid - lLight);
   } else if (brightness <= 75) {
     // Segment B (50) to DARK (75)
     // S: sMid -> sDark
     // L: 50 -> lDark
-    let t = (brightness - 50) / 25;
+    const t = (brightness - 50) / 25;
     s = sMid + t * (sDark - sMid);
     l = lMid + t * (lDark - lMid);
   } else {
     // Segment DARK (75) to C (100)
     // S: sDark -> 0
     // L: lDark -> 0
-    let t = (brightness - 75) / 25;
+    const t = (brightness - 75) / 25;
     s = sDark - t * sDark;
     l = lDark - t * lDark;
   }
@@ -122,20 +112,20 @@ let interpolateColor = (brightness, lightHsl, darkHsl) => {
 };
 
 /** Apply brightness to the document root element */
-export let applyBrightness = (brightness) => {
-  let doc = document.documentElement;
-  for (let [name, config] of Object.entries(COLOR_MAP)) {
-    let [s, l] = interpolateColor(brightness, config.light, config.dark);
+export const applyBrightness = (brightness) => {
+  const doc = document.documentElement;
+  for (const [name, config] of Object.entries(COLOR_MAP)) {
+    const [s, l] = interpolateColor(brightness, config.light, config.dark);
     doc.style.setProperty(`--${name}-s`, `${s}%`);
     doc.style.setProperty(`--${name}-l`, `${l}%`);
   }
 
   // Apply clamped variables to the settings popup to limit its slider response
-  let clampedBrightness = Math.max(25, Math.min(75, brightness));
-  let popupEl = document.getElementById('wrench-popup');
+  const clampedBrightness = Math.max(25, Math.min(75, brightness));
+  const popupEl = document.getElementById('wrench-popup');
   if (popupEl) {
-    for (let [name, config] of Object.entries(COLOR_MAP)) {
-      let [s, l] = interpolateColor(clampedBrightness, config.light, config.dark);
+    for (const [name, config] of Object.entries(COLOR_MAP)) {
+      const [s, l] = interpolateColor(clampedBrightness, config.light, config.dark);
       popupEl.style.setProperty(`--${name}`, `hsl(var(--hue), ${s}%, ${l}%)`);
     }
   }
@@ -145,7 +135,7 @@ export let applyBrightness = (brightness) => {
   if (clampedBrightness >= 50) {
     [logoS, logoL] = interpolateColor(clampedBrightness, COLOR_MAP['color-primary'].light, COLOR_MAP['color-primary'].dark);
   } else {
-    let t = Math.min(1, clampedBrightness / 25);
+    const t = Math.min(1, clampedBrightness / 25);
     logoS = Math.round(t * COLOR_MAP['color-primary'].light[0]);
     logoL = Math.round(50 + ((50 - clampedBrightness) / 50) * 50);
   }
@@ -154,12 +144,12 @@ export let applyBrightness = (brightness) => {
   // Wrench icon / navbar icons:
   let iconS, iconL;
   if (brightness >= 50) {
-    let clampedB = Math.min(75, brightness);
+    const clampedB = Math.min(75, brightness);
     [iconS, iconL] = interpolateColor(clampedB, COLOR_MAP['text-primary'].light, COLOR_MAP['text-primary'].dark);
   } else {
-    let bVal = Math.max(0, brightness);
+    const bVal = Math.max(0, brightness);
     iconS = COLOR_MAP['text-primary'].light[0];
-    let t = Math.min(1, bVal / 25);
+    const t = Math.min(1, bVal / 25);
     iconL = Math.round(16 + t * (75 - 16));
   }
   doc.style.setProperty('--nav-icon-color', `hsl(var(--hue), ${iconS}%, ${iconL}%)`);
@@ -191,8 +181,3 @@ export let applyBrightness = (brightness) => {
   });
 };
 
-/** Save brightness to local storage and update corresponding legacy theme state */
-export let saveBrightness = (brightness) => {
-  localStorage.setItem(BRIGHTNESS_KEY, brightness);
-  localStorage.setItem(THEME_KEY, brightness < 50 ? 'light' : 'dark');
-};

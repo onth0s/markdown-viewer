@@ -1,22 +1,22 @@
-export let initPreviewHorizontalScrollbar = (previewEl, hscrollbarEl, hThumbEl) => {
+export const initPreviewHorizontalScrollbar = (previewEl, hscrollbarEl, hThumbEl) => {
   if (!previewEl || !hscrollbarEl || !hThumbEl) return;
 
   let isDragging = false;
   let dragStartX = 0;
   let dragStartScroll = 0;
 
-  let update = () => {
-    let maxScroll = previewEl.scrollWidth - previewEl.clientWidth;
+  const update = () => {
+    const maxScroll = previewEl.scrollWidth - previewEl.clientWidth;
     if (maxScroll <= 0) {
       hscrollbarEl.style.display = 'none';
       return;
     }
     hscrollbarEl.style.display = 'flex';
 
-    let ratio = previewEl.scrollLeft / maxScroll;
-    let trackW = hscrollbarEl.clientWidth;
-    let thumbW = Math.max(20, (previewEl.clientWidth / previewEl.scrollWidth) * trackW);
-    let maxLeft = trackW - thumbW;
+    const ratio = previewEl.scrollLeft / maxScroll;
+    const trackW = hscrollbarEl.clientWidth;
+    const thumbW = Math.max(20, (previewEl.clientWidth / previewEl.scrollWidth) * trackW);
+    const maxLeft = trackW - thumbW;
 
     hThumbEl.style.width = thumbW + 'px';
     hThumbEl.style.marginLeft = (ratio * maxLeft) + 'px';
@@ -31,11 +31,11 @@ export let initPreviewHorizontalScrollbar = (previewEl, hscrollbarEl, hThumbEl) 
 
   document.addEventListener('mousemove', (e) => {
     if (!isDragging) return;
-    let trackW = hscrollbarEl.clientWidth;
-    let thumbW = hThumbEl.clientWidth;
-    let maxLeft = trackW - thumbW;
-    let delta = e.clientX - dragStartX;
-    let maxScroll = previewEl.scrollWidth - previewEl.clientWidth;
+    const trackW = hscrollbarEl.clientWidth;
+    const thumbW = hThumbEl.clientWidth;
+    const maxLeft = trackW - thumbW;
+    const delta = e.clientX - dragStartX;
+    const maxScroll = previewEl.scrollWidth - previewEl.clientWidth;
     previewEl.scrollLeft = dragStartScroll + (delta / maxLeft) * maxScroll;
   });
 
@@ -43,10 +43,10 @@ export let initPreviewHorizontalScrollbar = (previewEl, hscrollbarEl, hThumbEl) 
 
   hscrollbarEl.addEventListener('click', (e) => {
     if (e.target === hThumbEl) return;
-    let rect = hscrollbarEl.getBoundingClientRect();
-    let clickX = e.clientX - rect.left;
-    let trackW = hscrollbarEl.clientWidth;
-    let ratio = Math.max(0, Math.min(1, clickX / trackW));
+    const rect = hscrollbarEl.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    const trackW = hscrollbarEl.clientWidth;
+    const ratio = Math.max(0, Math.min(1, clickX / trackW));
     previewEl.scrollLeft = ratio * (previewEl.scrollWidth - previewEl.clientWidth);
   });
 

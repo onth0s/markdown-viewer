@@ -3,6 +3,38 @@
  * Shared scroll overlay utility used by both the editor and preview panes.
  */
 
+const PROXIMITY_THRESHOLD = 60;
+
+/**
+ * Factory that attaches a proximity-based overlay to a wrapper element.
+ * The overlay becomes visible when `triggerFn` returns true for the cursor position.
+ *
+ * @param {HTMLElement} overlayEl  - The overlay element to show/hide.
+ * @param {HTMLElement} wrapperEl  - The element whose mousemove events are tracked.
+ * @param {function}    triggerFn  - (mouseX, mouseY, rect) => boolean
+ */
+const setupProximityOverlay = (overlayEl, wrapperEl, triggerFn) => {
+  if (!overlayEl || !wrapperEl) return;
+
+  const show = () => overlayEl.classList.add('visible');
+  const hide = () => overlayEl.classList.remove('visible');
+
+  wrapperEl.addEventListener('mousemove', (e) => {
+    const rect = wrapperEl.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+    if (triggerFn(mouseX, mouseY, rect)) {
+      show();
+    } else {
+      hide();
+    }
+  });
+
+  wrapperEl.addEventListener('mouseleave', hide);
+  overlayEl.addEventListener('mouseenter', show);
+  overlayEl.addEventListener('mouseleave', hide);
+};
+
 /**
  * Attaches a proximity-based scroll overlay to a scrollable element.
  * The overlay becomes visible when the cursor hovers near the top-right
@@ -11,133 +43,39 @@
  * @param {HTMLElement} overlayEl - The overlay element to show/hide.
  * @param {HTMLElement} scrollEl  - The scrollable target element.
  */
-export let setupScrollOverlay = (overlayEl, scrollEl) => {
+export const setupScrollOverlay = (overlayEl, scrollEl) => {
   if (!overlayEl || !scrollEl) return;
-  let PROXIMITY_THRESHOLD = 60;
 
-  let show = () => { overlayEl.classList.add('visible'); };
-  let hide = () => { overlayEl.classList.remove('visible'); };
+  const wrapper = scrollEl.parentElement;
+  if (!wrapper) return;
 
-  let wrapper = scrollEl.parentElement;
-  if (wrapper) {
-    wrapper.addEventListener('mousemove', (e) => {
-      let rect = wrapper.getBoundingClientRect();
-      let mouseY = e.clientY - rect.top;
-      let mouseX = e.clientX - rect.left;
-      let height = rect.height;
-      let nearRight = mouseX >= rect.width - PROXIMITY_THRESHOLD;
-      let nearTop = mouseY <= PROXIMITY_THRESHOLD;
-      let nearBottom = mouseY >= height - PROXIMITY_THRESHOLD;
+  setupProximityOverlay(overlayEl, wrapper, (mouseX, mouseY, rect) => {
+    const nearRight = mouseX >= rect.width - PROXIMITY_THRESHOLD;
+    const nearTop = mouseY <= PROXIMITY_THRESHOLD;
+    const nearBottom = mouseY >= rect.height - PROXIMITY_THRESHOLD;
+    if (nearRight && (nearTop || nearBottom)) {
+      overlayEl.classList.toggle('at-top', nearTop);
+      overlayEl.classList.toggle('at-bottom', nearBottom);
+      return true;
+    }
+    return false;
+  });
 
-      if (nearRight && (nearTop || nearBottom)) {
-        overlayEl.classList.toggle('at-top', nearTop);
-        overlayEl.classList.toggle('at-bottom', nearBottom);
-        show();
-      } else {
-        hide();
-      }
-    });
-
-    wrapper.addEventListener('mouseleave', () => { hide(); });
-  }
-
-  overlayEl.addEventListener('mouseenter', () => { show(); });
-  overlayEl.addEventListener('mouseleave', () => { hide(); });
-
-  let topBtn = overlayEl.querySelector('.scroll-popup-top');
-  let bottomBtn = overlayEl.querySelector('.scroll-popup-bottom');
-
-  if (topBtn) {
-    topBtn.addEventListener('click', () => { scrollEl.scrollTop = 0; });
-  }
-  if (bottomBtn) {
-    bottomBtn.addEventListener('click', () => { scrollEl.scrollTop = scrollEl.scrollHeight; });
-  }
+  const topBtn = overlayEl.querySelector('.scroll-popup-top');
+  const bottomBtn = overlayEl.querySelector('.scroll-popup-bottom');
+  if (topBtn) topBtn.addEventListener('click', () => { scrollEl.scrollTop = 0; });
+  if (bottomBtn) bottomBtn.addEventListener('click', () => { scrollEl.scrollTop = scrollEl.scrollHeight; });
 };
 
-export let setupFullscreenOverlay = (overlayEl, wrapperEl) => {
+export const setupFullscreenOverlay = (overlayEl, wrapperEl) => {
+  setupProximityOverlay(overlayEl, wrapperEl, (mouseX, mouseY) => {
+    return mouseX <= PROXIMITY_THRESHOLD && mouseY <= PROXIMITY_THRESHOLD;
+  });
+};
+
+export const setupClearallOverlay = (overlayEl, wrapperEl) => {
   if (!overlayEl || !wrapperEl) return;
-  let PROXIMITY_THRESHOLD = 60;
-
-  let show = () => { overlayEl.classList.add('visible'); };
-  let hide = () => { overlayEl.classList.remove('visible'); };
-
-  wrapperEl.addEventListener('mousemove', (e) => {
-    let rect = wrapperEl.getBoundingClientRect();
-    let mouseY = e.clientY - rect.top;
-    let mouseX = e.clientX - rect.left;
-    let nearLeft = mouseX <= PROXIMITY_THRESHOLD;
-    let nearTop = mouseY <= PROXIMITY_THRESHOLD;
-
-    if (nearLeft && nearTop) {
-      show();
-    } else {
-      hide();
-    }
-  });
-
-  wrapperEl.addEventListener('mouseleave', () => { hide(); });
-  overlayEl.addEventListener('mouseenter', () => { show(); });
-  overlayEl.addEventListener('mouseleave', () => { hide(); });
-};
-
-export let setupClearallOverlay = (overlayEl, wrapperEl) => {
-  if (!overlayEl || !wrapperEl) return;
-  let PROXIMITY_THRESHOLD = 60;
-
-  let show = () => { overlayEl.classList.add('visible'); };
-  let hide = () => { overlayEl.classList.remove('visible'); };
-
-  wrapperEl.addEventListener('mousemove', (e) => {
-    let rect = wrapperEl.getBoundingClientRect();
-    let mouseY = e.clientY - rect.top;
-    let mouseX = e.clientX - rect.left;
-    let nearLeft = mouseX <= PROXIMITY_THRESHOLD;
-    let nearBottom = mouseY >= rect.height - PROXIMITY_THRESHOLD;
-
-    if (nearLeft && nearBottom) {
-      show();
-    } else {
-      hide();
-    }
-  });
-
-  wrapperEl.addEventListener('mouseleave', () => { hide(); });
-  overlayEl.addEventListener('mouseenter', () => { show(); });
-  overlayEl.addEventListener('mouseleave', () => { hide(); });
-};
-
-/**
- * Wires the fullscreen toggle button inside the preview fullscreen overlay.
- * Toggles the data-fullscreen attribute on the document root and fires a resize event.
- *
- * @param {HTMLElement} overlayEl - The fullscreen popup overlay element
- */
-export let initFullscreenButton = (overlayEl) => {
-  let btn = overlayEl && overlayEl.querySelector('.fullscreen-popup-btn');
-  if (!btn) return;
-  btn.addEventListener('click', () => {
-    let isFullscreen = document.documentElement.hasAttribute('data-fullscreen');
-    if (isFullscreen) {
-      document.documentElement.removeAttribute('data-fullscreen');
-      window.dispatchEvent(new Event('resize'));
-    } else {
-      document.documentElement.setAttribute('data-fullscreen', '');
-    }
-  });
-};
-
-/**
- * Wires the clear-all button inside the editor clearall overlay.
- * Clears all localStorage data and reloads the page.
- *
- * @param {HTMLElement} overlayEl - The clearall popup overlay element
- */
-export let initClearallButton = (overlayEl) => {
-  let btn = overlayEl && overlayEl.querySelector('.clearall-popup-btn');
-  if (!btn) return;
-  btn.addEventListener('click', () => {
-    localStorage.clear();
-    location.reload();
+  setupProximityOverlay(overlayEl, wrapperEl, (mouseX, mouseY, rect) => {
+    return mouseX <= PROXIMITY_THRESHOLD && mouseY >= rect.height - PROXIMITY_THRESHOLD;
   });
 };

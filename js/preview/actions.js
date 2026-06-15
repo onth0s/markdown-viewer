@@ -9,11 +9,11 @@ import { setTheme, setPreviewCss } from '../common/theme-controller.js';
 const HTML2PDF_CDN = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
 
 let html2pdfPromise = null;
-let loadHtml2Pdf = () => {
+const loadHtml2Pdf = () => {
   if (typeof window.html2pdf === 'function') return Promise.resolve(window.html2pdf);
   if (html2pdfPromise) return html2pdfPromise;
   html2pdfPromise = new Promise((resolve, reject) => {
-    let s = document.createElement('script');
+    const s = document.createElement('script');
     s.src = HTML2PDF_CDN;
     s.crossOrigin = 'anonymous';
     s.onload = () => {
@@ -29,11 +29,11 @@ let loadHtml2Pdf = () => {
   return html2pdfPromise;
 };
 
-export let copyToClipboard = (text, success, error) => {
+export const copyToClipboard = (text, success, error) => {
   if (navigator.clipboard) {
     navigator.clipboard.writeText(text).then(success, error);
   } else {
-    let ta = document.createElement('textarea');
+    const ta = document.createElement('textarea');
     ta.value = text;
     ta.style.position = 'fixed'; ta.style.left = '-9999px';
     document.body.appendChild(ta);
@@ -43,11 +43,11 @@ export let copyToClipboard = (text, success, error) => {
   }
 };
 
-export let initCopyButton = (editor) => {
-  let copyBtn = document.querySelector('#copy-button');
+export const initCopyButton = (editor) => {
+  const copyBtn = document.querySelector('#copy-button');
   if (!copyBtn || !editor) return;
 
-  let notifyCopied = () => {
+  const notifyCopied = () => {
     copyBtn.title = 'Copied!';
     setTimeout(() => { copyBtn.title = 'Copy'; }, 1000);
   };
@@ -58,15 +58,15 @@ export let initCopyButton = (editor) => {
   });
 };
 
-export let initDownloadButton = (editor) => {
-  let downloadBtn = document.querySelector('#download-button');
+export const initDownloadButton = (editor) => {
+  const downloadBtn = document.querySelector('#download-button');
   if (!downloadBtn || !editor) return;
 
   downloadBtn.addEventListener('click', (e) => {
     e.preventDefault();
-    let blob = new Blob([editor.value], { type: 'text/markdown' });
-    let url = URL.createObjectURL(blob);
-    let a = document.createElement('a');
+    const blob = new Blob([editor.value], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
     a.href = url;
     a.download = 'document.md';
     document.body.appendChild(a);
@@ -78,7 +78,78 @@ export let initDownloadButton = (editor) => {
 
 
 
-export let exportPreviewToPdf = async (previewWrapper, outputEl) => {
+/**
+ * Prepares the html2canvas cloned document for PDF rendering.
+ * Forces light theme, injects page-break CSS, sets explicit element widths,
+ * and scales Mermaid SVGs based on their viewBox dimensions.
+ *
+ * @param {Document} clonedDoc - The document clone provided by html2canvas
+ */
+const preparePdfClone = (clonedDoc) => {
+  clonedDoc.documentElement.setAttribute('data-theme', 'light');
+  const hue = clonedDoc.documentElement.style.getPropertyValue('--hue');
+  clonedDoc.documentElement.removeAttribute('style');
+  if (hue) {
+    clonedDoc.documentElement.style.setProperty('--hue', hue);
+  }
+
+  // Inject pagebreak and font override CSS
+  const pbStyle = clonedDoc.createElement('style');
+  pbStyle.id = 'export-pagebreaks';
+  pbStyle.textContent = `
+    h1, h2, h3, h4, h5, h6 { page-break-after: avoid; break-after: avoid; }
+    pre, blockquote, table, tr, img, .mermaid, li:not(:has(ul)):not(:has(ol)) { page-break-inside: avoid; break-inside: avoid; }
+    .markdown-body pre.mermaid { max-width: 100% !important; }
+    .markdown-body .mermaid svg { max-width: 100% !important; height: auto !important; }
+    #preview-wrapper, .markdown-body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif !important;
+    }
+    .markdown-body code, .markdown-body pre, .markdown-body tt, .markdown-body pre code {
+      font-family: Consolas, "Liberation Mono", Menlo, "Courier New", monospace !important;
+    }
+  `;
+  clonedDoc.head.appendChild(pbStyle);
+
+  const cpw = clonedDoc.getElementById('preview-wrapper');
+  if (cpw) { cpw.style.background = '#fff'; cpw.style.color = '#24292f'; cpw.style.width = '190mm'; cpw.style.maxWidth = '190mm'; }
+  const co = clonedDoc.getElementById('output');
+  if (co) { co.style.background = '#fff'; co.style.color = '#24292f'; co.style.width = '190mm'; co.style.maxWidth = '190mm'; }
+
+  // Explicitly scale Mermaid SVGs based on their viewBox to resolve html2canvas scaling issues
+  const svgs = Array.from(clonedDoc.querySelectorAll('.mermaid svg'));
+  const MAX_SVG_WIDTH = 680;
+  for (const svg of svgs) {
+    const viewBox = svg.getAttribute('viewBox');
+    if (!viewBox) continue;
+    const parts = viewBox.trim().split(/[\s,]+/);
+    if (parts.length !== 4) continue;
+    const vbWidth = parseFloat(parts[2]);
+    const vbHeight = parseFloat(parts[3]);
+    if (!(vbWidth > 0 && vbHeight > 0)) continue;
+
+    // Clear inline styles that could conflict with explicit attributes
+    svg.style.width = '';
+    svg.style.maxWidth = '';
+    svg.style.height = '';
+
+    if (vbWidth > MAX_SVG_WIDTH) {
+      const scale = MAX_SVG_WIDTH / vbWidth;
+      const targetHeight = vbHeight * scale;
+      svg.setAttribute('width', MAX_SVG_WIDTH);
+      svg.setAttribute('height', targetHeight);
+      svg.style.setProperty('width', MAX_SVG_WIDTH + 'px', 'important');
+      svg.style.setProperty('height', targetHeight + 'px', 'important');
+    } else {
+      svg.setAttribute('width', vbWidth);
+      svg.setAttribute('height', vbHeight);
+      svg.style.setProperty('width', vbWidth + 'px', 'important');
+      svg.style.setProperty('height', vbHeight + 'px', 'important');
+    }
+    svg.style.setProperty('max-width', '100%', 'important');
+  }
+};
+
+export const exportPreviewToPdf = async (previewWrapper, outputEl) => {
   if (!previewWrapper || !outputEl) return;
   let html2pdf;
   try {
@@ -89,8 +160,8 @@ export let exportPreviewToPdf = async (previewWrapper, outputEl) => {
     return;
   }
 
-  let originalBrightness = getBrightness();
-  let wasDark = originalBrightness >= 50;
+  const originalBrightness = getBrightness();
+  const wasDark = originalBrightness >= 50;
 
   try {
     // Temporarily switch live preview to light theme so that html2canvas computes light mode styles correctly.
@@ -103,83 +174,12 @@ export let exportPreviewToPdf = async (previewWrapper, outputEl) => {
     await document.fonts.ready;
     await new Promise((resolve) => setTimeout(resolve, 150));
 
-    let options = {
+    const options = {
       margin: 10,
       filename: 'markdown-preview.pdf',
       image: { type: 'jpeg', quality: 0.98 },
       pagebreak: { mode: ['avoid-all', 'css'] },
-      html2canvas: {
-        scale: 2, useCORS: true,
-        onclone: (clonedDoc) => {
-          clonedDoc.documentElement.setAttribute('data-theme', 'light');
-          let hue = clonedDoc.documentElement.style.getPropertyValue('--hue');
-          clonedDoc.documentElement.removeAttribute('style');
-          if (hue) {
-            clonedDoc.documentElement.style.setProperty('--hue', hue);
-          }
-
-          // Inject pagebreak and font override CSS
-          let pbStyle = clonedDoc.createElement('style');
-          pbStyle.id = 'export-pagebreaks';
-          pbStyle.textContent = `
-            h1, h2, h3, h4, h5, h6 { page-break-after: avoid; break-after: avoid; }
-            pre, blockquote, table, tr, img, .mermaid, li:not(:has(ul)):not(:has(ol)) { page-break-inside: avoid; break-inside: avoid; }
-            .markdown-body pre.mermaid { max-width: 100% !important; }
-            .markdown-body .mermaid svg { max-width: 100% !important; height: auto !important; }
-            #preview-wrapper, .markdown-body {
-              font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif !important;
-            }
-            .markdown-body code, .markdown-body pre, .markdown-body tt, .markdown-body pre code {
-              font-family: Consolas, "Liberation Mono", Menlo, "Courier New", monospace !important;
-            }
-          `;
-          clonedDoc.head.appendChild(pbStyle);
-
-          let cpw = clonedDoc.getElementById('preview-wrapper');
-          if (cpw) { cpw.style.background = '#fff'; cpw.style.color = '#24292f'; cpw.style.width = '190mm'; cpw.style.maxWidth = '190mm'; }
-          let co = clonedDoc.getElementById('output');
-          if (co) { co.style.background = '#fff'; co.style.color = '#24292f'; co.style.width = '190mm'; co.style.maxWidth = '190mm'; }
-
-          // Explicitly scale Mermaid SVGs based on their viewBox to resolve html2canvas scaling issues
-          let svgs = Array.from(clonedDoc.querySelectorAll('.mermaid svg'));
-          for (let i = 0; i < svgs.length; i++) {
-            let svg = svgs[i];
-            let viewBox = svg.getAttribute('viewBox');
-            if (viewBox) {
-              let parts = viewBox.trim().split(/[\s,]+/);
-              if (parts.length === 4) {
-                let vbWidth = parseFloat(parts[2]);
-                let vbHeight = parseFloat(parts[3]);
-                if (vbWidth > 0 && vbHeight > 0) {
-                  let maxWidth = 680;
-                  
-                  // Clear inline styles that could conflict with explicit attributes
-                  svg.style.width = '';
-                  svg.style.maxWidth = '';
-                  svg.style.height = '';
-                  
-                  if (vbWidth > maxWidth) {
-                    let scale = maxWidth / vbWidth;
-                    let targetHeight = vbHeight * scale;
-                    svg.setAttribute('width', maxWidth);
-                    svg.setAttribute('height', targetHeight);
-                    svg.style.setProperty('width', maxWidth + 'px', 'important');
-                    svg.style.setProperty('height', targetHeight + 'px', 'important');
-                  } else {
-                    svg.setAttribute('width', vbWidth);
-                    svg.setAttribute('height', vbHeight);
-                    svg.style.setProperty('width', vbWidth + 'px', 'important');
-                    svg.style.setProperty('height', vbHeight + 'px', 'important');
-                  }
-                  svg.style.setProperty('max-width', '100%', 'important');
-                }
-              }
-            }
-          }
-
-
-        }
-      },
+      html2canvas: { scale: 2, useCORS: true, onclone: preparePdfClone },
       jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
     await html2pdf().set(options).from(previewWrapper).save();
@@ -195,8 +195,8 @@ export let exportPreviewToPdf = async (previewWrapper, outputEl) => {
   }
 };
 
-export let initPdfButton = (previewWrapper, outputEl) => {
-  let exportBtn = document.querySelector('#export-button');
+export const initPdfButton = (previewWrapper, outputEl) => {
+  const exportBtn = document.querySelector('#export-button');
   if (!exportBtn) return;
   exportBtn.addEventListener('click', (e) => {
     e.preventDefault();

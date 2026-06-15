@@ -1,28 +1,28 @@
-import { escapeHtml } from '../common/utils.js';
+import { escapeHtml, stripCR } from '../common/utils.js';
 import { scheduleMermaidRender } from './mermaid-renderer.js';
 import { enrichTokensWithPositions } from '../selection/source-mapper.js';
 import { wrapEmojis } from '../common/emoji-helper.js';
 
 /* global marked, DOMPurify */
 
-let renderer = new marked.Renderer();
-let renderCode = renderer.code.bind(renderer);
+const renderer = new marked.Renderer();
+const renderCode = renderer.code.bind(renderer);
 renderer.code = (token) => {
-  let lang = (token.lang || '').match(/^\S*/)?.[0].toLowerCase();
+  const lang = (token.lang || '').match(/^\S*/)?.[0].toLowerCase();
   if (lang !== 'mermaid') return renderCode(token);
   return '<pre class="mermaid">' + escapeHtml(token.text) + '</pre>\n';
 };
 
-let renderImage = renderer.image.bind(renderer);
+const renderImage = renderer.image.bind(renderer);
 renderer.image = (token) => {
-  let href = token.href || '';
+  const href = token.href || '';
   if (href.endsWith('markdown-preview-logo.svg') || href.endsWith('logo.png')) {
     return `<img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="${escapeHtml(token.text || '')}" class="themed-logo" data-original-src="${href}">`;
   }
   return renderImage(token);
 };
 
-let originalListitem = renderer.listitem;
+const originalListitem = renderer.listitem;
 renderer.listitem = function (token) {
   let html = originalListitem.call(this, token);
   if (token.task) {
@@ -40,15 +40,15 @@ renderer.listitem = function (token) {
  * @param {object} token - The marked token being rendered
  * @returns {string} HTML with injected data-source-pos attribute
  */
-let wrapWithSourcePos = (html, token) => {
+const wrapWithSourcePos = (html, token) => {
   if (!token || token.start == null || token.end == null) return html;
-  let posAttr = `data-source-pos="${token.start}-${token.end}"`;
+  const posAttr = `data-source-pos="${token.start}-${token.end}"`;
 
   // Inject into the first opening HTML tag found in the output
-  let trimmed = html.trim();
-  let tagMatch = trimmed.match(/^<(\w+)([\s>])/);
+  const trimmed = html.trim();
+  const tagMatch = trimmed.match(/^<(\w+)([\s>])/);
   if (tagMatch) {
-    let tagName = tagMatch[1];
+    const tagName = tagMatch[1];
     return trimmed.replace(/^<\w+/, `<${tagName} ${posAttr}`) + html.substring(trimmed.length);
   }
 
@@ -57,17 +57,17 @@ let wrapWithSourcePos = (html, token) => {
 };
 
 // Decorate the renderer to automatically attach data-source-pos to all HTML tags
-export let createSourcePosRenderer = (baseRenderer) => {
-  let decoratedRenderer = Object.create(baseRenderer);
-  let proto = Object.getPrototypeOf(baseRenderer);
-  let keys = Object.getOwnPropertyNames(proto).concat(Object.getOwnPropertyNames(baseRenderer));
+export const createSourcePosRenderer = (baseRenderer) => {
+  const decoratedRenderer = Object.create(baseRenderer);
+  const proto = Object.getPrototypeOf(baseRenderer);
+  const keys = Object.getOwnPropertyNames(proto).concat(Object.getOwnPropertyNames(baseRenderer));
 
-  for (let key of keys) {
+  for (const key of keys) {
     if (key === 'constructor') continue;
-    let originalFn = baseRenderer[key] || proto[key];
+    const originalFn = baseRenderer[key] || proto[key];
     if (typeof originalFn === 'function') {
       decoratedRenderer[key] = function (token, ...args) {
-        let html = originalFn.call(this, token, ...args);
+        const html = originalFn.call(this, token, ...args);
         return wrapWithSourcePos(html, token);
       };
     }
@@ -77,19 +77,14 @@ export let createSourcePosRenderer = (baseRenderer) => {
 
 const sourcePosRenderer = createSourcePosRenderer(renderer);
 
-export let convert = (output, markdown) => {
+export const convert = (output, markdown) => {
   if (!output) return;
   try {
-    let cleanMd = "";
-    for (let i = 0; i < markdown.length; i++) {
-      if (markdown[i] !== '\r') {
-        cleanMd += markdown[i];
-      }
-    }
-    let tokens = marked.lexer(cleanMd);
+    const cleanMd = stripCR(markdown);
+    const tokens = marked.lexer(cleanMd);
     enrichTokensWithPositions(tokens);
 
-    let html = marked.parser(tokens, { renderer: sourcePosRenderer, headerIds: false, mangle: false });
+    const html = marked.parser(tokens, { renderer: sourcePosRenderer, headerIds: false, mangle: false });
     let sanitized;
     if (typeof DOMPurify !== 'undefined') {
       sanitized = DOMPurify.sanitize(html, { ADD_ATTR: ['class', 'data-source-pos'] });
@@ -98,15 +93,15 @@ export let convert = (output, markdown) => {
       sanitized = html;
     }
     output.innerHTML = sanitized;
-    let hasCode = !!output.querySelector('pre code');
+    const hasCode = !!output.querySelector('pre code');
     if (hasCode) {
-      let runHighlight = () => {
+      const runHighlight = () => {
         Prism.highlightAllUnder(output);
         output.querySelectorAll('code[class*="language-"]').forEach(codeEl => {
-          let nodes = Array.from(codeEl.childNodes);
+          const nodes = Array.from(codeEl.childNodes);
           nodes.forEach(node => {
             if (node.nodeType === 3) {
-              let span = document.createElement('span');
+              const span = document.createElement('span');
               span.className = 'token plain-text';
               codeEl.insertBefore(span, node);
               span.appendChild(node);
@@ -117,7 +112,7 @@ export let convert = (output, markdown) => {
       if (typeof Prism !== 'undefined') {
         runHighlight();
       } else {
-        let prismScript = document.querySelector('script[src*="prism-core.min.js"]');
+        const prismScript = document.querySelector('script[src*="prism-core.min.js"]');
         if (prismScript) {
           prismScript.addEventListener('load', runHighlight, { once: true });
         }

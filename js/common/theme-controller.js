@@ -18,19 +18,19 @@ import { updateThemedLogos } from './logo-engine.js';
  * @param {boolean} useDark
  * @returns {Promise<void>}
  */
-export let setPreviewCss = (useDark) => {
-  let link = document.getElementById('gh-markdown-link');
-  let desired = useDark ? PREVIEW_CSS_DARK : PREVIEW_CSS_LIGHT;
+export const setPreviewCss = (useDark) => {
+  const link = document.getElementById('gh-markdown-link');
+  const desired = useDark ? PREVIEW_CSS_DARK : PREVIEW_CSS_LIGHT;
 
-  let prismLink = document.getElementById('prism-theme-link');
-  let desiredPrism = useDark ? PRISM_CSS_DARK : PRISM_CSS_LIGHT;
+  const prismLink = document.getElementById('prism-theme-link');
+  const desiredPrism = useDark ? PRISM_CSS_DARK : PRISM_CSS_LIGHT;
 
   if (prismLink) {
     prismLink.setAttribute('href', desiredPrism);
   }
 
   if (!link) {
-    let newLink = document.createElement('link');
+    const newLink = document.createElement('link');
     newLink.id = 'gh-markdown-link';
     newLink.rel = 'stylesheet';
     newLink.href = desired;
@@ -39,7 +39,7 @@ export let setPreviewCss = (useDark) => {
   }
   if (link.getAttribute('href') === desired) return Promise.resolve();
   return new Promise((resolve) => {
-    let loaded = () => { link.removeEventListener('load', loaded); requestAnimationFrame(resolve); };
+    const loaded = () => { link.removeEventListener('load', loaded); requestAnimationFrame(resolve); };
     link.addEventListener('load', loaded);
     link.setAttribute('href', desired);
   });
@@ -49,7 +49,7 @@ export let setPreviewCss = (useDark) => {
  * Sets the data-theme attribute on the document root.
  * @param {boolean} enabled - true → dark, false → light
  */
-export let setTheme = (enabled) => {
+export const setTheme = (enabled) => {
   document.documentElement.setAttribute('data-theme', enabled ? 'dark' : 'light');
 };
 
@@ -60,20 +60,20 @@ export let setTheme = (enabled) => {
  * @param {HTMLElement} outputEl               - Output element (for Mermaid re-render)
  * @param {function}    renderMermaidDiagrams  - Async fn to re-render Mermaid diagrams
  */
-export let initThemeToggle = (previewEl, outputEl, renderMermaidDiagrams) => {
-  let brightness = getBrightness();
+export const initThemeToggle = (previewEl, outputEl, renderMermaidDiagrams) => {
+  const brightness = getBrightness();
   setTheme(brightness >= 50);
   setPreviewCss(brightness >= 50);
   applyBrightness(brightness);
 
-  let toggle = document.querySelector('.theme-toggle');
+  const toggle = document.querySelector('.theme-toggle');
   if (!toggle) return;
   toggle.addEventListener('click', async () => {
-    let currentB = getBrightness();
-    let checked = currentB < 50;
-    let newB = checked ? DEFAULT_DARK_BRIGHTNESS : DEFAULT_LIGHT_BRIGHTNESS;
+    const currentB = getBrightness();
+    const checked = currentB < 50;
+    const newB = checked ? DEFAULT_DARK_BRIGHTNESS : DEFAULT_LIGHT_BRIGHTNESS;
 
-    let ratio = (previewEl.scrollHeight - previewEl.clientHeight) > 0
+    const ratio = (previewEl && (previewEl.scrollHeight - previewEl.clientHeight) > 0)
       ? previewEl.scrollTop / (previewEl.scrollHeight - previewEl.clientHeight)
       : 0;
 
@@ -82,14 +82,14 @@ export let initThemeToggle = (previewEl, outputEl, renderMermaidDiagrams) => {
     setTheme(checked);
     updateThemedLogos();
 
-    let brightnessSlider = document.getElementById('brightness-slider');
+    const brightnessSlider = document.getElementById('brightness-slider');
     if (brightnessSlider) {
       brightnessSlider.value = newB;
     }
 
     await setPreviewCss(checked);
     await renderMermaidDiagrams(outputEl);
-    if ((previewEl.scrollHeight - previewEl.clientHeight) > 0) {
+    if (previewEl && (previewEl.scrollHeight - previewEl.clientHeight) > 0) {
       previewEl.scrollTop = ratio * (previewEl.scrollHeight - previewEl.clientHeight);
     }
   });

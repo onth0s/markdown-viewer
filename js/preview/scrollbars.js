@@ -1,20 +1,20 @@
 import { setupScrollOverlay } from '../common/scroll-utils.js';
 
-export let initPreviewCustomScrollbar = (previewEl, previewTrack, previewThumb) => {
+export const initPreviewCustomScrollbar = (previewEl, previewTrack, previewThumb) => {
   if (!previewEl || !previewTrack || !previewThumb) return;
 
   let isDragging = false;
   let dragStartY = 0;
   let dragStartScroll = 0;
 
-  let update = () => {
-    let max = previewEl.scrollHeight - previewEl.clientHeight;
+  const update = () => {
+    const max = previewEl.scrollHeight - previewEl.clientHeight;
     if (max <= 0) { previewThumb.style.height = '0px'; return; }
-    let ratio = previewEl.scrollTop / max;
-    let trackH = previewTrack.clientHeight;
-    let availH = trackH - 28;
-    let thumbH = Math.max(20, (previewEl.clientHeight / previewEl.scrollHeight) * availH);
-    let maxTop = availH - thumbH;
+    const ratio = previewEl.scrollTop / max;
+    const trackH = previewTrack.clientHeight;
+    const availH = trackH - 28;
+    const thumbH = Math.max(20, (previewEl.clientHeight / previewEl.scrollHeight) * availH);
+    const maxTop = availH - thumbH;
     previewThumb.style.height = thumbH + 'px';
     previewThumb.style.top = (14 + ratio * maxTop) + 'px';
   };
@@ -28,11 +28,11 @@ export let initPreviewCustomScrollbar = (previewEl, previewTrack, previewThumb) 
 
   document.addEventListener('mousemove', (e) => {
     if (!isDragging) return;
-    let trackH = previewTrack.clientHeight;
-    let thumbH = previewThumb.clientHeight;
-    let maxTop = trackH - 28 - thumbH;
-    let delta = e.clientY - dragStartY;
-    let maxScroll = previewEl.scrollHeight - previewEl.clientHeight;
+    const trackH = previewTrack.clientHeight;
+    const thumbH = previewThumb.clientHeight;
+    const maxTop = trackH - 28 - thumbH;
+    const delta = e.clientY - dragStartY;
+    const maxScroll = previewEl.scrollHeight - previewEl.clientHeight;
     previewEl.scrollTop = dragStartScroll + (delta / maxTop) * maxScroll;
   });
 
@@ -40,16 +40,16 @@ export let initPreviewCustomScrollbar = (previewEl, previewTrack, previewThumb) 
 
   previewTrack.addEventListener('click', (e) => {
     if (e.target === previewThumb || e.target.classList.contains('scrollbar-arrow')) return;
-    let rect = previewTrack.getBoundingClientRect();
-    let clickY = e.clientY - rect.top;
-    let ratio = clickY / previewTrack.clientHeight;
+    const rect = previewTrack.getBoundingClientRect();
+    const clickY = e.clientY - rect.top;
+    const ratio = clickY / previewTrack.clientHeight;
     previewEl.scrollTop = ratio * (previewEl.scrollHeight - previewEl.clientHeight);
   });
 
   let scrollInterval = null;
   previewTrack.querySelectorAll('.scrollbar-arrow').forEach((arrow) => {
-    let dir = arrow.dataset.dir === 'up' ? -1 : 1;
-    let step = () => { previewEl.scrollTop += dir * 40; };
+    const dir = arrow.dataset.dir === 'up' ? -1 : 1;
+    const step = () => { previewEl.scrollTop += dir * 40; };
     arrow.addEventListener('mousedown', (e) => {
       e.stopPropagation();
       step();
@@ -68,7 +68,7 @@ export let initPreviewCustomScrollbar = (previewEl, previewTrack, previewThumb) 
   // preserved. Horizontal scrolls are left alone so code blocks still pan.
   previewEl.addEventListener('wheel', (e) => {
     if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return; // horizontal-dominant – leave it
-    let pre = (e.target instanceof Element) ? e.target.closest('pre') : null;
+    const pre = (e.target instanceof Element) ? e.target.closest('pre') : null;
     if (!pre) return; // not over a code block – browser handles normally
     let delta = e.deltaY;
     if (e.deltaMode === WheelEvent.DOM_DELTA_LINE) delta *= 16;

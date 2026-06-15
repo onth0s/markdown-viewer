@@ -1,5 +1,6 @@
 import { translateOffset } from './source-mapper.js';
 import { clearHighlights, applyHighlight } from './dom-highlighter.js';
+import { stripCR } from '../common/utils.js';
 
 export class SelectionEngine {
   /**
@@ -18,7 +19,7 @@ export class SelectionEngine {
    */
   setMarkdown(markdown) {
     this.rawMarkdown = markdown || '';
-    this.markdown = this.rawMarkdown.replace(/\r/g, '');
+    this.markdown = stripCR(this.rawMarkdown);
   }
 
   /**
@@ -33,8 +34,8 @@ export class SelectionEngine {
     }
 
     // Translate absolute offsets to clean line offsets
-    let cleanStart = translateOffset(this.rawMarkdown, start);
-    let cleanEnd = translateOffset(this.rawMarkdown, end);
+    const cleanStart = translateOffset(this.rawMarkdown, start);
+    const cleanEnd = translateOffset(this.rawMarkdown, end);
 
     this.selStart = start;
     this.selEnd = end;

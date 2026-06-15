@@ -16,7 +16,11 @@ export default [
     rules: {
       "no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
       "no-undef": "error",
-      "no-console": "off"
+      "no-console": "off",
+      "prefer-const": "error",
+      "no-var": "error",
+      "eqeqeq": ["error", "always", { "null": "ignore" }],
+      "no-implicit-globals": "error"
     }
   }
 ];
