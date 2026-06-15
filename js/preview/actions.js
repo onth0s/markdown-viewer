@@ -19,25 +19,39 @@ const PRINT_CSS = `
 }
 
 @media print {
-  html {
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  html, body {
+    background-color: var(--bg-preview) !important;
+    background: var(--bg-preview) !important;
+    color: var(--text-primary) !important;
   }
 
   body {
     font-family: 'Roboto', -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
     font-size: 11pt;
     line-height: 1.6;
-    color: var(--text-primary);
-    background: var(--bg-preview);
     margin: 0;
     padding: 0;
   }
 
+  #preview-wrapper {
+    height: auto !important;
+    overflow: visible !important;
+    position: static !important;
+    background: transparent !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+  }
+
   /* ── GitHub markdown body styling (subset) ── */
   .markdown-body {
-    background: var(--bg-preview);
-    color: var(--text-primary);
+    background: var(--bg-preview) !important;
+    color: var(--text-primary) !important;
   }
   .markdown-body h1 { font-size: 20pt; border-bottom: 1px solid var(--border-default); padding-bottom: 0.3em; }
   .markdown-body h2 { font-size: 16pt; border-bottom: 1px solid var(--border-default); padding-bottom: 0.3em; }
@@ -183,8 +197,12 @@ const buildPrintHtml = (sourceEl, docStyle, currentTheme, ghHref, prismHref) => 
   <link rel="stylesheet" href="${prismHref}">
   <style>${PRINT_CSS}</style>
 </head>
-<body class="markdown-body">
-  ${clone.innerHTML}
+<body>
+  <div id="preview-wrapper">
+    <div class="markdown-body">
+      ${clone.innerHTML}
+    </div>
+  </div>
 </body>
 </html>`;
 };
