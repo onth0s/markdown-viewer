@@ -131,7 +131,7 @@ function highlightTextRange(element, startOffset, endOffset) {
       
       try {
         range.surroundContents(span);
-      } catch (e) {
+      } catch {
         // Fallback: if surroundContents fails due to non-text intersections
         const wrapped = node.textContent.substring(localStart, localEnd);
         const before = node.textContent.substring(0, localStart);

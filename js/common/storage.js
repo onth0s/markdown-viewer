@@ -10,11 +10,11 @@ import {
 } from './constants.js';
 
 export const saveLastContent = (content) => {
-  try { localStorage.setItem(STORAGE_CONTENT_KEY, content); } catch (e) {}
+  try { localStorage.setItem(STORAGE_CONTENT_KEY, content); } catch {}
 };
 
 export const loadLastContent = () => {
-  try { return localStorage.getItem(STORAGE_CONTENT_KEY); } catch (e) { return null; }
+  try { return localStorage.getItem(STORAGE_CONTENT_KEY); } catch { return null; }
 };
 
 export const loadThemeSettings = () => {
@@ -22,23 +22,23 @@ export const loadThemeSettings = () => {
     const raw = localStorage.getItem(STORAGE_THEME_KEY);
     if (raw === 'dark') return true;
     if (raw === 'light') return false;
-  } catch (e) {}
+  } catch {}
   return true;
 };
 
 export const saveThemeSettings = (settings) => {
-  try { localStorage.setItem(STORAGE_THEME_KEY, settings ? 'dark' : 'light'); } catch (e) {}
+  try { localStorage.setItem(STORAGE_THEME_KEY, settings ? 'dark' : 'light'); } catch {}
 };
 
 export const loadScrollBarSettings = () => {
   try {
     const raw = localStorage.getItem(STORAGE_SCROLL_KEY);
     return raw !== 'false';
-  } catch (e) { return true; }
+  } catch { return true; }
 };
 
 export const saveScrollBarSettings = (settings) => {
-  try { localStorage.setItem(STORAGE_SCROLL_KEY, settings ? 'true' : 'false'); } catch (e) {}
+  try { localStorage.setItem(STORAGE_SCROLL_KEY, settings ? 'true' : 'false'); } catch {}
 };
 
 export const saveScrollPositions = (editorRatio, previewRatio, caret) => {
@@ -49,7 +49,7 @@ export const saveScrollPositions = (editorRatio, previewRatio, caret) => {
       caret: caret
     });
     localStorage.setItem(STORAGE_SCROLL_POS_KEY, payload);
-  } catch (e) {}
+  } catch {}
 };
 
 export const loadScrollPositions = () => {
@@ -57,13 +57,13 @@ export const loadScrollPositions = () => {
     const raw = localStorage.getItem(STORAGE_SCROLL_POS_KEY);
     if (!raw) return null;
     return JSON.parse(raw);
-  } catch (e) { return null; }
+  } catch { return null; }
 };
 
 export const loadSwappedState = () => {
   try {
     return localStorage.getItem(STORAGE_SWAP_KEY) === 'true';
-  } catch (e) {
+  } catch {
     return false;
   }
 };
@@ -71,11 +71,11 @@ export const loadSwappedState = () => {
 export const saveSwappedState = (swapped) => {
   try {
     localStorage.setItem(STORAGE_SWAP_KEY, swapped ? 'true' : 'false');
-  } catch (e) {}
+  } catch {}
 };
 
 export const savePaneRatio = (ratio) => {
-  try { localStorage.setItem(STORAGE_PANE_RATIO_KEY, String(ratio)); } catch (e) {}
+  try { localStorage.setItem(STORAGE_PANE_RATIO_KEY, String(ratio)); } catch {}
 };
 
 export const loadPaneRatio = () => {
@@ -84,7 +84,7 @@ export const loadPaneRatio = () => {
     if (raw === null) return null;
     const v = parseFloat(raw);
     return isNaN(v) ? null : Math.max(0.1, Math.min(0.9, v));
-  } catch (e) { return null; }
+  } catch { return null; }
 };
 
 // ─── Hue ─────────────────────────────────────────────────────────────────────
@@ -95,13 +95,13 @@ export const getHue = () => {
   try {
     const raw = localStorage.getItem(HUE_KEY);
     return raw !== null ? parseInt(raw, 10) : DEFAULT_HUE;
-  } catch (e) {
+  } catch {
     return DEFAULT_HUE;
   }
 };
 
 export const saveHue = (hue) => {
-  try { localStorage.setItem(HUE_KEY, hue); } catch (e) {}
+  try { localStorage.setItem(HUE_KEY, hue); } catch {}
 };
 
 // ─── Brightness ───────────────────────────────────────────────────────────────
@@ -116,7 +116,7 @@ export const getBrightness = () => {
     // Fallback to legacy theme key
     const old = localStorage.getItem(STORAGE_THEME_KEY);
     return old === 'light' ? DEFAULT_LIGHT_BRIGHTNESS : DEFAULT_DARK_BRIGHTNESS;
-  } catch (e) {
+  } catch {
     return DEFAULT_DARK_BRIGHTNESS;
   }
 };
@@ -125,5 +125,5 @@ export const saveBrightness = (brightness) => {
   try {
     localStorage.setItem(BRIGHTNESS_KEY, brightness);
     localStorage.setItem(STORAGE_THEME_KEY, brightness < 50 ? 'light' : 'dark');
-  } catch (e) {}
+  } catch {}
 };

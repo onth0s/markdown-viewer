@@ -22,5 +22,14 @@ export default [
       "eqeqeq": ["error", "always", { "null": "ignore" }],
       "no-implicit-globals": "error"
     }
+  },
+  {
+    files: ["misc/log_tokens.js"],
+    languageOptions: {
+      sourceType: "commonjs",
+      globals: {
+        ...globals.node
+      }
+    }
   }
 ];
