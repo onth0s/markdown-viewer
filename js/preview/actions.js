@@ -176,7 +176,7 @@ body {
  * @param {HTMLElement} sourceEl
  * @returns {string} Standalone HTML document string
  */
-const buildPrintHtml = (sourceEl, docStyle, currentTheme, ghHref, prismHref) => {
+const buildPrintHtml = (sourceEl, docStyle, currentTheme, ghHref, prismHref, themeColors) => {
   const clone = sourceEl.cloneNode(true);
 
   // Strip selection highlights, anchors, and other non-print interactive structures
@@ -200,7 +200,16 @@ const buildPrintHtml = (sourceEl, docStyle, currentTheme, ghHref, prismHref) => 
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="${ghHref}">
   <link rel="stylesheet" href="${prismHref}">
-  <style>${PRINT_CSS}</style>
+  <style>
+    :root {
+      --bg-preview: ${themeColors.bgPreview} !important;
+      --text-primary: ${themeColors.textPrimary} !important;
+      --border-default: ${themeColors.borderDefault} !important;
+      --bg-code: ${themeColors.bgCode} !important;
+      --text-secondary: ${themeColors.textSecondary} !important;
+    }
+    ${PRINT_CSS}
+  </style>
 </head>
 <body>
   <div id="preview-wrapper">
@@ -228,13 +237,22 @@ export const exportPreviewToPdf = async (outputEl) => {
   const prismLink = document.getElementById('prism-theme-link');
   const prismHref = prismLink ? prismLink.getAttribute('href') : '';
 
+  const computedStyle = window.getComputedStyle(document.documentElement);
+  const themeColors = {
+    bgPreview: computedStyle.getPropertyValue('--bg-preview').trim(),
+    textPrimary: computedStyle.getPropertyValue('--text-primary').trim(),
+    borderDefault: computedStyle.getPropertyValue('--border-default').trim(),
+    bgCode: computedStyle.getPropertyValue('--bg-code').trim(),
+    textSecondary: computedStyle.getPropertyValue('--text-secondary').trim(),
+  };
+
   const iframe = document.createElement('iframe');
   // Position off-screen but keep rendering context active
   iframe.style.cssText = 'position:fixed;left:-9999px;top:0;width:1px;height:1px;border:0;';
   iframe.sandbox = 'allow-modals allow-same-origin';
   document.body.appendChild(iframe);
 
-  const html = buildPrintHtml(outputEl, docStyle, currentTheme, ghHref, prismHref);
+  const html = buildPrintHtml(outputEl, docStyle, currentTheme, ghHref, prismHref, themeColors);
   iframe.srcdoc = html;
 
   // Wait for print-document assets (fonts/images) to render
