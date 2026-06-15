@@ -15,7 +15,7 @@ export const copyToClipboard = (text, success, error) => {
 const PRINT_CSS = `
 @page {
   size: A4;
-  margin: 16mm 20mm;
+  margin: 0;
 }
 
 @media print {
@@ -25,9 +25,12 @@ const PRINT_CSS = `
   }
 
   html, body {
+    height: auto !important;
+    min-height: 100% !important;
     background-color: var(--bg-preview) !important;
     background: var(--bg-preview) !important;
     color: var(--text-primary) !important;
+    display: block !important;
   }
 
   body {
@@ -35,11 +38,13 @@ const PRINT_CSS = `
     font-size: 11pt;
     line-height: 1.6;
     margin: 0;
-    padding: 0;
+    padding: 16mm 20mm;
   }
 
   #preview-wrapper {
+    display: block !important;
     height: auto !important;
+    min-height: 0 !important;
     overflow: visible !important;
     position: static !important;
     background: transparent !important;
