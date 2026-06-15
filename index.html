@@ -154,6 +154,17 @@
             document.documentElement.setAttribute('data-swapped', '');
           }
 
+          var RATIO_KEY = 'mdv_pane_ratio';
+          var ratioRaw = localStorage.getItem(RATIO_KEY);
+          if (ratioRaw !== null && window.innerWidth >= window.innerHeight) {
+            var ratio = parseFloat(ratioRaw);
+            if (!isNaN(ratio) && ratio >= 0.1 && ratio <= 0.9) {
+              var ps = document.createElement('style');
+              ps.textContent = '#edit{width:' + (ratio * 100) + '%!important}#preview{width:' + ((1 - ratio) * 100) + '%!important}';
+              document.head.appendChild(ps);
+            }
+          }
+
           var PREVIEW_CSS_LIGHT = 'css/github-markdown-light.css';
           var PREVIEW_CSS_DARK = 'css/github-markdown-dark_dimmed.css';
           var href = useDark ? PREVIEW_CSS_DARK : PREVIEW_CSS_LIGHT;

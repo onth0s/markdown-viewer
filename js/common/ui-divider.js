@@ -41,9 +41,9 @@ export const setupDivider = () => {
     }
   };
 
-  // Apply immediately on load so panes are never mis-sized after reload
-  // Use rAF so the container has finished painting its own size first
-  requestAnimationFrame(() => applyRatio(lastLeftRatio));
+  // Apply exact pixel sizes — container dimensions are already known
+  // since the module runs after full DOM parse
+  applyRatio(lastLeftRatio);
 
   const startDrag = () => {
     isDragging = true;
