@@ -1452,4 +1452,11 @@ body.is-dragging-file #drop-overlay {
   }
 }
 
-
+@media print {
+  .markdown-body pre,
+  .markdown-body pre code {
+    white-space: pre-wrap !important;
+    word-break: break-word !important;
+    overflow-x: hidden !important;
+  }
+}
