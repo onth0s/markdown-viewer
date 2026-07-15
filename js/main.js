@@ -185,6 +185,36 @@ const bootstrap = () => {
   if (editorEl) editorEl.addEventListener('scroll', persistScrollPositions, { passive: true });
   if (previewEl) previewEl.addEventListener('scroll', persistScrollPositions, { passive: true });
   window.addEventListener('beforeunload', persistScrollPositions);
+
+  // 12. Implicit focus detection and Ctrl+A handling
+  let focusedPane = 'editor';
+  if (editPaneContainer) {
+    editPaneContainer.addEventListener('mouseenter', () => focusedPane = 'editor');
+    editPaneContainer.addEventListener('focusin', () => focusedPane = 'editor');
+  }
+  if (previewPaneContainer) {
+    previewPaneContainer.addEventListener('mouseenter', () => focusedPane = 'preview');
+    previewPaneContainer.addEventListener('focusin', () => focusedPane = 'preview');
+  }
+
+  window.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'a') {
+      if (focusedPane === 'preview') {
+        e.preventDefault();
+        const selection = window.getSelection();
+        const range = document.createRange();
+        range.selectNodeContents(outputEl);
+        selection.removeAllRanges();
+        selection.addRange(range);
+      } else if (focusedPane === 'editor') {
+        if (document.activeElement !== editorEl) {
+          e.preventDefault();
+          editorEl.focus();
+          editorEl.select();
+        }
+      }
+    }
+  });
 };
 
 // Start application
