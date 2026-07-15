@@ -1,5 +1,5 @@
 param(
-    [int]$Port = 5001
+    [int]$Port = 5000
 )
 
 Write-Host "Starting http-server on port $Port..." -ForegroundColor Cyan
