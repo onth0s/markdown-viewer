@@ -2,8 +2,8 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Markdown Viewer Smoke Test', () => {
   test.beforeEach(async ({ page }) => {
-    // Navigate to the app served locally (default port is 5001)
-    await page.goto('http://localhost:5001/');
+    // Navigate to the app served locally (default port is 5000)
+    await page.goto('http://localhost:5000/');
   });
 
   test('should load the page and render default content', async ({ page }) => {

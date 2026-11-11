@@ -41,12 +41,10 @@ export const initScrollSync = (editorEl, previewEl, editPaneContainer, previewPa
     const max = source.scrollHeight - source.clientHeight;
     if (max <= 0) return;
     if (source.scrollTop <= 1) {
-      source.scrollTop = 0;
       target.scrollTop = 0;
       return;
     }
     if (source.scrollTop >= max - 1) {
-      source.scrollTop = max;
       target.scrollTop = target.scrollHeight;
       return;
     }

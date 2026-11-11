@@ -58,7 +58,7 @@ const applyScrollRatio = (el, ratio) => {
 };
 
 const persistScrollPositions = () => {
-  if (!editorEl || !previewEl) return;
+  if (window.__CLEARING_ALL__ || !editorEl || !previewEl) return;
   saveScrollPositions(
     computeScrollRatio(editorEl),
     computeScrollRatio(previewEl),
@@ -199,6 +199,11 @@ const bootstrap = () => {
 
   window.addEventListener('keydown', (e) => {
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'a') {
+      // If the editor is already focused and active, let the browser handle editor selection naturally
+      if (document.activeElement === editorEl) {
+        return;
+      }
+
       if (focusedPane === 'preview') {
         e.preventDefault();
         const selection = window.getSelection();
@@ -207,11 +212,9 @@ const bootstrap = () => {
         selection.removeAllRanges();
         selection.addRange(range);
       } else if (focusedPane === 'editor') {
-        if (document.activeElement !== editorEl) {
-          e.preventDefault();
-          editorEl.focus();
-          editorEl.select();
-        }
+        e.preventDefault();
+        editorEl.focus();
+        editorEl.select();
       }
     }
   });

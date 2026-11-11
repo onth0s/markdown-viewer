@@ -79,28 +79,30 @@ export const updateCaretIndicator = (editor, track, caretIndicator) => {
 export const initCustomScrollbar = (editor, track, thumb) => {
   if (!editor || !track || !thumb) return;
 
-  let isDragging = false;
   let dragStartY = 0;
   let dragStartScroll = 0;
 
-  thumb.addEventListener('mousedown', (e) => {
-    isDragging = true;
-    dragStartY = e.clientY;
-    dragStartScroll = editor.scrollTop;
-    e.preventDefault();
-  });
-
-  document.addEventListener('mousemove', (e) => {
-    if (!isDragging) return;
+  const onMouseMove = (e) => {
     const avail = track.clientHeight;
     const thumbH = thumb.clientHeight;
     const maxTop = avail - thumbH;
     const delta = e.clientY - dragStartY;
     const maxScroll = editor.scrollHeight - editor.clientHeight;
     editor.scrollTop = dragStartScroll + (delta / maxTop) * maxScroll;
-  });
+  };
 
-  document.addEventListener('mouseup', () => { isDragging = false; });
+  const onMouseUp = () => {
+    document.removeEventListener('mousemove', onMouseMove);
+    document.removeEventListener('mouseup', onMouseUp);
+  };
+
+  thumb.addEventListener('mousedown', (e) => {
+    dragStartY = e.clientY;
+    dragStartScroll = editor.scrollTop;
+    e.preventDefault();
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+  });
 
   track.addEventListener('click', (e) => {
     if (e.target === thumb) return;

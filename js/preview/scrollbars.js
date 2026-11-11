@@ -3,9 +3,22 @@ import { setupScrollOverlay } from '../common/scroll-utils.js';
 export const initPreviewCustomScrollbar = (previewEl, previewTrack, previewThumb) => {
   if (!previewEl || !previewTrack || !previewThumb) return;
 
-  let isDragging = false;
   let dragStartY = 0;
   let dragStartScroll = 0;
+
+  const onMouseMove = (e) => {
+    const trackH = previewTrack.clientHeight;
+    const thumbH = previewThumb.clientHeight;
+    const maxTop = trackH - 28 - thumbH;
+    const delta = e.clientY - dragStartY;
+    const maxScroll = previewEl.scrollHeight - previewEl.clientHeight;
+    previewEl.scrollTop = dragStartScroll + (delta / maxTop) * maxScroll;
+  };
+
+  const onMouseUp = () => {
+    document.removeEventListener('mousemove', onMouseMove);
+    document.removeEventListener('mouseup', onMouseUp);
+  };
 
   const update = () => {
     const max = previewEl.scrollHeight - previewEl.clientHeight;
@@ -20,23 +33,12 @@ export const initPreviewCustomScrollbar = (previewEl, previewTrack, previewThumb
   };
 
   previewThumb.addEventListener('mousedown', (e) => {
-    isDragging = true;
     dragStartY = e.clientY;
     dragStartScroll = previewEl.scrollTop;
     e.preventDefault();
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
   });
-
-  document.addEventListener('mousemove', (e) => {
-    if (!isDragging) return;
-    const trackH = previewTrack.clientHeight;
-    const thumbH = previewThumb.clientHeight;
-    const maxTop = trackH - 28 - thumbH;
-    const delta = e.clientY - dragStartY;
-    const maxScroll = previewEl.scrollHeight - previewEl.clientHeight;
-    previewEl.scrollTop = dragStartScroll + (delta / maxTop) * maxScroll;
-  });
-
-  document.addEventListener('mouseup', () => { isDragging = false; });
 
   previewTrack.addEventListener('click', (e) => {
     if (e.target === previewThumb || e.target.classList.contains('scrollbar-arrow')) return;

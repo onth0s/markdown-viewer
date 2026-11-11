@@ -68,7 +68,7 @@ markdown-viewer/
 │       ├── selection-engine.js  # Editor cursor position & text mapping orchestrator
 │       ├── source-mapper.js     # Text-to-HTML source tracking mapping engine
 │       └── dom-highlighter.js   # Preview element spotlight/highlight rendering
-├── serve.ps1             # Helper script to boot the web server locally (defaults to port 5001)
+├── serve.ps1             # Helper script to boot the web server locally (defaults to port 5000)
 └── DEFAULT.md            # Default template loaded on first application run
 ```
 
@@ -90,13 +90,13 @@ Using the helper script (Windows PowerShell):
 
 Using Node.js (`http-server` or `npx`):
 ```bash
-npx http-server -p 5001 .
+npx http-server -p 5000 .
 ```
 
 Using Python:
 ```bash
-python -m http-server 5001
+python -m http.server 5000
 ```
 
 ### 2. View in Browser
-Open the localhost address provided by your local server (e.g. `http://localhost:5001`) to load the application.
+Open the localhost address provided by your local server (e.g. `http://localhost:5000`) to load the application.

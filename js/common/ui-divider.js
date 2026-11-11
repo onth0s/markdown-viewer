@@ -51,10 +51,33 @@ export const setupDivider = () => {
     }
   });
 
+  const onMouseMove = (e) => moveDrag(e.clientX, e.clientY);
+  const onTouchMove = (e) => {
+    const t = e.touches[0];
+    if (t) { e.preventDefault(); moveDrag(t.clientX, t.clientY); }
+  };
+
+  const endDrag = () => {
+    if (isDragging) {
+      isDragging = false;
+      divider.classList.remove('active', 'hover');
+      document.body.style.cursor = 'default';
+      savePaneRatio(lastLeftRatio);
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('touchmove', onTouchMove);
+      document.removeEventListener('mouseup', endDrag);
+      document.removeEventListener('touchend', endDrag);
+    }
+  };
+
   const startDrag = () => {
     isDragging = true;
     divider.classList.add('active');
     document.body.style.cursor = isPortrait() ? 'row-resize' : 'col-resize';
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('touchmove', onTouchMove, { passive: false });
+    document.addEventListener('mouseup', endDrag);
+    document.addEventListener('touchend', endDrag);
   };
 
   const moveDrag = (clientX, clientY) => {
@@ -97,15 +120,6 @@ export const setupDivider = () => {
     }
   };
 
-  const endDrag = () => {
-    if (isDragging) {
-      isDragging = false;
-      divider.classList.remove('active', 'hover');
-      document.body.style.cursor = 'default';
-      savePaneRatio(lastLeftRatio);
-    }
-  };
-
   divider.addEventListener('mouseenter', () => divider.classList.add('hover'));
   divider.addEventListener('mouseleave', () => { if (!isDragging) divider.classList.remove('hover'); });
   divider.addEventListener('mousedown', (e) => { e.preventDefault(); startDrag(); });
@@ -114,24 +128,6 @@ export const setupDivider = () => {
     lastLeftRatio = 0.5;
     applyRatio(lastLeftRatio);
     savePaneRatio(lastLeftRatio);
-  });
-
-  document.addEventListener('mousemove', (e) => moveDrag(e.clientX, e.clientY));
-  document.addEventListener('touchmove', (e) => {
-    const t = e.touches[0];
-    if (t) { e.preventDefault(); moveDrag(t.clientX, t.clientY); }
-  }, { passive: false });
-
-  document.addEventListener('mouseup', endDrag);
-  document.addEventListener('touchend', endDrag);
-
-  document.addEventListener('mouseleave', () => {
-    if (isDragging) {
-      isDragging = false;
-      divider.classList.remove('active', 'hover');
-      document.body.style.cursor = 'default';
-      savePaneRatio(lastLeftRatio);
-    }
   });
 
   window.addEventListener('resize', () => applyRatio(lastLeftRatio));

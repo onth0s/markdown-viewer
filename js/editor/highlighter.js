@@ -50,6 +50,14 @@ export const highlightMd = (txt) => {
       continue;
     }
 
+    // Stash and highlight inline code blocks so internal characters are not parsed as markdown
+    const codePlaceholders = [];
+    l = l.replace(/(`[^`\n]+`)/g, (m) => {
+      const ph = `%%MDCODE${codePlaceholders.length}%%`;
+      codePlaceholders.push(wrapIfRoom(l, 'hl-code', m));
+      return ph;
+    });
+
     l = l.replace(/^(&gt;)+/, (m) => wrapIfRoom(l, 'hl-quote', m));
 
     l = l.replace(/^(\s*)([-*+]|\d{1,3}\.)(\s)/, (_, sp, mk, ws) => {
@@ -61,24 +69,31 @@ export const highlightMd = (txt) => {
 
     l = l.replace(/^(\|[\s:-]+\|[\s:-]+\|)/, (m) => wrapIfRoom(l, 'hl-table-sep', m));
 
+    // Stash images so link regex cannot match inside image bracket tokens
+    const imgPlaceholders = [];
     l = l.replace(/!\[([^\]]*)\]\(([^)]*)\)/g, (_, alt, url) => {
+      const ph = `%%MDIMG${imgPlaceholders.length}%%`;
       const inner = '![<span class="hl-img-alt">' + alt + '</span>](<span class="hl-img-url">' + url + '</span>)';
-      return wrapIfRoom(l, 'hl-image', inner);
+      imgPlaceholders.push(wrapIfRoom(l, 'hl-image', inner));
+      return ph;
     });
 
-    l = l.replace(/\[([^\]]*)\]\(([^)]*)\)/g, (_, text, url) => {
+    l = l.replace(/(?<!!)\[([^\]]*)\]\(([^)]*)\)/g, (_, text, url) => {
       const inner = '[<span class="hl-link-text">' + text + '</span>](<span class="hl-link-url">' + url + '</span>)';
       return wrapIfRoom(l, 'hl-link', inner);
     });
 
-    l = l.replace(/(`[^`\n]+`)/g, (m) => wrapIfRoom(l, 'hl-code', m));
+    // Restore images before emphasis formatting
+    for (let pi = 0; pi < imgPlaceholders.length; pi++) {
+      l = l.replace(`%%MDIMG${pi}%%`, imgPlaceholders[pi]);
+    }
 
-    l = l.replace(/(\*\*\*\S[^*]*\*\*\*)/g, (m) => wrapIfRoom(l, 'hl-em-strong', m));
-    l = l.replace(/(\*\*\S[^*]*\*\*)/g, (m) => wrapIfRoom(l, 'hl-strong', m));
-    l = l.replace(/(?<!\*)\*(\S[^*]*)\*(?!\*)/g, (_, inner) => '*' + wrapIfRoom(l, 'hl-em', inner) + '*');
-    l = l.replace(/(___\S[^_]*___)/g, (m) => wrapIfRoom(l, 'hl-em-strong', m));
-    l = l.replace(/(__\S[^_]*__)/g, (m) => wrapIfRoom(l, 'hl-strong', m));
-    l = l.replace(/(?<!_)_(\S[^_]*)_(?!_)/g, (_, inner) => '_' + wrapIfRoom(l, 'hl-em', inner) + '_');
+    l = l.replace(/(?<!\*)\*\*\*(\S[^*]*)\*\*\*(?!\*)/g, (m) => wrapIfRoom(l, 'hl-em-strong', m));
+    l = l.replace(/(?<!\*)\*\*(\S[^*]*)\*\*(?!\*)/g, (m) => wrapIfRoom(l, 'hl-strong', m));
+    l = l.replace(/(?<![*\w])\*(\S[^*]*)\*(?![*\w])/g, (_, inner) => '*' + wrapIfRoom(l, 'hl-em', inner) + '*');
+    l = l.replace(/(?<!_)___(\S[^_]*)___(?!_)/g, (m) => wrapIfRoom(l, 'hl-em-strong', m));
+    l = l.replace(/(?<!_)__(\S[^_]*)__(?!_)/g, (m) => wrapIfRoom(l, 'hl-strong', m));
+    l = l.replace(/(?<![_\w])_(\S[^_]*)_(?![_\w])/g, (_, inner) => '_' + wrapIfRoom(l, 'hl-em', inner) + '_');
 
     l = l.replace(/(~~\S[^~]*~~)/g, (m) => wrapIfRoom(l, 'hl-strike', m));
 
@@ -89,6 +104,11 @@ export const highlightMd = (txt) => {
       const level = (hash.match(/#/g) || []).length;
       return hash + wrapIfRoom(l, 'hl-heading hl-h' + level, rest);
     });
+
+    // Restore code blocks after all inline formatting
+    for (let ci = 0; ci < codePlaceholders.length; ci++) {
+      l = l.replace(`%%MDCODE${ci}%%`, codePlaceholders[ci]);
+    }
 
     result.push(l);
     i++;

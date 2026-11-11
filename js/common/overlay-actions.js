@@ -36,6 +36,13 @@ export const initClearallButton = (overlayEl) => {
   const btn = overlayEl && overlayEl.querySelector('.clearall-popup-btn');
   if (!btn) return;
   btn.addEventListener('click', async () => {
+    const confirmed = window.confirm(
+      'Are you sure you want to clear all editor content and reset all preferences? This action cannot be undone.'
+    );
+    if (!confirmed) return;
+
+    // Prevent beforeunload from repopulating localStorage during navigation
+    window.__CLEARING_ALL__ = true;
     localStorage.clear();
 
     if ('caches' in self) {

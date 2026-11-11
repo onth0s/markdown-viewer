@@ -3,18 +3,22 @@ import path from 'path';
 
 const htmlPath = path.resolve('index.html');
 const jsPath = path.resolve('js/common/theme-engine.js');
+const cssPath = fs.existsSync(path.resolve('css/variables.css'))
+  ? path.resolve('css/variables.css')
+  : path.resolve('css/style.css');
 
 const htmlContent = fs.readFileSync(htmlPath, 'utf8');
 const jsContent = fs.readFileSync(jsPath, 'utf8');
+const cssContent = fs.existsSync(cssPath) ? fs.readFileSync(cssPath, 'utf8') : '';
 
-// Extract COLOR_MAP from html
+// 1. Extract COLOR_MAP from index.html
 const htmlMapMatch = htmlContent.match(/var COLOR_MAP = \{([\s\S]*?)\};/);
 if (!htmlMapMatch) {
   console.error('Failed to find COLOR_MAP in index.html');
   process.exit(1);
 }
 
-// Extract COLOR_MAP from js
+// 2. Extract COLOR_MAP from theme-engine.js
 const jsMapMatch = jsContent.match(/return \{([\s\S]*?)\};/);
 if (!jsMapMatch) {
   console.error('Failed to find COLOR_MAP in theme-engine.js');
@@ -77,8 +81,45 @@ for (const key of allKeys) {
   }
 }
 
+// 3. Validate CSS custom properties if CSS exists
+if (cssContent) {
+  const darkBlockMatch = cssContent.match(/\[data-theme=["']dark["']\]\s*\{([\s\S]*?)\}/);
+  const darkBlock = darkBlockMatch ? darkBlockMatch[1] : '';
+
+  for (const key of Object.keys(htmlResolved)) {
+    const expectedLight = htmlResolved[key].light;
+    const expectedDark = htmlResolved[key].dark;
+
+    // Light check
+    const sLightMatch = cssContent.match(new RegExp(`--${key}-s:\\s*(\\d+)%`));
+    const lLightMatch = cssContent.match(new RegExp(`--${key}-l:\\s*(\\d+)%`));
+    if (sLightMatch && lLightMatch) {
+      const s = parseInt(sLightMatch[1], 10);
+      const l = parseInt(lLightMatch[1], 10);
+      if (s !== expectedLight[0] || l !== expectedLight[1]) {
+        console.error(`CSS Light mismatch for "${key}": CSS=[${s}, ${l}], COLOR_MAP=${JSON.stringify(expectedLight)}`);
+        hasError = true;
+      }
+    }
+
+    // Dark check
+    if (darkBlock) {
+      const sDarkMatch = darkBlock.match(new RegExp(`--${key}-s:\\s*(\\d+)%`));
+      const lDarkMatch = darkBlock.match(new RegExp(`--${key}-l:\\s*(\\d+)%`));
+      if (sDarkMatch && lDarkMatch) {
+        const s = parseInt(sDarkMatch[1], 10);
+        const l = parseInt(lDarkMatch[1], 10);
+        if (s !== expectedDark[0] || l !== expectedDark[1]) {
+          console.error(`CSS Dark mismatch for "${key}": CSS=[${s}, ${l}], COLOR_MAP=${JSON.stringify(expectedDark)}`);
+          hasError = true;
+        }
+      }
+    }
+  }
+}
+
 if (hasError) {
   process.exit(1);
 } else {
-  console.log('✓ Theme COLOR_MAP color configs match perfectly!');
+  console.log('✓ All Theme tokens (index.html, theme-engine.js, and CSS) match perfectly!');
 }

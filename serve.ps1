@@ -3,4 +3,4 @@ param(
 )
 
 Write-Host "Starting http-server on port $Port..." -ForegroundColor Cyan
-npx http-server -p $Port .
+npx http-server -p $Port -c-1 .

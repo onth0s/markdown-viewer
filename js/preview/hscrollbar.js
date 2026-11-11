@@ -1,9 +1,22 @@
 export const initPreviewHorizontalScrollbar = (previewEl, hscrollbarEl, hThumbEl) => {
   if (!previewEl || !hscrollbarEl || !hThumbEl) return;
 
-  let isDragging = false;
   let dragStartX = 0;
   let dragStartScroll = 0;
+
+  const onMouseMove = (e) => {
+    const trackW = hscrollbarEl.clientWidth;
+    const thumbW = hThumbEl.clientWidth;
+    const maxLeft = trackW - thumbW;
+    const delta = e.clientX - dragStartX;
+    const maxScroll = previewEl.scrollWidth - previewEl.clientWidth;
+    previewEl.scrollLeft = dragStartScroll + (delta / maxLeft) * maxScroll;
+  };
+
+  const onMouseUp = () => {
+    document.removeEventListener('mousemove', onMouseMove);
+    document.removeEventListener('mouseup', onMouseUp);
+  };
 
   const update = () => {
     const maxScroll = previewEl.scrollWidth - previewEl.clientWidth;
@@ -23,23 +36,12 @@ export const initPreviewHorizontalScrollbar = (previewEl, hscrollbarEl, hThumbEl
   };
 
   hThumbEl.addEventListener('mousedown', (e) => {
-    isDragging = true;
     dragStartX = e.clientX;
     dragStartScroll = previewEl.scrollLeft;
     e.preventDefault();
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
   });
-
-  document.addEventListener('mousemove', (e) => {
-    if (!isDragging) return;
-    const trackW = hscrollbarEl.clientWidth;
-    const thumbW = hThumbEl.clientWidth;
-    const maxLeft = trackW - thumbW;
-    const delta = e.clientX - dragStartX;
-    const maxScroll = previewEl.scrollWidth - previewEl.clientWidth;
-    previewEl.scrollLeft = dragStartScroll + (delta / maxLeft) * maxScroll;
-  });
-
-  document.addEventListener('mouseup', () => { isDragging = false; });
 
   hscrollbarEl.addEventListener('click', (e) => {
     if (e.target === hThumbEl) return;

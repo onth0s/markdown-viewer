@@ -51,16 +51,14 @@ export const getSourcePosRenderer = () => {
  * @param {object} token - The marked token being rendered
  * @returns {string} HTML with injected data-source-pos attribute
  */
-const wrapWithSourcePos = (html, token) => {
-  if (!token || token.start == null || token.end == null) return html;
+export const wrapWithSourcePos = (html, token) => {
+  if (!token || token.start == null || token.end == null || typeof html !== 'string') return html;
+  if (!html.trim()) return html;
   const posAttr = `data-source-pos="${token.start}-${token.end}"`;
 
   // Inject into the first opening HTML tag found in the output
-  const trimmed = html.trim();
-  const tagMatch = trimmed.match(/^<(\w+)([\s>])/);
-  if (tagMatch) {
-    const tagName = tagMatch[1];
-    return trimmed.replace(/^<\w+/, `<${tagName} ${posAttr}`) + html.substring(trimmed.length);
+  if (/^\s*<[a-zA-Z0-9_-]+[\s>]/.test(html)) {
+    return html.replace(/^(\s*<[a-zA-Z0-9_-]+)/, `$1 ${posAttr}`);
   }
 
   // Fallback: wrap in a neutral span

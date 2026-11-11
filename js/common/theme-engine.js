@@ -70,7 +70,7 @@ export const COLOR_MAP = (() => {
 })();
 
 /** Interpolate a single color role value */
-const interpolateColor = (brightness, lightHsl, darkHsl) => {
+export const interpolateColor = (brightness, lightHsl, darkHsl) => {
   const [sLight, lLight] = lightHsl;
   const [sDark, lDark] = darkHsl;
   const sMid = (sLight + sDark) / 2;
@@ -164,7 +164,7 @@ export const applyBrightness = (brightness) => {
   doc.style.setProperty('--prism-opacity', prismOpacity.toString());
 
   // Gradual fade for emojis at extreme brightness levels — native emoji
-  // rendering ignores CSS color, so we opacity-fade them at the extremes.
+  // rendering ignores CSS color, so we opacity-fade them at the extremes via CSS variable.
   let emojiOpacity = 1.0;
   if (brightness < 25) {
     emojiOpacity = brightness / 25;
@@ -172,12 +172,5 @@ export const applyBrightness = (brightness) => {
     emojiOpacity = (100 - brightness) / 25;
   }
   doc.style.setProperty('--emoji-opacity', emojiOpacity.toString());
-
-  // Directly apply opacity to all wrapped emojis in the DOM as a
-  // cross-browser safety net — some environments render emoji glyphs
-  // outside the normal CSS compositing pipeline.
-  document.querySelectorAll('.emoji-wrapper').forEach(el => {
-    el.style.opacity = emojiOpacity;
-  });
 };
 

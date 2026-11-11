@@ -33,10 +33,26 @@ export const initSettingsPanel = (previewEl, outputEl, renderMermaidDiagrams) =>
       e.stopPropagation();
       const opening = !wrenchBtn.classList.contains('open');
       wrenchBtn.classList.toggle('open');
+      wrenchBtn.setAttribute('aria-expanded', wrenchBtn.classList.contains('open') ? 'true' : 'false');
       if (opening) positionPopup();
     });
     wrenchPopup.addEventListener('click', (e) => { e.stopPropagation(); });
-    document.addEventListener('click', () => wrenchBtn.classList.remove('open'));
+    document.addEventListener('click', () => {
+      wrenchBtn.classList.remove('open');
+      wrenchBtn.setAttribute('aria-expanded', 'false');
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && wrenchBtn.classList.contains('open')) {
+        wrenchBtn.classList.remove('open');
+        wrenchBtn.setAttribute('aria-expanded', 'false');
+        wrenchBtn.focus();
+      }
+    });
+    window.addEventListener('resize', () => {
+      if (wrenchBtn.classList.contains('open')) {
+        positionPopup();
+      }
+    });
   }
 
   // ── Hue slider ───────────────────────────────────────────────────────────

@@ -1,0 +1,214 @@
+/* ── Editor Pane & Textarea ── */
+#editor-wrapper {
+  flex: 1;
+  overflow: hidden;
+  padding: 0;
+  position: relative;
+  background-color: var(--bg-editor);
+}
+
+#editor-highlight {
+  margin: 0;
+  padding: 12px 16px 70vh 16px;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  overflow-y: scroll;
+  scrollbar-gutter: stable;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  pointer-events: none;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  font-family: 'Monaco', 'Consolas', 'Courier New', monospace;
+  font-size: 14px;
+  line-height: 1.5;
+  tab-size: 4;
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+}
+
+#editor-highlight::-webkit-scrollbar {
+  display: none;
+}
+
+#editor {
+  width: 100%;
+  height: 100%;
+  resize: none;
+  border: none;
+  outline: none;
+  padding: 12px 16px 70vh 16px;
+  font-family: 'Monaco', 'Consolas', 'Courier New', monospace;
+  font-size: 14px;
+  line-height: 1.5;
+  tab-size: 4;
+  background: transparent;
+  color: transparent;
+  caret-color: var(--caret-color);
+  box-sizing: border-box;
+  display: block;
+  overflow: hidden;
+  position: relative;
+  z-index: 2;
+}
+
+#editor::selection {
+  background: var(--selection-bg);
+  color: var(--selection-text);
+}
+
+/* ── Caret / Selection Position Indicator ── */
+#caret-indicator {
+  position: absolute;
+  right: 0;
+  width: 12px;
+  height: 2px;
+  background-color: var(--caret-color);
+  pointer-events: none;
+  z-index: 10;
+  opacity: 0;
+  transition: opacity 0.15s ease-in-out;
+}
+
+#caret-indicator.visible {
+  opacity: 0.8;
+}
+
+#caret-indicator.visible.selection-active {
+  opacity: 0.5;
+}
+
+[data-theme="dark"] #caret-indicator {
+  background-color: var(--color-primary);
+}
+
+[data-theme="dark"] #caret-indicator.visible {
+  opacity: 0.9;
+}
+
+[data-theme="dark"] #caret-indicator.visible.selection-active {
+  opacity: 0.5;
+}
+
+/* ── Syntax Highlighting ── */
+.hl-h1, .hl-h2, .hl-h3, .hl-h4, .hl-h5, .hl-h6,
+.hl-hash { color: var(--syntax-heading); }
+.hl-em, .hl-strong, .hl-em-strong { color: var(--syntax-bold); }
+.hl-code { color: var(--syntax-code); }
+.hl-fence, .hl-fence-lang { color: var(--syntax-fence); }
+.hl-link, .hl-link-text { color: var(--syntax-link); }
+.hl-link-url { color: var(--syntax-fence); }
+.hl-image, .hl-img-alt { color: var(--syntax-image); }
+.hl-img-url { color: var(--syntax-fence); }
+.hl-quote { color: var(--syntax-quote); }
+.hl-list-marker { color: var(--syntax-list); }
+.hl-hr { color: var(--syntax-hr); }
+.hl-strike { color: var(--syntax-strike); }
+.hl-table-sep { color: var(--syntax-table-sep); }
+.hl-table { color: var(--syntax-table); }
+.hl-fenced-block { color: var(--syntax-table); }
+.hl-code-content { color: var(--syntax-table); }
+
+/* ── Clear-All Proximity Overlay ── */
+.clearall-popup-overlay {
+  position: absolute;
+  bottom: 8px;
+  left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: 6px;
+  padding: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 10;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.1s;
+}
+
+.clearall-popup-overlay.visible { opacity: 1; pointer-events: auto; }
+
+[data-theme="dark"] .clearall-popup-overlay {
+  background: var(--bg-surface);
+  border-color: var(--border-default);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.clearall-popup-btn {
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  outline: none;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background 0.1s, color 0.1s;
+  user-select: none;
+}
+
+.clearall-popup-btn:hover {
+  background: var(--color-primary-subtle);
+  color: var(--color-primary);
+}
+
+/* ── Drag-and-Drop Overlay ── */
+#drop-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.45);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  pointer-events: none;
+  animation: drop-overlay-fade 0.15s ease-out;
+}
+
+body.is-dragging-file #drop-overlay {
+  display: flex;
+}
+
+#drop-overlay-card {
+  padding: 32px 48px;
+  border: 2px dashed var(--color-primary);
+  border-radius: 12px;
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font-size: 18px;
+  font-weight: 500;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+  text-align: center;
+  max-width: 80vw;
+  user-select: none;
+}
+
+#drop-overlay-card .drop-overlay-sub {
+  display: block;
+  margin-top: 8px;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text-secondary);
+}
+
+@keyframes drop-overlay-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
